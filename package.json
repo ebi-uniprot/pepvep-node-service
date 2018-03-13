@@ -1,0 +1,28 @@
+{
+  "name": "pepvep-node-service",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "./node_modules/.bin/nodemon -w ./index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ebi-uniprot/pepvep-node-service.git"
+  },
+  "author": "Mahdi Mahmoudy <mmahmoudy@ebi.ac.uk>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ebi-uniprot/pepvep-node-service/issues"
+  },
+  "homepage": "https://github.com/ebi-uniprot/pepvep-node-service#readme",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "cookie-parser": "^1.4.3",
+    "express": "^4.16.3"
+  },
+  "devDependencies": {
+    "nodemon": "^1.17.1"
+  }
+}
