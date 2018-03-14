@@ -1,0 +1,3 @@
+[submodule "src/lib/biolib"]
+	path = src/lib/biolib
+	url = git@github.com:ebi-uniprot/biolib.git
