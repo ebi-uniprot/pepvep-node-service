@@ -1,8 +1,8 @@
 
-const express = require('express');
-const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser');
-const axios = require('axios');
+import * as express from 'express';
+import * as bodyParser from 'body-parser';
+import * as cookieParser from 'cookie-parser';
+import axios from 'axios';
 
 const app = express();
 const port = 3687;
@@ -12,7 +12,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 // Is Alive?
-app.get('/is-alive', (req, res) => res.send('yes!'));
+app.get('/is-alive', (req, res) => res.send('Node service is alive.'));
 
 // Example
 app.get('/example', (req, res) => {

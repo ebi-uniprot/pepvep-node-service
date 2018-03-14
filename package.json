@@ -2,9 +2,10 @@
   "name": "pepvep-node-service",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
-    "start": "./node_modules/.bin/nodemon -w ./index.js",
+    "start": "./node_modules/.bin/nodemon -L -w src src/index.js",
+    "ts-watch": "./node_modules/.bin/tsc -w",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -24,6 +25,7 @@
     "express": "^4.16.3"
   },
   "devDependencies": {
-    "nodemon": "^1.17.1"
+    "nodemon": "^1.17.1",
+    "typescript": "^2.7.2"
   }
 }
