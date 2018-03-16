@@ -4,8 +4,18 @@ import * as bodyParser from 'body-parser';
 import * as cookieParser from 'cookie-parser';
 import axios from 'axios';
 
+import UniProtKB from './data-fetch/UniProtKB';
+import Protein from './lib/biolib/src/protein/protein';
+
 const app = express();
 const port = 3687;
+
+// Enable CORS
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
+});
 
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -14,12 +24,17 @@ app.use(bodyParser.json());
 // Is Alive?
 app.get('/is-alive', (req, res) => res.send('Node service is alive.'));
 
-// Example
-app.get('/example', (req, res) => {
-  const url = 'https://www.ebi.ac.uk/proteins/api/coordinates/9606/1:121593709-121594999?offset=0&size=100&format=json';
-  
-  axios.get(url)
-    .then(response => res.send(response.data));
+// Protein API
+app.get('/protein/:accessions', (req, res) => {
+  const accessions = req.params.accessions.split(',');
+  UniProtKB.impactSearchByProteinAccessions(accessions, results => res.send(results));
+});
+
+
+// Example of biolib usage
+app.get('/biolib', (req, res) => {
+  const ABPP: Protein = new Protein('P05067');
+  res.send(ABPP.accession);
 });
 
 app.listen(port, () => console.log(`server listening on http://localhost:${port}/`));
