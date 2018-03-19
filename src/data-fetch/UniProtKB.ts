@@ -1,28 +1,13 @@
 
 import axios from 'axios';
 
+import Helpers from './Helpers';
 import Protein from '../lib/biolib/src/protein/protein';
 
 export default class UniProtKB {
 
-  private static stringOrArrayToCommaSeparated(elements: string | string[]) : string {
-    return ('string' === typeof elements)
-      ? elements
-      : elements
-        .reduce((commaSeparated: any, current: string, index: number) => {
-
-          if (0 < index) {
-            commaSeparated += ',';
-          }
-
-          commaSeparated += current;
-
-          return commaSeparated;
-        }, '');
-  }
-
   public static proteinDetailsByAccession(accessions: string[], callback: Function = null) : any {
-    let queryString: string = this.stringOrArrayToCommaSeparated(accessions);
+    let queryString: string = Helpers.stringOrArrayToCommaSeparated(accessions);
 
     const url: string = `https://www.ebi.ac.uk/proteins/api/proteins?format=json&accession=${queryString}`;
 
@@ -34,7 +19,7 @@ export default class UniProtKB {
   }
 
   public static genomicCoordinatesByAccession(accessions: string[], callback: Function = null) : any {
-    let queryString: string = this.stringOrArrayToCommaSeparated(accessions);
+    let queryString: string = Helpers.stringOrArrayToCommaSeparated(accessions);
 
     const url: string = `https://www.ebi.ac.uk/proteins/api/coordinates?format=json&accession=${queryString}`;
 
@@ -53,23 +38,69 @@ export default class UniProtKB {
 
     function proccess(protein: any, coordinates: any) : any {
       let results: any = {};
+      results.proteins = {};
 
-      results.proteins = protein.data
-        .map(item => {
-          let details: any = {};
+      const processProteinDetails: Function = (protein: any) => {
+        let details: any = {
+          accession: 'NA',
+          name: 'NA',
+          geneName: 'NA',
+          transcriptId: 'NA',
+          position: {
+            start: 'NA',
+            end: 'NA'
+          }
+        };
 
-          details.accession = item.accession;
+        details.accession = protein.accession;
 
-          details.name = (item.protein && item.protein.recommendedName && item.protein.recommendedName.fullName)
-            ? item.protein.recommendedName.fullName.value
-            : 'NA';
+        if (protein.protein &&
+            protein.protein.recommendedName &&
+            protein.protein.recommendedName.fullName
+        ) {
+          details.name = protein.protein.recommendedName.fullName.value;
+        }
 
-          details.geneName = (item.gene && item.gene[0] && item.gene[0].name)
-            ? item.gene[0].name.value
-            : 'NA';
+        else if (
+          protein.protein &&
+          protein.protein.submittedName &&
+          protein.protein.submittedName[0] &&
+          protein.protein.submittedName[0].fullName
+        ) {
+          details.name = protein.protein.submittedName[0].fullName.value;
+        }
 
-          return details;
-        });
+        details.geneName = (protein.gene && protein.gene[0] && protein.gene[0].name)
+          ? protein.gene[0].name.value
+          : 'NA';
+
+        results.proteins[protein.accession] = details;
+      };
+
+      const processCoordinateDetails: Function = (coordinate: any) => {
+        if ('undefined' === typeof coordinate) {
+          return;
+        }
+
+        let details: any = results.proteins[coordinate.accession];
+        const geneCoordinates: any = coordinate.gnCoordinate[0];
+        const geneLocation: any = geneCoordinates.genomicLocation;
+
+        details.transcriptId = geneCoordinates.ensemblTranscriptId;
+
+        details.position = {
+          start: geneLocation.start,
+          end: geneLocation.end
+        };
+      };
+
+      for(let i = 0; i < protein.data.length; i++) {
+        processProteinDetails(protein.data[i]);
+      }
+
+      for(let i = 0; i < coordinates.data.length; i++) {
+        processCoordinateDetails(coordinates.data[i]);
+      }
 
       return callback(results);
     };
@@ -78,6 +109,4 @@ export default class UniProtKB {
       ? promise.then(axios.spread(proccess))
       : promise;
   }
-
-
 }
