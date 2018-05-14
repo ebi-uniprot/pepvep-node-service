@@ -101,13 +101,9 @@ export default class UniProtKB {
       .then(axios.spread(proccess));
   }
 
-  public static getProteinsByPosition(chromosome: string, position: number, callback: Function = null) : any {
+  public static async getProteinsByPosition(chromosome: string, position: number) {
     const url: string = `https://www.ebi.ac.uk/proteins/api/coordinates/${taxID}/${chromosome}:${position}-${position}&format=json&in_range=false`;
 
-    const promise = axios.get(url);
-
-    return ('function' === typeof callback)
-      ? promise.then(result => callback(result))
-      : promise;
+    return await axios.get(url);
   }
 }
