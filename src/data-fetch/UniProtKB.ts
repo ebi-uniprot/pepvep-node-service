@@ -4,11 +4,13 @@ import axios from 'axios';
 import Helpers from './Helpers';
 import Protein from '../lib/biolib/src/protein/protein';
 
+const taxID = '9606';
+
 export default class UniProtKB {
 
   public static proteinDetailsByAccession(accessions: string[], callback: Function = null) : any {
     let queryString: string = Helpers.stringOrArrayToCommaSeparated(accessions);
-
+    
     const url: string = `https://www.ebi.ac.uk/proteins/api/proteins?format=json&accession=${queryString}`;
 
     const promise = axios.get(url);
@@ -107,6 +109,16 @@ export default class UniProtKB {
 
     return ('function' === typeof callback)
       ? promise.then(axios.spread(proccess))
+      : promise;
+  }
+
+  public static getProteinsByPosition(chromosome: string, position: number, callback: Function = null) : any {
+    const url: string = `https://www.ebi.ac.uk/proteins/api/coordinates/${taxID}/${chromosome}:${position}-${position}&format=json&in_range=false`;
+
+    const promise = axios.get(url);
+
+    return ('function' === typeof callback)
+      ? promise.then(result => callback(result))
       : promise;
   }
 }

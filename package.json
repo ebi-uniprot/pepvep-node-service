@@ -6,7 +6,8 @@
   "scripts": {
     "start": "./node_modules/.bin/nodemon -L -w src src/index.js",
     "ts-watch": "./node_modules/.bin/tsc -w",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "./node_modules/mocha/bin/mocha",
+    "test-watch": "./node_modules/mocha/bin/mocha --watch"
   },
   "repository": {
     "type": "git",
@@ -21,8 +22,11 @@
   "dependencies": {
     "axios": "^0.18.0",
     "body-parser": "^1.18.2",
+    "chai": "^4.1.2",
     "cookie-parser": "^1.4.3",
-    "express": "^4.16.3"
+    "express": "^4.16.3",
+    "mocha": "^5.1.1",
+    "nock": "^9.2.5"
   },
   "devDependencies": {
     "nodemon": "^1.17.1",
