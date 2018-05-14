@@ -6,31 +6,21 @@ import Protein from '../lib/biolib/src/protein/protein';
 
 export default class UniProtKB {
 
-  public static proteinDetailsByAccession(accessions: string[], callback: Function = null) : any {
+  public static async proteinDetailsByAccession(accessions: string[]) {
     let queryString: string = Helpers.stringOrArrayToCommaSeparated(accessions);
 
     const url: string = `https://www.ebi.ac.uk/proteins/api/proteins?format=json&accession=${queryString}`;
-
-    const promise = axios.get(url);
-
-    return ('function' === typeof callback)
-      ? promise.then(result => callback(result))
-      : promise;
+    return await axios.get(url);
   }
 
-  public static genomicCoordinatesByAccession(accessions: string[], callback: Function = null) : any {
+  public static async genomicCoordinatesByAccession(accessions: string[]) {
     let queryString: string = Helpers.stringOrArrayToCommaSeparated(accessions);
 
     const url: string = `https://www.ebi.ac.uk/proteins/api/coordinates?format=json&accession=${queryString}`;
-
-    const promise = axios.get(url);
-
-    return ('function' === typeof callback)
-      ? promise.then(result => callback(result))
-      : promise;
+    return await axios.get(url);
   }
 
-  public static impactSearchByProteinAccessions(accessions: string[], callback: Function = null) : any {
+  public static async impactSearchByProteinAccessions(accessions: string[]) {
     const promise = axios.all([
       this.proteinDetailsByAccession(accessions),
       this.genomicCoordinatesByAccession(accessions),
@@ -102,11 +92,10 @@ export default class UniProtKB {
         processCoordinateDetails(coordinates.data[i]);
       }
 
-      return callback(results);
+      return results;
     };
 
-    return ('function' === typeof callback)
-      ? promise.then(axios.spread(proccess))
-      : promise;
+    return promise
+      .then(axios.spread(proccess));
   }
 }
