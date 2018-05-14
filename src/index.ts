@@ -28,7 +28,9 @@ app.get('/is-alive', (req, res) => res.send('Node service is alive.'));
 // Protein API
 app.get('/protein/:accessions', (req, res) => {
   const accessions: string[] = req.params.accessions.split(',');
-  UniProtKB.impactSearchByProteinAccessions(accessions, results => res.send(results));
+
+  UniProtKB.impactSearchByProteinAccessions(accessions)
+    .then(results => res.send(results));
 });
 
 app.post('/parser', (req, res) => {
@@ -52,7 +54,8 @@ console.log("vcf:", req.body.input);
   // ];
   const variants: string[] = req.body.input;
 
-  VEP.variantConsequencesBatch(species, variants, results => res.send(results.data));
+  VEP.variantConsequencesBatch(species, variants)
+    .then(results => res.send(results.data));
 });
 
 // Example of biolib usage
