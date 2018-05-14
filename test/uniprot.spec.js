@@ -19,7 +19,7 @@ describe('UniProtKB', function() {
 
   describe('#getPositionalSignificance()', function(){
     it('should get features which overlap with position', function() {
-      Significance.default.getPositionalSignificance('6',26104031).then(d => {
+      return Significance.default.getPositionalSignificance('6',26104031).then(d => {
         expect(d.length).to.equal(2);
         expect(d[0].accession).to.equal('B2R4R0');
         expect(d[0].geneCoordinates[0].feature.length).to.equal(1);
@@ -28,7 +28,7 @@ describe('UniProtKB', function() {
     });
 
     it('should get nothing', function() {
-      Significance.default.getPositionalSignificance('6', 11112).then(d => {
+      return Significance.default.getPositionalSignificance('6', 11112).then(d => {
         expect(d.length).to.equal(0);
       });
     });
