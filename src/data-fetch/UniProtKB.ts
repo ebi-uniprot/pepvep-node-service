@@ -102,7 +102,7 @@ export default class UniProtKB {
   }
 
   public static async getProteinsByPosition(chromosome: string, position: number) {
-    const url: string = `https://www.ebi.ac.uk/proteins/api/coordinates/${taxID}/${chromosome}:${position}-${position}&format=json&in_range=false`;
+    const url: string = `https://www.ebi.ac.uk/proteins/api/coordinates/${taxID}/${chromosome}:${position}-${position}?format=json&in_range=false`;
 
     return await axios.get(url);
   }
