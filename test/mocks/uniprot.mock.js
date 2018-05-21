@@ -9,6 +9,11 @@ var uniprotMock = () => {
     nock('https://www.ebi.ac.uk')
     .get(`/proteins/api/coordinates/9606/6:11112-11112?format=json&in_range=false`)
     .reply(200, []);
+
+    nock('https://www.ebi.ac.uk')
+    .get(`/proteins/api/coordinates/9606/66:aaaa-aaaa?format=json&in_range=false`)
+    .reply(400, []);
+
 }
 
 module.exports = uniprotMock;
