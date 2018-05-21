@@ -106,4 +106,9 @@ export default class UniProtKB {
 
     return await axios.get(url);
   }
+
+  public static async getProteinVariants(accession: string) {
+    const url: string = `https://www.ebi.ac.uk/proteins/api/variation/${accession}`;
+    return await axios.get(url);
+  }
 }
