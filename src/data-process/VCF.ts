@@ -24,6 +24,8 @@ export default class VCF {
     let VEPData = undefined;
     let UNIData = undefined;
 
+    let consequences = {};
+
     await VEP.variantConsequencesBatch(species, variants)
     .then(({ data }) => {
 
@@ -37,6 +39,18 @@ export default class VCF {
       start = data.start;
       end = data.end;
       VEPData = data;
+
+      data.transcript_consequences
+        .forEach(item => {
+          const id = item.transcript_id;
+          const impact = item.impact;
+
+          if ('undefined' === typeof consequences[id]) {
+            consequences[id] = [];
+          }
+
+          consequences[id].push(impact);
+        });
 
       return UniProtKB.getProteinsByPosition(chromosome, position);
     })
@@ -60,6 +74,7 @@ export default class VCF {
             row.proteinName = data.name;
             row.geneName = data.gene[0].value;
             row.transcriptId = item.ensemblTranscriptId;
+            row.impact = consequences[item.ensemblTranscriptId].join(',');
             row.VEP = VEPData;
             row.UNI = UNIData;
             
