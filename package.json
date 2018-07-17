@@ -5,8 +5,8 @@
   "main": "src/index.ts",
   "scripts": {
     "start": "ts-node src/index.ts",
-    "test": "mocha --require ts-node/register test/**.spec.ts",
-    "test-watch": "mocha --require ts-node/register --watch-extensions ts,tsx \"test/**/*.{ts,tsx}\""
+    "test": "mocha --require ts-node/register test/**/*.spec.ts",
+    "test-watch": "mocha --require ts-node/register --watch-extensions ts --watch 'test/**/*.spec.ts'"
   },
   "repository": {
     "type": "git",

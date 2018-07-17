@@ -1,24 +1,12 @@
-import {
-  expect
-} from 'chai';
 import 'mocha';
-import UniProtKbFetch from '../src/data-fetch/UniProtKB';
-import Significance from '../src/data-process/significance';
-import uniProtKbMock from './mocks/uniprot.mock';
+import { expect } from 'chai';
+import Significance from '../../src/data-process/Significance';
+import uniProtKbMock from '../mocks/uniprot.mock';
 
-describe('UniProtKB', function () {
+describe('Significance', function () {
   beforeEach(function () {
     uniProtKbMock();
   })
-
-  describe('#getProteinsByPosition()', function () {
-    it('should retrieve different entries for a given position', function () {
-      return UniProtKbFetch.getProteinsByPosition('6', 26104031).then(d => {
-        var response = d.data;
-        expect(response.length).to.equal(5);
-      });
-    });
-  });
 
   describe('#getPositionalSignificance()', function () {
     it('should get features which overlap with position', function () {
