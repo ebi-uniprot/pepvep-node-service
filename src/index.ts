@@ -7,6 +7,7 @@ import axios from 'axios';
 import UniProtKB from './data-fetch/UniProtKB';
 import VEP from './data-fetch/VEP';
 import Protein from './lib/biolib/src/protein/protein';
+import VCF from './data-process/VCF';
 
 const app = express();
 const port = 3687;
@@ -42,20 +43,12 @@ app.post('/parser', (req, res) => {
   // VEP.variantConsequences(species, region, allele, results => res.send(results.data));
 console.log("vcf:", req.body.input);
   const species: string = 'homo_sapiens';
-  // const variants: string[] = [
-  //    vcf
-  // ];
-  // const variants: string[] = [
-  //   `1 182712 . A C . . .`,
-  //   `3 319780 . GA G . . .`,
-  //   `19 110747 . G GT . . .`,
-  //   `1 160283 sv1 . <DUP> . . SVTYPE=DUP;END=471362 .`,
-  //   `1 1385015 sv2 . <DEL> . . SVTYPE=DEL;END=1387562 .`
-  // ];
   const variants: string[] = req.body.input;
 
-  VEP.variantConsequencesBatch(species, variants)
-    .then(results => res.send(results.data));
+  // VEP.variantConsequencesBatch(species, variants)
+  //   .then(results => res.send(results.data));
+  VCF.processVCFInput(species, variants)
+    .then(results => res.send(results));
 });
 
 // Example of biolib usage
