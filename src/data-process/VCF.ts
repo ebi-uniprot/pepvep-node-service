@@ -17,50 +17,55 @@ export default class VCF {
       allele: undefined,
     });
 
+    let chromosome = undefined;
+    let allele = undefined;
+    let start = undefined;
+    let end = undefined;
+    let VEPData = undefined;
+    let UNIData = undefined;
+
     await VEP.variantConsequencesBatch(species, variants)
     .then(({ data }) => {
-// console.log("VEP:::", data);
+
       data = data[0];
-      const chromosome: string = data.seq_region_name;
+      chromosome = data.seq_region_name;
       const position: number = (data.start <= data.end)
         ? data.start
         : data.end;
 
-      // VCFResults = data;
-      let row: any = emptyRow();
-
-      row.allele = data.allele_string;
-      row.start = data.start;
-      row.end = data.end;
-      row.chromosome = data.seq_region_name;
-
-      row.VEP = data;
-      VCFResults[0] = row;
+      allele = data.allele_string;
+      start = data.start;
+      end = data.end;
+      VEPData = data;
 
       return UniProtKB.getProteinsByPosition(chromosome, position);
     })
     .then(({ data }) => {
-// console.log("UNI:::", data);
       data = data[0];
 
+      UNIData = data;
+
       if ('undefined' !== typeof data) {
-        let row = VCFResults[0];
-        row.proteinAccession = data.accession;
-        row.proteinName = data.name;
-        row.geneName = data.gene[0].value;
-        row.transcriptIds = data.gnCoordinate
-          .reduce((a, c) => {
-            return ('undefined' !== typeof c.ensemblTranscriptId)
-              ? c.ensemblTranscriptId + ';' + a
-              : '';
-            }, '');
-        row.UNI = data;
+
+        data.gnCoordinate
+          .forEach(item => {
+
+            let row: any = emptyRow();
+
+            row.allele = allele;
+            row.start = start;
+            row.end = end;
+            row.chromosome = chromosome;
+            row.proteinAccession = data.accession;
+            row.proteinName = data.name;
+            row.geneName = data.gene[0].value;
+            row.transcriptId = item.ensemblTranscriptId;
+            row.VEP = VEPData;
+            row.UNI = UNIData;
+            
+            VCFResults.push(row);
+          });
       }
-
-
-      // VCFResults = ('undefined' !== typeof data)
-      //   ? data
-      //   : ['No Data'];
     })
     .catch(err => console.log(err));
 
