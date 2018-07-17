@@ -1,8 +1,6 @@
-
 import axios from 'axios';
 
 import Helpers from './Helpers';
-import Protein from '../lib/biolib/src/protein/protein';
 
 const taxID = '9606';
 
@@ -10,7 +8,7 @@ export default class UniProtKB {
 
   public static async proteinDetailsByAccession(accessions: string[]) {
     let queryString: string = Helpers.stringOrArrayToCommaSeparated(accessions);
-    
+
     const url: string = `https://www.ebi.ac.uk/proteins/api/proteins?format=json&accession=${queryString}`;
     return await axios.get(url);
   }
@@ -28,7 +26,7 @@ export default class UniProtKB {
       this.genomicCoordinatesByAccession(accessions),
     ]);
 
-    function proccess(protein: any, coordinates: any) : any {
+    function proccess(protein: any, coordinates: any): any {
       let results: any = {};
       results.proteins = {};
 
@@ -47,13 +45,11 @@ export default class UniProtKB {
         details.accession = protein.accession;
 
         if (protein.protein &&
-            protein.protein.recommendedName &&
-            protein.protein.recommendedName.fullName
+          protein.protein.recommendedName &&
+          protein.protein.recommendedName.fullName
         ) {
           details.name = protein.protein.recommendedName.fullName.value;
-        }
-
-        else if (
+        } else if (
           protein.protein &&
           protein.protein.submittedName &&
           protein.protein.submittedName[0] &&
@@ -62,9 +58,9 @@ export default class UniProtKB {
           details.name = protein.protein.submittedName[0].fullName.value;
         }
 
-        details.geneName = (protein.gene && protein.gene[0] && protein.gene[0].name)
-          ? protein.gene[0].name.value
-          : 'NA';
+        details.geneName = (protein.gene && protein.gene[0] && protein.gene[0].name) ?
+          protein.gene[0].name.value :
+          'NA';
 
         results.proteins[protein.accession] = details;
       };
@@ -86,11 +82,11 @@ export default class UniProtKB {
         };
       };
 
-      for(let i = 0; i < protein.data.length; i++) {
+      for (let i = 0; i < protein.data.length; i++) {
         processProteinDetails(protein.data[i]);
       }
 
-      for(let i = 0; i < coordinates.data.length; i++) {
+      for (let i = 0; i < coordinates.data.length; i++) {
         processCoordinateDetails(coordinates.data[i]);
       }
 

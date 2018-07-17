@@ -1,12 +1,9 @@
-
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import * as cookieParser from 'cookie-parser';
 import axios from 'axios';
 
 import UniProtKB from './data-fetch/UniProtKB';
-import VEP from './data-fetch/VEP';
-import Protein from './lib/biolib/src/protein/protein';
 import VCF from './data-process/VCF';
 
 const app = express();
@@ -20,7 +17,9 @@ app.use((req, res, next) => {
 });
 
 app.use(express.static('public'));
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({
+  extended: false
+}));
 app.use(bodyParser.json());
 
 // Is Alive?
@@ -39,9 +38,9 @@ app.post('/parser', (req, res) => {
   // const species: string = 'human';
   // const region: string = `${chrom}:${position.start}-${position.end}:${strand}`;
   // const vcf: string = `${chrom}\t${position.start}\t.\t${ref || '.'}\t${allele}\t.\t.\t.`;
-// console.log("VCF:", vcf);
+  // console.log("VCF:", vcf);
   // VEP.variantConsequences(species, region, allele, results => res.send(results.data));
-console.log("vcf:", req.body.input);
+  console.log("vcf:", req.body.input);
   const species: string = 'homo_sapiens';
   const variants: string[] = req.body.input;
 
@@ -49,12 +48,6 @@ console.log("vcf:", req.body.input);
   //   .then(results => res.send(results.data));
   VCF.processVCFInput(species, variants)
     .then(results => res.send(results));
-});
-
-// Example of biolib usage
-app.get('/biolib', (req, res) => {
-  const ABPP: Protein = new Protein('P05067');
-  res.send(ABPP.accession);
 });
 
 app.listen(port, () => console.log(`server listening on http://localhost:${port}/`));
