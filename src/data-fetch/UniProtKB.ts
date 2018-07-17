@@ -8,9 +8,9 @@ const taxID = '9606';
 
 export default class UniProtKB {
 
-  public static async proteinDetailsByAccession(accessions: string[]) {
+  public static async proteinsDetailByAccession(accessions: string[]) {
     let queryString: string = Helpers.stringOrArrayToCommaSeparated(accessions);
-    
+
     const url: string = `https://www.ebi.ac.uk/proteins/api/proteins?format=json&accession=${queryString}`;
     return await axios.get(url);
   }
@@ -24,7 +24,7 @@ export default class UniProtKB {
 
   public static async impactSearchByProteinAccessions(accessions: string[]) {
     const promise = axios.all([
-      this.proteinDetailsByAccession(accessions),
+      this.proteinsDetailByAccession(accessions),
       this.genomicCoordinatesByAccession(accessions),
     ]);
 
