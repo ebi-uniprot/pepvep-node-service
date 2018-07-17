@@ -1,4 +1,4 @@
-[{
+const data = [{
     "accession": "Q08AJ9",
     "name": "Q08AJ9_HUMAN",
     "taxid": 9606,
@@ -96142,3 +96142,5 @@
         "ensemblTranslationId": "ENSP00000481507"
     }]
 }]
+
+export default data;
