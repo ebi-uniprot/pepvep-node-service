@@ -6,6 +6,7 @@
 
 # JavaScript files in the source directory
 /src/**/*.js
+/test/**/*.js
 
 # misc
 .DS_Store
