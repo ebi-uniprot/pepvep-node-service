@@ -1,5 +1,7 @@
 import proteinsByPositionResponse from './proteinsByPositionResponse';
 import proteinsDetailByAccessionResponse from './proteinsDetailByAccessionResponse';
+import genomicCoordinatesByAccessionResponse from './genomicCoordinatesByAccessionResponse';
+import getProteinVariantsResponse from './getProteinVariantsResponse';
 
 import nock = require('nock');
 
@@ -19,6 +21,14 @@ const uniprotMock = () => {
     nock('https://www.ebi.ac.uk')
         .get(`/proteins/api/proteins?format=json&accession=P05067`)
         .reply(200, proteinsDetailByAccessionResponse);
+
+    nock('https://www.ebi.ac.uk')
+        .get(`/proteins/api/coordinates?format=json&accession=P05067`)
+        .reply(200, genomicCoordinatesByAccessionResponse);
+
+    nock('https://www.ebi.ac.uk')
+        .get(`/proteins/api/variation/P05067`)
+        .reply(200, getProteinVariantsResponse);
 }
 
 export default uniprotMock;
