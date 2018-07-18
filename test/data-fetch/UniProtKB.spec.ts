@@ -1,5 +1,7 @@
 import 'mocha';
-import { expect } from 'chai';
+import {
+  expect
+} from 'chai';
 import UniProtKbFetch from '../../src/data-fetch/UniProtKB';
 import uniProtKbMock from '../mocks/uniprot.mock';
 
@@ -14,7 +16,9 @@ describe('UniProtKB', () => {
   describe('#proteinDetailsByAccession()', () => {
     it('should retrieve details for a given accession', () => {
       return UniProtKbFetch.proteinsDetailByAccession([accession])
-        .then(({ data }) => {
+        .then(({
+          data
+        }) => {
           expect(data).not.to.be.undefined;
           expect(data).not.to.be.null;
           expect(data).not.to.be.empty;
@@ -26,7 +30,9 @@ describe('UniProtKB', () => {
   describe('#genomicCoordinatesByAccession()', () => {
     it('should retrieve details for a given coordinate', () => {
       return UniProtKbFetch.genomicCoordinatesByAccession([accession])
-        .then(({ data }) => {
+        .then(({
+          data
+        }) => {
           expect(data).not.to.be.undefined;
           expect(data).not.to.be.null;
           expect(data).not.to.be.empty;
@@ -38,7 +44,9 @@ describe('UniProtKB', () => {
   describe('#getProteinsByPosition()', () => {
     it('should retrieve different entries for a given position', () => {
       return UniProtKbFetch.getProteinsByPosition('6', 26104031)
-        .then(({ data }) => {
+        .then(({
+          data
+        }) => {
           expect(data.length).to.equal(5);
         });
     });
@@ -47,7 +55,9 @@ describe('UniProtKB', () => {
   describe('#getProteinVariants()', () => {
     it('should retrieve variants for a given accession', () => {
       return UniProtKbFetch.getProteinVariants(accession)
-        .then(({ data }) => {
+        .then(({
+          data
+        }) => {
           expect(data).not.to.be.undefined;
           expect(data).not.to.be.null;
           expect(data).not.to.be.empty;

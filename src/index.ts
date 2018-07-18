@@ -3,6 +3,7 @@ import * as bodyParser from 'body-parser';
 import * as cookieParser from 'cookie-parser';
 import axios from 'axios';
 
+import Helpers from './data-fetch/Helpers'
 import UniProtKB from './data-fetch/UniProtKB';
 import VCF from './data-process/VCF';
 
@@ -47,6 +48,13 @@ app.post('/parser', (req, res) => {
   // VEP.variantConsequencesBatch(species, variants)
   //   .then(results => res.send(results.data));
   VCF.processVCFInput(species, variants)
+    .then(results => res.send(results));
+});
+
+app.post('/protein-variants', (req, res) => {
+  const proteinVariants: string = req.body.input;
+  const queryItems = Helpers.parseProteinChangeInput(proteinVariants);
+  UniProtKB.proteinsDetailByAccession(queryItems.map(d => d['accession']))
     .then(results => res.send(results));
 });
 

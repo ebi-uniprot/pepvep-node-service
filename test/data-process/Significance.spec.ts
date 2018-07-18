@@ -1,5 +1,7 @@
 import 'mocha';
-import { expect } from 'chai';
+import {
+  expect
+} from 'chai';
 import Significance from '../../src/data-process/Significance';
 import uniProtKbMock from '../mocks/uniprot.mock';
 
@@ -26,5 +28,20 @@ describe('Significance', function () {
       //   expect(d.length).to.equal(0);
       // });
     });
-  })
+  });
+
+  describe('#getPositionalSignificanceForProtein', function () {
+    it('should get the right number of features', function () {
+      return Significance.getPositionalSignificanceForProtein('P05067', 20).then(d => {
+        expect(d.length).to.equal(6);
+      })
+    });
+
+    it('should not find anything outside of range', function () {
+      return Significance.getPositionalSignificanceForProtein('P05067', 999999).then(d => {
+        expect(d.length).to.equal(0);
+      })
+    });
+
+  });
 });

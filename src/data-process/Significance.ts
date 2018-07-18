@@ -23,6 +23,13 @@ export default class Significance {
         return positionalSignificance;
     }
 
+    public static async getPositionalSignificanceForProtein(accession: string, position: number, callback: Function = null) {
+        const {
+            data
+        } = await UniProtKB.getProteinFeatures(accession);
+        return data.features.filter(feature => feature.begin <= position && feature.end >= position);
+    }
+
     private static getMatchingGeneCoordinates(coordinates, position: number, chromosome: string) {
         return coordinates.filter(gnCoordinate => gnCoordinate.genomicLocation.chromosome === chromosome && Number(gnCoordinate.genomicLocation.start) <= position &&
             Number(gnCoordinate.genomicLocation.end) >= position);
@@ -44,10 +51,10 @@ export default class Significance {
         };
     }
 
-    public static async getClinicalSignificance(accession:string, chromosome:string, position:number, allele:string) {
+    public static async getClinicalSignificance(accession: string, chromosome: string, position: number, allele: string) {
         const variants = await UniProtKB.getProteinVariants(accession);
         return variants.data.features.filter(variant => {
-            if(!variant.genomicLocation) {
+            if (!variant.genomicLocation) {
                 return;
             }
             const hgvs = this.parseHGVS(variant.genomicLocation);

@@ -8,7 +8,6 @@ export default class UniProtKB {
 
   public static async proteinsDetailByAccession(accessions: string[]) {
     let queryString: string = Helpers.stringOrArrayToCommaSeparated(accessions);
-
     const url: string = `https://www.ebi.ac.uk/proteins/api/proteins?format=json&accession=${queryString}`;
     return await axios.get(url);
   }
@@ -17,6 +16,11 @@ export default class UniProtKB {
     let queryString: string = Helpers.stringOrArrayToCommaSeparated(accessions);
 
     const url: string = `https://www.ebi.ac.uk/proteins/api/coordinates?format=json&accession=${queryString}`;
+    return await axios.get(url);
+  }
+
+  public static async getProteinFeatures(accession: string) {
+    const url: string = `https://www.ebi.ac.uk/proteins/api/features/${accession}`;
     return await axios.get(url);
   }
 
