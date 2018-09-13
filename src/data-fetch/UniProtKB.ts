@@ -103,12 +103,19 @@ export default class UniProtKB {
 
   public static async getProteinsByPosition(chromosome: string, position: number) {
     const url: string = `https://www.ebi.ac.uk/proteins/api/coordinates/${taxID}/${chromosome}:${position}-${position}?format=json&in_range=false`;
-
     return await axios.get(url);
   }
 
   public static async getProteinVariants(accession: string) {
     const url: string = `https://www.ebi.ac.uk/proteins/api/variation/${accession}`;
+    return await axios.get(url);
+  }
+
+  public static async getProteinsByMultiplePositions(positions: string[]) {
+    const positionsString: string = positions.join(',').slice(0, -1);
+console.log("Positions :::", positionsString);
+    const url: string = `http://wwwdev.ebi.ac.uk/proteins/api/coordinates/${taxID}/${positionsString}?format=json&in_range=false`;
+console.log("---- UniProt URL:", url);
     return await axios.get(url);
   }
 }

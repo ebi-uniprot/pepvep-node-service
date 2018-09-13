@@ -3,7 +3,6 @@ import UniProtKB from '../data-fetch/UniProtKB';
 import VEP from '../data-fetch/VEP';
 
 export default class VCF {
-
   public static async processVCFInput(species: string, variants: string[]) {
     let VCFResults: any[] = [];
 
@@ -28,7 +27,6 @@ export default class VCF {
 
     await VEP.variantConsequencesBatch(species, variants)
     .then(({ data }) => {
-
       data = data[0];
       chromosome = data.seq_region_name;
       const position: number = (data.start <= data.end)
@@ -63,7 +61,6 @@ export default class VCF {
 
         data.gnCoordinate
           .forEach(item => {
-
             let row: any = emptyRow();
 
             row.allele = allele;
@@ -77,7 +74,7 @@ export default class VCF {
             row.impact = consequences[item.ensemblTranscriptId].join(',');
             row.VEP = VEPData;
             row.UNI = UNIData;
-            
+
             VCFResults.push(row);
           });
       }

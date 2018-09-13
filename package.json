@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/ebi-uniprot/pepvep-node-service#readme",
   "dependencies": {
+    "@types/node": "^10.9.4",
     "axios": "^0.18.0",
     "body-parser": "^1.18.2",
     "cookie-parser": "^1.4.3",

@@ -5,7 +5,9 @@ import axios from 'axios';
 
 import Helpers from './data-fetch/Helpers'
 import UniProtKB from './data-fetch/UniProtKB';
-import VCF from './data-process/VCF';
+import VEP from './data-fetch/VEP';
+
+import SearchResults from './data-process/SearchResults';
 
 const app = express();
 const port = 3687;
@@ -34,20 +36,13 @@ app.get('/protein/:accessions', (req, res) => {
     .then(results => res.send(results));
 });
 
+// Default VEP Input
 app.post('/parser', (req, res) => {
-  // const {chrom, position, strand, ref, allele} = req.body;
-  // const species: string = 'human';
-  // const region: string = `${chrom}:${position.start}-${position.end}:${strand}`;
-  // const vcf: string = `${chrom}\t${position.start}\t.\t${ref || '.'}\t${allele}\t.\t.\t.`;
-  // console.log("VCF:", vcf);
-  // VEP.variantConsequences(species, region, allele, results => res.send(results.data));
-  console.log("vcf:", req.body.input);
-  const species: string = 'homo_sapiens';
-  const variants: string[] = req.body.input;
+  console.log("input:", req.body.input);
+  const organism: string = 'homo_sapiens';
+  const input: string = req.body.input;
 
-  // VEP.variantConsequencesBatch(species, variants)
-  //   .then(results => res.send(results.data));
-  VCF.processVCFInput(species, variants)
+  SearchResults.defaultSearch(organism, input)
     .then(results => res.send(results));
 });
 
