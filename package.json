@@ -4,7 +4,7 @@
   "description": "",
   "main": "src/index.ts",
   "scripts": {
-    "start": "ts-node src/index.ts",
+    "start": "nodemon",
     "test": "mocha --require ts-node/register test/**/*.spec.ts",
     "test-watch": "mocha --require ts-node/register --watch-extensions ts --watch 'test/**/*.spec.ts'"
   },
@@ -31,6 +31,7 @@
     "chai": "^4.1.2",
     "mocha": "^5.2.0",
     "nock": "^9.4.2",
+    "nodemon": "^1.18.4",
     "ts-node": "^7.0.0",
     "typescript": "^2.7.2"
   }

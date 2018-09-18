@@ -7,12 +7,13 @@ import VEP from '../data-fetch/VEP';
 export default class SearchResults {
   public static async defaultSearch(organism: string, input: string) {
     let results: any[] = [];
-    let features: any = {};
-    let consequences: any = {};
+    let proteinFeatures: any = {};
+    let transcriptConsequences: any = {};
 
     const emptyGroup = () => ({
       key: undefined,
       input: undefined,
+      colocatedVariants: undefined,
       rows: [],
     });
 
@@ -40,7 +41,7 @@ export default class SearchResults {
     await VEP.variantConsequencesAllInputs(organism, input)
       .then(({ data }) => {
         let positions: string[] = [];
-
+// console.log("**** DATA:", JSON.stringify(data));
         results = data
           .map(query => {
             positions
@@ -49,28 +50,30 @@ export default class SearchResults {
             let group = emptyGroup();
             group.key = crypto.createHash('md5').update(query.input).digest('hex');
             group.input = query.input;
+            group.colocatedVariants = query.colocated_variants;
             group.rows = query.transcript_consequences
               .map(con => {
                 let row: any = emptyRow();
+                const ensg: string = con.gene_id;
                 const enst: string = con.transcript_id;
-console.log("ENST/ENSG:", enst, con.gene_id);
-                if ('undefined' === typeof features[enst]) {
-                  features[enst] = [];
-                  consequences[enst] = [];
+
+                if ('undefined' === typeof proteinFeatures[ensg]) {
+                  proteinFeatures[ensg] = {};
+                  transcriptConsequences[ensg] = {};
+                }
+
+                if ('undefined' === typeof proteinFeatures[ensg][enst]) {
+                  proteinFeatures[ensg][enst] = [];
+                  transcriptConsequences[ensg][enst] = [];
                 }
 
                 if ('undefined' !== typeof query.transcript_consequences) {
                   query.transcript_consequences
                     .forEach(c => {
-                      if (c.transcript_id === enst) {
-                        consequences[enst].push(c);
+                      if (c.gene_id === ensg && c.transcript_id === enst) {
+                        transcriptConsequences[ensg][enst].push(c);
                       }
                     });
-                }
-
-                if ('undefined' !== typeof query.colocated_variants) {
-                  query.colocated_variants
-                    .forEach(c => consequences[enst].push(c));
                 }
 
                 row.protein.start = con.protein_start;
@@ -82,31 +85,41 @@ console.log("ENST/ENSG:", enst, con.gene_id);
                 row.gene.allele = query.allele_string;
                 row.gene.ensgId = con.gene_id;
                 row.gene.enstId = enst;
-                row.features = features[enst];
-                row.consequences = consequences[enst];
+                row.proteinFeatures = proteinFeatures[ensg][enst];
+                row.transcriptConsequences = transcriptConsequences[ensg][enst];
                 return row;
               });
             return group;
           });
         return UniProtKB.getProteinsByMultiplePositions(positions);
       })
-      .then(response => {
+      .then(({ data }) => {
+        let geneNames : any = {};
 // console.log("**** DATA:", JSON.stringify(response.data));
-        response.data
-          .forEach(c => {
+        data.forEach(c => {
             const { gnCoordinate } = c;
             gnCoordinate
               .forEach(g => {
+                const ensg : string = g.ensemblGeneId;
                 const enst : string = g.ensemblTranscriptId;
-console.log(">>> ENST/ENSG:", enst, g.ensemblGeneId);
-                if ('undefined' === typeof features[enst]) {
+
+                if ('undefined' === typeof proteinFeatures[ensg][enst]) {
                   return;
                 }
 
-                g.feature.forEach(f => features[enst].push(f));
+                geneNames[ensg] = c.gene
+                  .find(e => e.type === 'primary')
+                  ['value'];      // Pick the value from the object
+
+                g.feature.forEach(f => proteinFeatures[ensg][enst].push(f));
               });
           });
-console.log("features:", features);
+
+          results.forEach(group => {
+            group.rows.forEach(row => {
+              row.gene.name = geneNames[row.gene.ensgId];
+            });
+          });
         });
     return results;
   }

@@ -112,10 +112,11 @@ export default class UniProtKB {
   }
 
   public static async getProteinsByMultiplePositions(positions: string[]) {
-    const positionsString: string = positions.join(',').slice(0, -1);
-console.log("Positions :::", positionsString);
+    const positionsString: string = (1 === positions.length)
+      ? positions[0]
+      : positions.join(',').slice(0, -1);
+
     const url: string = `http://wwwdev.ebi.ac.uk/proteins/api/coordinates/${taxID}/${positionsString}?format=json&in_range=false`;
-console.log("---- UniProt URL:", url);
     return await axios.get(url);
   }
 }
