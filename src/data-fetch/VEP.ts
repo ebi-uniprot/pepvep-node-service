@@ -4,7 +4,11 @@ import axios from 'axios';
 export default class VEP {
   public static async variantConsequencesAllInputs(organism: string, input: string) {
     const url: string = `https://rest.ensembl.org/vep/${organism}/region?content-type=application/json`;
-    return await axios.post(url, {variants: [input]});
+    return await axios.post(url, {
+      variants: [input],
+      protein: true,
+      uniprot: true
+    });
   }
 
   public static async variantConsequences(organism: string, region: string, allele: string ) {

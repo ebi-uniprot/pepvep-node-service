@@ -38,11 +38,15 @@ app.get('/protein/:accessions', (req, res) => {
 
 // Default VEP Input
 app.post('/parser', (req, res) => {
-  console.log("input:", req.body.input);
+  // console.log("input:", req.body.input);
   const organism: string = 'homo_sapiens';
   const input: string = req.body.input;
 
-  SearchResults.defaultSearch(organism, input)
+  // SearchResults.defaultSearch(organism, input)
+  //   .then(results => res.send(results));
+
+  let search = new SearchResults();
+  search.defaultSearch(organism, input)
     .then(results => res.send(results));
 });
 

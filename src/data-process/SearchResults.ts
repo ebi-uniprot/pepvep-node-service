@@ -3,124 +3,75 @@ import * as crypto from 'crypto';
 
 import UniProtKB from '../data-fetch/UniProtKB';
 import VEP from '../data-fetch/VEP';
+import Significance from './Significance';
+
+import {
+  Node,
+  Edge,
+  SearchResultsGraph,
+  InputNode,
+  ProteinNode,
+  InputToProteinEdge,
+  GeneNode,
+  GeneToProteinEdge,
+  InputToGeneEdge
+} from '../data-graph';
 
 export default class SearchResults {
-  public static async defaultSearch(organism: string, input: string) {
-    let results: any[] = [];
-    let proteinFeatures: any = {};
-    let transcriptConsequences: any = {};
+  // All data from API calls will be added to this graph and later
+  // can be quired.
+  public results: SearchResultsGraph = new SearchResultsGraph();
 
-    const emptyGroup = () => ({
-      key: undefined,
-      input: undefined,
-      colocatedVariants: undefined,
-      rows: [],
-    });
-
-    const emptyRow = () => ({
-      protein: {
-        accession: undefined,
-        name: undefined,
-        length: undefined,
-        start: undefined,
-        end: undefined,
-        variant: undefined,
-      },
-      gene: {
-        name: undefined,
-        ensgId: undefined,
-        enstId: undefined,
-        chromosome: undefined,
-        start: undefined,
-        end: undefined,
-        allele: undefined,
-      },
-      significance: undefined,
-    });
-
+  public async defaultSearch(organism: string, input: string) {
+    
+    // Assuming the input is one of the default VEP inputs, we would
+    // just pass the input to VEP end-point and consume the result.
+    // Note: this has to change later as we would need to handle both
+    // Genomic (VEP) and Protein (UniProt) input variants.
     await VEP.variantConsequencesAllInputs(organism, input)
       .then(({ data }) => {
-        let positions: string[] = [];
-// console.log("**** DATA:", JSON.stringify(data));
-        results = data
-          .map(query => {
-            positions
-              .push(`${query.seq_region_name}:${query.start}-${query.end}`);
+// console.log("Got data here:", JSON.stringify(data));
+        data.forEach(result => {
+          // The `InputNode` will be used later to create the results table.
+          let inputNode: InputNode = new InputNode(result.input);
+          this.results.addNode(inputNode);
 
-            let group = emptyGroup();
-            group.key = crypto.createHash('md5').update(query.input).digest('hex');
-            group.input = query.input;
-            group.colocatedVariants = query.colocated_variants;
-            group.rows = query.transcript_consequences
-              .map(con => {
-                let row: any = emptyRow();
-                const ensg: string = con.gene_id;
-                const enst: string = con.transcript_id;
-
-                if ('undefined' === typeof proteinFeatures[ensg]) {
-                  proteinFeatures[ensg] = {};
-                  transcriptConsequences[ensg] = {};
-                }
-
-                if ('undefined' === typeof proteinFeatures[ensg][enst]) {
-                  proteinFeatures[ensg][enst] = [];
-                  transcriptConsequences[ensg][enst] = [];
-                }
-
-                if ('undefined' !== typeof query.transcript_consequences) {
-                  query.transcript_consequences
-                    .forEach(c => {
-                      if (c.gene_id === ensg && c.transcript_id === enst) {
-                        transcriptConsequences[ensg][enst].push(c);
-                      }
-                    });
-                }
-
-                row.protein.start = con.protein_start;
-                row.protein.end = con.protein_end;
-                row.protein.variant = con.amino_acids;
-                row.gene.chromosome = query.seq_region_name;
-                row.gene.start = query.start;
-                row.gene.end = query.end;
-                row.gene.allele = query.allele_string;
-                row.gene.ensgId = con.gene_id;
-                row.gene.enstId = enst;
-                row.proteinFeatures = proteinFeatures[ensg][enst];
-                row.transcriptConsequences = transcriptConsequences[ensg][enst];
-                return row;
+          // Looping through Transcript Consequences to collect some useful information.
+          if ('undefined' !== typeof result.transcript_consequences) {
+            result.transcript_consequences
+              .forEach(tc => {
+                // PROTEIN NODE: We will use the ENSP ID (protein_id field) to create and identify 
+                // our protein nodes, however, we will store the ENST ID as well (transcript_id field)
+                // which can be used as an identifier too -- if needed.
+                // Both `swissprot` and `trembl` fields are a type of array and may or may not contain
+                // any protein accessions. This is handle inside `ProteinNode` class.
+                const proteinNode: ProteinNode = new ProteinNode(tc.protein_id, tc.transcript_id, tc.swissprot, tc.trembl);
+                this.results.addNode(proteinNode);
+                // Connecting this ProteinNode to its respective InputNode.
+                const inputToProteinEdge: InputToProteinEdge = new InputToProteinEdge(inputNode, proteinNode);
+                this.results.addEdge(inputToProteinEdge);
+                
+                // GENE NODE: We will use ENSG ID (gene_id field) to create and identify our gene nodes.
+                const geneNode: GeneNode = new GeneNode(tc.gene_id);
+                this.results.addNode(geneNode);
+                // Conneting this GeneNode to its respective ProteinNode.
+                const geneToProteinEdge: GeneToProteinEdge = new GeneToProteinEdge(geneNode, proteinNode);
+                this.results.addEdge(geneToProteinEdge);
+                // Connecting this GeneNode to its respective InputNode.
+                const inputToGeneEdge: InputToGeneEdge = new InputToGeneEdge(inputNode, geneNode);
+                this.results.addEdge(inputToGeneEdge); 
               });
-            return group;
-          });
-        return UniProtKB.getProteinsByMultiplePositions(positions);
-      })
-      .then(({ data }) => {
-        let geneNames : any = {};
-// console.log("**** DATA:", JSON.stringify(response.data));
-        data.forEach(c => {
-            const { gnCoordinate } = c;
-            gnCoordinate
-              .forEach(g => {
-                const ensg : string = g.ensemblGeneId;
-                const enst : string = g.ensemblTranscriptId;
+          }
 
-                if ('undefined' === typeof proteinFeatures[ensg][enst]) {
-                  return;
-                }
-
-                geneNames[ensg] = c.gene
-                  .find(e => e.type === 'primary')
-                  ['value'];      // Pick the value from the object
-
-                g.feature.forEach(f => proteinFeatures[ensg][enst].push(f));
-              });
-          });
-
-          results.forEach(group => {
-            group.rows.forEach(row => {
-              row.gene.name = geneNames[row.gene.ensgId];
-            });
-          });
         });
-    return results;
+
+        // console.log(this.results.toString());
+        // console.log(this.results.toJSON());
+
+        console.log(`All Accessions:\n`, this.results.getAllProteinAccessions());
+        console.log(`Preferred Accessions:\n`, this.results.getPreferredProteinAccessions());
+        console.log(`All Gene IDs:\n`, this.results.getAllGeneIDs());
+
+      });
   }
 }

@@ -4,7 +4,8 @@
     "target": "ES5",
     "outDir": "src",
     "rootDir": "src",
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "lib": ["es2015", "es2017"]
   },
   "include": [
     "src/**/*", "test/**/*"

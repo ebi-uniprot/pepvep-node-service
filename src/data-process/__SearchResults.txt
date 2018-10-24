@@ -1,0 +1,156 @@
+
+import * as crypto from 'crypto';
+
+import UniProtKB from '../data-fetch/UniProtKB';
+import VEP from '../data-fetch/VEP';
+import Significance from './Significance';
+
+export default class SearchResults {
+  public static async defaultSearch(organism: string, input: string) {
+    // Final results array
+    let results: any[] = [];
+
+    // Holds Protein Fetures per each [ensg][enst]
+    let proteinFeatures: any = {};
+
+    // Holds Transcript Consequences per each [ensg][enst]
+    let vepTranscriptConsequences: any = {};
+
+    const emptyGroup = () => ({
+      key: undefined,
+      input: undefined,
+      colocatedVariants: undefined,
+      rows: [],
+    });
+
+    const emptyRow = () => ({
+      protein: {
+        accession: undefined,
+        name: undefined,
+        length: undefined,
+        start: undefined,
+        end: undefined,
+        variant: undefined,
+      },
+      gene: {
+        name: undefined,
+        ensgId: undefined,
+        enstId: undefined,
+        chromosome: undefined,
+        start: undefined,
+        end: undefined,
+        allele: undefined,
+      },
+      significance: undefined,
+    });
+
+    // Assuming the input is one of the default VEP inputs, we would
+    // just pass the input to VEP end-point and consume the result.
+    // Note: this has to change later as we would need to handle both
+    // Genomic (VEP) and Protein (UniProt) input variants.
+    await VEP.variantConsequencesAllInputs(organism, input)
+      .then(({ data }) => {
+        // All genomic positions: ch:start-end. This is used later on
+        // to query UniProtKB for all proteins in these positions.
+        let positions: string[] = [];
+console.log("**** VEP DATA:", JSON.stringify(data));
+        results = data
+          .map(query => {
+            // Collecting genomic positions.
+            positions
+              .push(`${query.seq_region_name}:${query.start}-${query.end}`);
+
+            let group = emptyGroup();
+            group.key = crypto.createHash('md5').update(query.input).digest('hex');
+            group.input = query.input;
+
+            // Alternative colacted varients.
+            group.colocatedVariants = query.colocated_variants;
+
+            // Picking up the required properties from Transcript Consequences.
+            group.rows = query.transcript_consequences
+              .map(transcriptConsequence => {
+                let row: any = emptyRow();
+                const ensg: string = transcriptConsequence.gene_id;
+                const enst: string = transcriptConsequence.transcript_id;
+
+                // Create an ENSG entry if it's not created yet.
+                if ('undefined' === typeof proteinFeatures[ensg]) {
+                  proteinFeatures[ensg] = {};
+                  vepTranscriptConsequences[ensg] = {};
+                }
+
+                // Creat an ENST entry if it's not created yet.
+                if ('undefined' === typeof proteinFeatures[ensg][enst]) {
+                  proteinFeatures[ensg][enst] = [];
+                  vepTranscriptConsequences[ensg][enst] = [];
+                }
+
+                // Storing the current Transcript Consequence object.
+                vepTranscriptConsequences[ensg][enst].push(transcriptConsequence);
+
+                // TODO: Re-order Transcript Consequwnces in a way that 
+                // entries with 'missense_variant' value in the 'consequece terms'
+                // array would be sorted on top.
+                // Note: Ask Andrew why is this important or for details if not clear.
+                
+                row.protein.start = transcriptConsequence.protein_start;
+                row.protein.end = transcriptConsequence.protein_end;
+                row.protein.variant = transcriptConsequence.amino_acids;
+                row.gene.chromosome = query.seq_region_name;
+                row.gene.start = query.start;
+                row.gene.end = query.end;
+                row.gene.allele = query.allele_string;
+                row.gene.ensgId = transcriptConsequence.gene_id;
+                row.gene.enstId = enst;
+                row.proteinFeatures = proteinFeatures[ensg][enst];
+                row.transcriptConsequences = vepTranscriptConsequences[ensg][enst];
+                return row;
+              });
+            return group;
+          });
+        return UniProtKB.getProteinsByMultiplePositions(positions);
+      })
+      .then(({ data }) => {
+        // Gene names to display on search results table.
+        let geneNames : any = {};
+// console.log("**** DATA:", JSON.stringify(data));
+        data.forEach(protein => {
+            const { gnCoordinate } = protein;
+            gnCoordinate
+              .forEach(geneCoordinate => {
+                const ensg: string = geneCoordinate.ensemblGeneId;
+                const enst: string = geneCoordinate.ensemblTranscriptId;
+
+                // The API returns more data that we need. If this entry is
+                // not defined, then it is not something we are interested in.
+                if ('undefined' === typeof proteinFeatures[ensg][enst]) {
+                  return;
+                }
+
+                // Gene name for this entry.
+                geneNames[ensg] = protein.gene
+                  .find(e => e.type === 'primary')
+                  ['value'];      // Pick the value from the object
+
+                // Collect perotein features.
+                if ('undefined' !== typeof geneCoordinate.feature) {
+                  geneCoordinate
+                    .feature
+                    .forEach(feature => proteinFeatures[ensg][enst].push(feature));
+                }
+
+                // return Significance.getClinicalSignificance(protein.accession,);
+              });
+          });
+
+          // Add 'Gene Name' values to each row of the search results.
+          results.forEach(group => {
+            group.rows.forEach(row => {
+              row.gene.name = geneNames[row.gene.ensgId];
+            });
+          });
+        });
+    return results;
+  }
+}
