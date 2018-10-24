@@ -6,7 +6,7 @@ import { AnyNodeType } from '../index';
  */
 export interface EdgeInterface {
   /**
-   * For an `Edge` this value should always be a string constant: "Edge".
+   * For an `Edge` this value should always be a string constant "Edge".
    */
   readonly role: string;
 

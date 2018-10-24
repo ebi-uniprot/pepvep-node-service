@@ -31,31 +31,33 @@ export default class Graph {
     /**
      * As similar nodes will be stored in categories based on
      * their sub-types, here we need to check if this is the
-     * time a node from a sub-type is being added to the graph.
+     * firt time a `Node` from a sub-type is being added to the
+     * graph.
      *
-     * If this is the first time adding a node of a sub-type
-     * to the graph, then first create an empty object for
-     * the whole category, so later on 
+     * If this is the first time adding a `Node` of a sub-type
+     * to the graph, then first create an empty object for the
+     * whole category, so later on it can be used to store the
+     * nodes.
      */
     if ('undefined' === typeof this._nodes[node.type]) {
       this._nodes[node.type] = {};
     }
 
     /**
-     * Since we don't want duplicated nodes, here we check if a
-     * certain node already exists in our graph. The direct path
-     * to a node -- with complexity of O(1), then would be its
-     * sub-type and its unique ID.
+     * Since we don't want duplicated nodes, here we check if
+     * this node already exists in our graph. The direct path
+     * to a node -- with complexity of O(1), would be its sub-type
+     * and its unique ID.
      *
-     * If the node already exists, simply do nothing and return.
+     * If the node already exists, do nothing and return.
      */
     if ('undefined' !== typeof this._nodes[node.type][node.id]) {
       return;
     }
 
     /**
-     * A node is being added to the graph now and stored in its
-     * sub-type category, with its unique ID.
+     * A `Node` is being added to this `Graph` instance and is stored
+     * in its sub-type category, using its unique identifier.
      */
     this._nodes[node.type][node.id] = node;
   }
