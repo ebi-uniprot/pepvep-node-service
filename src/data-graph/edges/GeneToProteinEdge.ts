@@ -5,6 +5,10 @@ import {
   Edge
 } from '../index';
 
+/**
+ * To express the relationship between a `GeneNode` and
+ * a `ProteinNode`.
+ */
 export default class GeneToProteinEdge extends Edge {
 
   constructor(geneNode: GeneNode, proteinNode: ProteinNode) {
