@@ -1,6 +1,10 @@
 
 import { Node } from '../index';
 
+/**
+ * To represent a 'Variation' both in terms of Genomic
+ * and Protein changes.
+ */
 export default class VariationNode extends Node {
   readonly aminoAcids: string;
   readonly allele: string;

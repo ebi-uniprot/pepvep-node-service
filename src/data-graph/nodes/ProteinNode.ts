@@ -1,6 +1,12 @@
 
 import { Node } from '../index';
 
+/**
+ * To represent a 'Protein' node in the graph. While
+ * multiple accessions can be assigned to a single protein
+ * node, the node itself should be a unique protein entry,
+ * which is deinfed by ENSP/ENST IDs here.
+ */
 export default class ProteinNode extends Node {
   readonly ensp: string;
   readonly enst: string;
@@ -15,10 +21,26 @@ export default class ProteinNode extends Node {
     this.tremblAccessions = tremblAccessions || [];
   }
 
+  /**
+   * This method will return an array of all of the accessions
+   * assigned to this node. There may be different accessions
+   * here from SwissProt and Trembl that both point to the same
+   * entry.
+   *
+   * If you would like to exclude the accessions that are possibly
+   * pointing to the same protin entry, use the `prefereedAccession`
+   * method. 
+   */
   get accessions() : string[] {
     return [...this.swissprotAccessions, ...this.tremblAccessions];
   }
 
+  /**
+   * Since there may be multiple accessions per each individual protein
+   * node in which multilpe accessions may point to a unique protein
+   * entry, this method can be used to filter such accessions out and
+   * (at the moment) return only one accession for the `ProteinNode`.
+   */
   get preferredAccession() : string | null {
     // NOTE: this should be able to choose from iso-forms and canonicals
     if (0 < this.swissprotAccessions.length) {

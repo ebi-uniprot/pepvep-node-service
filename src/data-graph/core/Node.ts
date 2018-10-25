@@ -76,10 +76,27 @@ export interface NodeInterface {
   toJSON() : object;
 }
 
+/**
+ * This defines an object/dictionary for storing/returing
+ * multiple instances of `NodeInterface`. The 'key' of the
+ * object is usually the `id` of the node, however this is
+ * not inforced here. The 'value' will be an instance of a
+ * sub-class of `Node` class.
+ */
 export interface NodeInterfaceList {
   [id: string] : NodeInterface;
 }
 
+/**
+ * In some places instances of `Node` sub-classes are stored
+ * while being grouped in their own categories, based on their
+ * sub-type.
+ *
+ * This interface defines a contract to store/return such
+ * collections. The `id` here is the name of sub-type which
+ * should match with the name of the class that extends `Node`
+ * base-class. e.g. 'ProteinNode' for `ProteinNode` class.
+ */
 export interface NodeInterfaceListsCollection {
   [id: string] : NodeInterfaceList;
 }

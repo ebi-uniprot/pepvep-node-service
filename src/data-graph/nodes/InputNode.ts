@@ -1,6 +1,11 @@
 
 import { Node } from '../index';
 
+/**
+ * To define an 'Input' node in the graph, where
+ * the original user inputer -- raw variant queries,
+ * are stored.
+ */
 export default class InputNode extends Node {
   readonly raw: string;
 
