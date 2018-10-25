@@ -102,7 +102,7 @@ export default class Graph {
    * category e.g. `InputNode`. In order to get all nodes regardless of
    * their category, use `getAllNodes` method instead.
    */
-  public getNodes(type: string) :  | {} {
+  public getNodes(type: string) : NodeInterfaceList | {} {
     /**
      * This method should always return a JS Object, because probably
      * the rest of the code is making that assumption as well. Therefore,

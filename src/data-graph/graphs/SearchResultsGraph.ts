@@ -41,7 +41,7 @@ export default class SearchResultsGraph extends Graph {
           .forEach(edge => {
             accessions = [...(<InputToProteinEdge>edge).proteinNode.accessions, ...accessions];
           });
-          return accessions;
+        return accessions;
       }, []);
   }
 
@@ -67,7 +67,7 @@ export default class SearchResultsGraph extends Graph {
               accessions.push(accession);
             }
           });
-          return accessions;
+        return accessions;
       }, []);
   }
 
