@@ -1,5 +1,5 @@
 
-import { AnyNodeType } from '../index';
+import { NodeInterface } from '../index';
 
 /**
  * This is how each individual `Edge` should look like.
@@ -17,8 +17,8 @@ export interface EdgeInterface {
    * e.g. 'InputToProteinEdge' for `InputToProteinEdge` class.
    */
   readonly type: string;
-  readonly source: AnyNodeType;
-  readonly destination: AnyNodeType;
+  readonly source: NodeInterface;
+  readonly destination: NodeInterface;
 };
 
 /**
@@ -58,10 +58,10 @@ export interface EdgeNestedListInterface {
 export abstract class Edge implements EdgeInterface {
   readonly role: string = 'Edge';
   readonly type: string;
-  readonly source: AnyNodeType;
-  readonly destination: AnyNodeType;
+  readonly source: NodeInterface;
+  readonly destination: NodeInterface;
 
-  constructor(type: string, source: AnyNodeType, destination: AnyNodeType) {
+  constructor(type: string, source: NodeInterface, destination: NodeInterface) {
     this.type = type;
     this.source = source;
     this.destination = destination;

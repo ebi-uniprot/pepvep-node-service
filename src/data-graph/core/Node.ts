@@ -2,7 +2,6 @@
 import * as crypto from 'crypto';
 
 import {
-  AnyNodeType, AnyNodeListType,
   EdgeInterface, EdgeListInterface, EdgeNestedListInterface
 } from '../index';
 
@@ -72,9 +71,17 @@ export interface NodeInterface {
   addEdge(edge: EdgeInterface) : void;
 
   // TODO
-  removeEdge(target: AnyNodeType) : void;
+  removeEdge(target: NodeInterface) : void;
   toString() : string;
   toJSON() : object;
+}
+
+export interface NodeInterfaceList {
+  [id: string] : NodeInterface;
+}
+
+export interface NodeInterfaceListsCollection {
+  [id: string] : NodeInterfaceList;
 }
 
 /**
@@ -164,7 +171,7 @@ export abstract class Node implements NodeInterface {
     this._edges[edge.destination.type][edge.destination.id] = edge;
   }
 
-  public removeEdge(target: AnyNodeType) : void {
+  public removeEdge(target: NodeInterface) : void {
 
   }
 

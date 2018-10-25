@@ -1,7 +1,7 @@
 
 import {
   EdgeInterface,
-  AnyNodeType, AnyNodeListType, AnyNodeNestedListType
+  NodeInterface, NodeInterfaceList, NodeInterfaceListsCollection
 } from '../index';
 
 /**
@@ -21,13 +21,23 @@ export default class Graph {
    * sub-type are stored with their `Node.id` as the key and
    * the actual Node instance as the value.
    */
-  public _nodes: AnyNodeNestedListType = {};
+  public _nodes: NodeInterfaceListsCollection = {};
   
   /**
-   * Accepts and adds any instances of Node sub-types to the
-   * graph. For `AnyNodeType` definition check `AnyNodeType.ts`
+   * Accepts and adds any instances of `Node` sub-types that
+   * satisfies the `NodeInterface` requirements, to the `Graph`.
+   * 
+   * Later on, when retreiving each `Node` from the graph, you
+   * will be able to cast-up to the true type of that specific
+   * instances. For example, if a `ProteinNode` is added to the
+   * graph, you will be able to only access its methods and
+   * properties that are mentioned in `NodeInterface`. In order
+   * to access the rest of object, you need to case it up to its
+   * original `ProteinNode` type.
+   *
+   * e.g. const proteinNode = <ProteinNode>graph.getNode('ProteinNode', 'ID');
    */
-  public addNode(node: AnyNodeType) : void {
+  public addNode(node: NodeInterface) : void {
     /**
      * As similar nodes will be stored in categories based on
      * their sub-types, here we need to check if this is the
@@ -75,7 +85,7 @@ export default class Graph {
    * `key`s of the returned object, with actual node instances as the
    * value. 
    */
-  public getNode(type: string, id: string) : AnyNodeType | undefined {
+  public getNode(type: string, id: string) : NodeInterface | undefined {
     return this._nodes[type][id];
   }
 
@@ -92,7 +102,7 @@ export default class Graph {
    * category e.g. `InputNode`. In order to get all nodes regardless of
    * their category, use `getAllNodes` method instead.
    */
-  public getNodes(type: string) : AnyNodeListType | {} {
+  public getNodes(type: string) :  | {} {
     /**
      * This method should always return a JS Object, because probably
      * the rest of the code is making that assumption as well. Therefore,
@@ -115,7 +125,7 @@ export default class Graph {
    * This method will return all of the available nodes in the graph
    * regardless of their sub-type or relationship.
    */
-  public getAllNodes() : AnyNodeListType | {} {
+  public getAllNodes() : NodeInterfaceList | {} {
     return this.getNodeTypes()
       .map(nodeType => {
         const nodes = this.getNodes(nodeType);
@@ -143,7 +153,7 @@ export default class Graph {
   }
 
   // TODO
-  public removeEdge(source: AnyNodeType, destination: AnyNodeType) : void {
+  public removeEdge(source: NodeInterface, destination: NodeInterface) : void {
     source.removeEdge(destination);
     destination.removeEdge(source);
   }
