@@ -11,7 +11,7 @@ import {
  */
 export default class InputToVariationEdge extends Edge {
   constructor(inputNode: InputNode, variationNode: VariationNode) {
-    super('InputToVariationEdge', inputNode, variationNode);
+    super(inputNode, variationNode);
   }
 
   get inputNode() : InputNode {

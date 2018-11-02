@@ -12,7 +12,7 @@ import {
 export default class GeneToProteinEdge extends Edge {
 
   constructor(geneNode: GeneNode, proteinNode: ProteinNode) {
-    super('GeneToProteinEdge', geneNode, proteinNode);
+    super(geneNode, proteinNode);
   }
 
   get geneNode() : GeneNode {

@@ -14,7 +14,7 @@ export default class VariationToProteinEdge extends Edge {
   readonly end: number;
 
   constructor(variationNode: VariationNode, proteinNode: ProteinNode, start: number, end: number) {
-    super('VariationToProteinEdge', variationNode, proteinNode);
+    super(variationNode, proteinNode);
     this.start = start;
     this.end = end;
   }

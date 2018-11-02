@@ -12,7 +12,7 @@ import {
 export default class InputToProteinEdge extends Edge {
 
   constructor(inputNode: InputNode, proteinNode: ProteinNode) {
-    super('InputToProteinEdge', inputNode, proteinNode);
+    super(inputNode, proteinNode);
   }
 
   get inputNode() : InputNode {

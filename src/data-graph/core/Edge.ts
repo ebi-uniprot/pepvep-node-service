@@ -15,6 +15,8 @@ export interface EdgeInterface {
    * This should always be same as the name of the class that
    * extends the `Edge` base-class.
    * e.g. 'InputToProteinEdge' for `InputToProteinEdge` class.
+   * This value can be dynamically extracted form the instance
+   * the sub-class itself.
    */
   readonly type: string;
   readonly source: NodeInterface;
@@ -61,10 +63,10 @@ export abstract class Edge implements EdgeInterface {
   readonly source: NodeInterface;
   readonly destination: NodeInterface;
 
-  constructor(type: string, source: NodeInterface, destination: NodeInterface) {
-    this.type = type;
+  constructor(source: NodeInterface, destination: NodeInterface) {
     this.source = source;
     this.destination = destination;
+    this.type = this.constructor.name;
   }
 
   public toString() : string {

@@ -14,7 +14,7 @@ import {
   readonly end: number;
 
   constructor(geneNode: GeneNode, chromosomeNode: ChromosomeNode, start: number, end: number) {
-    super('GeneToChromosomeEdge', geneNode, chromosomeNode);
+    super(geneNode, chromosomeNode);
     this.start = start;
     this.end = end;
   }
