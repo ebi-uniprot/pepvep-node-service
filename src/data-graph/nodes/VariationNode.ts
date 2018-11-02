@@ -14,7 +14,7 @@ export default class VariationNode extends Node {
   private _transcriptConsequences: TranscriptConsequence[] = [];
 
   constructor(allele: string) {
-    super(`${allele}-${Math.random()}`, 'VariationNode');
+    super(`${allele}-${Math.random()}`);
     this.allele = allele;
   }
 

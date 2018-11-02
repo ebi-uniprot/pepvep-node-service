@@ -125,16 +125,17 @@ export abstract class Node implements NodeInterface {
    *
    * The `type` value should also be a valid 'sub-class' name
    * based on the available classes in the 'nodes' directory.
-   * e.g. 'InputNode' for `InputNode` class.
+   * e.g. 'InputNode' for `InputNode` class. This value can be
+   * extracted dynamically from the child-class itself.
    *
    * Note this is a base-class and should be kept generic for
    * all sub-classes. If you need to store extra information
    * and/or add extra functionality that is not useful for all
    * classes, create a sub-class in the 'nodes' directory.
    */
-  constructor(id: string, type: string) {
-    this.type = type;
+  constructor(id: string) {
     this.id = this.idGenerator(id);
+    this.type = this.constructor.name;
   }
 
   idGenerator(rawId: string): string {
@@ -202,7 +203,6 @@ export abstract class Node implements NodeInterface {
     result.id = this.id.toString();
     result.role = this.role.toString();
     result.type = this.type.toString();
-    // result.
 
     return result;
   }

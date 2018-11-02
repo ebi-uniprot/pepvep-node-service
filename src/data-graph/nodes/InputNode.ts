@@ -10,7 +10,7 @@ export default class InputNode extends Node {
   readonly raw: string;
 
   constructor(input: string) {
-    super(input, 'InputNode');
+    super(input);
     this.raw = input;
   }
 

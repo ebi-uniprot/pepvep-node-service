@@ -10,7 +10,7 @@ export default class GeneNode extends Node {
   readonly ensg: string;
 
   constructor(ensg: string) {
-    super(ensg, 'GeneNode');
+    super(ensg);
     this.ensg = ensg;
   }
 }

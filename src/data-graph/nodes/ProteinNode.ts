@@ -14,7 +14,7 @@ export default class ProteinNode extends Node {
   readonly tremblAccessions: string[];
 
   constructor(ensp: string, enst: string, swissprotAccessions: string[] | undefined, tremblAccessions: string[] | undefined) {
-    super(`ENSP:${ensp}-ENST:${enst}`, 'ProteinNode');
+    super(`ENSP:${ensp}-ENST:${enst}`);
     this.ensp = ensp;
     this.enst = enst;
     this.swissprotAccessions = swissprotAccessions || [];

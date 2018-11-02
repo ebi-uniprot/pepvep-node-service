@@ -9,7 +9,7 @@ export default class ChromosomeNode extends Node {
   readonly name: string;
 
   constructor(name: string) {
-    super(name, 'ChromosomeNode');
+    super(name);
     this.name = name;
   }
 }
