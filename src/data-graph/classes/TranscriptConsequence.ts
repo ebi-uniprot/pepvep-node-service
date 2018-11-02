@@ -9,6 +9,7 @@
 export default class TranscriptConsequence {
   private _biotype: string;
   private _impact: string;
+  private _codons: string;
   private _polyphenPrediction: string;
   private _polyphenScore: number;
   private _siftPrediction: string;
@@ -20,6 +21,9 @@ export default class TranscriptConsequence {
 
   get impact() : string { return this._biotype; };
   set impact(type: string) { this._impact = type; };
+
+  get codons() : string { return this._codons; };
+  set codons(codons: string) { this._codons = codons; };
 
   get polyphenPrediction() : string { return this._polyphenPrediction; };
   set polyphenPrediction(prediction: string) { this._polyphenPrediction = prediction; };

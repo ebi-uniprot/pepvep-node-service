@@ -19,7 +19,9 @@ import {
   VariationToProteinEdge,
   ChromosomeNode,
   GeneToChromosomeEdge,
-  TranscriptConsequence
+  TranscriptConsequence,
+  ColocatedVariant,
+  ClinicalSignificance
 } from '../data-graph';
 
 export default class SearchResults {
@@ -120,7 +122,7 @@ export default class SearchResults {
                   this.results.addEdge(variationToProteinEdge);
                 }
 
-                // TRANSCRIPT CONSEQUENCE CLASS: Since the transcript consequence can have a
+                // TRANSCRIPT CONSEQUENCE: Since the transcript consequence can have a
                 // variaty of optional details, we won't be inforcing any in the constructor,
                 // but add them later one-by-one, whenever they are avialable.
                 const transcriptConsequence: TranscriptConsequence = new TranscriptConsequence();
@@ -129,6 +131,7 @@ export default class SearchResults {
                 // inside the `setter` method itself.
                 transcriptConsequence.biotype = tc.biotype;
                 transcriptConsequence.impact = tc.impact;
+                transcriptConsequence.codons = tc.codons;
                 transcriptConsequence.polyphenPrediction = tc.polyphen_prediction;
                 transcriptConsequence.polyphenScore = tc.polyphen_score;
                 transcriptConsequence.siftPrediction = tc.sift_prediction;
@@ -139,9 +142,38 @@ export default class SearchResults {
                     .forEach(term => transcriptConsequence.addConsequenceTerm(term));
                 }
 
-                // Adding the 'Transcript Consequence' to the `VariationNode`;
+                // Adding this 'Transcript Consequence' to the `VariationNode`.
                 variationNode.addTranscriptConsequence(transcriptConsequence);
-                
+              });
+          }
+
+          // Looping through Colocated Variants and collecting relevant details.
+          if ('undefined' !== typeof VEPOutput.colocated_variants) {
+            VEPOutput.colocated_variants
+              .forEach(cv => {
+                // COLOCATED VARIANT: We'll use the ID of the colocated variant
+                // in order to create an instance, then, if any PubMed data was
+                // available too, we'll add them too.
+                const colocatedVariant: ColocatedVariant = new ColocatedVariant(cv.id);
+
+                if (Array.isArray(cv.pubmed)) {
+                  cv.pubmed.forEach(id => colocatedVariant.addPubMedID(id));
+                }
+
+                // Adding this 'Colocated Variant' to the `VariationNode`.
+                variationNode.addColocatedVariant(colocatedVariant);
+
+                // Here we can look to see if there are any clinical significance details
+                // are available too.
+                if (Array.isArray(cv.clin_sig)) {
+                  cv.clin_sig.forEach(cs => {
+                    // CLINICAL SIGNIFICANCE
+                    const clinicalSignificance: ClinicalSignificance = new ClinicalSignificance(cs);
+
+                    // Adding this 'Clinical Significance' to the `VariationNode`.
+                    variationNode.addClinicalSignificance(clinicalSignificance);
+                  });
+                }
               });
           }
 
