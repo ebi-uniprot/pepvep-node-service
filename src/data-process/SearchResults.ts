@@ -94,14 +94,20 @@ export default class SearchResults {
                 // Check if the VariationNode/InputToVariationEdge is already created. If not,
                 // create one here.
                 if (null === variationNode && null === inputToVariationEdge) {
-                  // VARIATION NODE: We will use Amino Acids (amino_acids field) and Allele (allele_string field)
-                  // to create and identify our variation node.
-                  variationNode = new VariationNode(tc.amino_acids, tc.allele_string);
+                  // VARIATION NODE: We will use Allele (allele_string field) to create and identify our
+                  // variation node. Later we will add the Amino Acids value (amino_acids field) to the
+                  // object, whenever it is availble.
+                  variationNode = new VariationNode(tc.allele_string);
                   this.results.addNode(variationNode);
 
                   // Connectig this VariationNode to its respective InputNode.
                   inputToVariationEdge = new InputToVariationEdge(inputNode, variationNode);
                   this.results.addEdge(inputToVariationEdge);
+                }
+
+                // Add Amino Acids to the `VariationNode`, once and only when it's available.
+                if (null === variationNode.aminoAcids && 'undefined' !== typeof tc.amino_acids) {
+                  variationNode.aminoAcids = tc.amino_acids;
                 }
 
                 // TODO: Don't add duplicated edges, if the same start and end positions is already added.
@@ -114,7 +120,7 @@ export default class SearchResults {
                   this.results.addEdge(variationToProteinEdge);
                 }
 
-                // TRANSCRIPT CONSEQUENCE NODE: Since the transcript consequence can have a
+                // TRANSCRIPT CONSEQUENCE CLASS: Since the transcript consequence can have a
                 // variaty of optional details, we won't be inforcing any in the constructor,
                 // but add them later one-by-one, whenever they are avialable.
                 const transcriptConsequence: TranscriptConsequence = new TranscriptConsequence();
@@ -132,7 +138,9 @@ export default class SearchResults {
                   tc.consequence_terms
                     .forEach(term => transcriptConsequence.addConsequenceTerm(term));
                 }
-                
+
+                // Adding the 'Transcript Consequence' to the `VariationNode`;
+                variationNode.addTranscriptConsequence(transcriptConsequence);
                 
               });
           }
