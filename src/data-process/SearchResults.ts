@@ -30,7 +30,7 @@ export default class SearchResults {
   public results: SearchResultsGraph = new SearchResultsGraph();
 
   public async defaultSearch(organism: string, input: string) {
-    
+
     // Assuming the input is one of the default VEP inputs, we would
     // just pass the input to VEP end-point and consume the result.
     // Note: this has to change later as we would need to handle both
@@ -185,6 +185,7 @@ export default class SearchResults {
         console.log(`All Accessions:\n`, this.results.getAllProteinAccessions());
         console.log(`Preferred Accessions:\n`, this.results.getPreferredProteinAccessions());
         console.log(`All Gene IDs:\n`, this.results.getAllGeneIDs());
+        console.log(`All Genomic Position:\n`, this.results.getAllGenomicPositions());
 
       });
   }

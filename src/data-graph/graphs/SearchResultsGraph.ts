@@ -4,7 +4,10 @@ import {
   InputNode,
   ProteinNode,
   GeneNode,
-  InputToProteinEdge
+  InputToProteinEdge,
+  GeneToProteinEdge,
+  ChromosomeNode,
+  GeneToChromosomeEdge
 } from '../index';
 
 /**
@@ -72,10 +75,73 @@ export default class SearchResultsGraph extends Graph {
   }
 
   /**
+   * This will return all the unique genomic positions related to the
+   * user inputs.
+   *
+   * The format is 'chromosome:start-end' for each unique position.
+   */
+  public getAllGenomicPositions() : string[] {
+    // Start with getting all the `InputNode`s first.
+    return Object.values(this.getNodes('InputNode'))
+      .reduce((positions: string[], inputNode) => {
+        // Now find all the `ProteinNode`s conected to our `InputNode`s.
+        Object.values((<InputNode>inputNode).getEdges('ProteinNode'))
+          .forEach(proteinEdge => {
+            // Find out what `GeneNode`s are connected to our `ProtienNode`s.
+            Object.values((<InputToProteinEdge>proteinEdge).proteinNode.getEdges('GeneNode'))
+              .forEach(geneEdge => {
+                // Now find all the `ChromosomeNode`s that are connected to our `GeneNode`s.
+                Object.values((<GeneToProteinEdge>geneEdge).geneNode.getEdges('ChromosomeNode'))
+                  .forEach(chromosomeEdge => {
+                    const geneToChromosomeEdge = <GeneToChromosomeEdge>chromosomeEdge;
+                    const chromosome: string = geneToChromosomeEdge.chromosomeNode.name;
+                    const start: number = geneToChromosomeEdge.start;
+                    const end: number = geneToChromosomeEdge.end;
+                    const position: string = `${chromosome}:${start}-${end}`;
+                    // Check if this exact position has been already added to the list.
+                    // If so, do nothing, otherwise add.
+                    if (0 > positions.indexOf(position)) {
+                      positions.push(position);
+                    }
+                  });
+              });
+          });
+        return positions;
+      }, [])
+  }
+
+  /**
    * This will extract all of the ENSG IDs related to our original
    * input variants.
    */
   public getAllGeneIDs() : string[] {
+    // Start with getting all the `InputNode`s first.
+    return Object.values(this.getNodes('InputNode'))
+      .reduce((geneIDs: string[], inputNode) => {
+        // Now find all the `ProteinNode`s conected to our `InputNode`s.
+        Object.values((<InputNode>inputNode).getEdges('ProteinNode'))
+          .forEach(proteinEdge => {
+            // Find out what `GeneNode`s are connected to our `ProtienNode`s.
+            Object.values((<InputToProteinEdge>proteinEdge).proteinNode.getEdges('GeneNode'))
+              .forEach(geneEdge => {
+                // Now find all the `ChromosomeNode`s that are connected to our `GeneNode`s.
+                const geneId: string = (<GeneToProteinEdge>geneEdge).geneNode.ensg;
+                // check if this Gene ID has been already added to the list.
+                // If so, do nothing, otherwise add.
+                if (0 > geneIDs.indexOf(geneId)) {
+                  geneIDs.push(geneId);
+                }
+              });
+          });
+        return geneIDs;
+      }, [])
+  }
+
+  /**
+   * This will extract all of the ENSG IDs related to our original
+   * input variants.
+   */
+  public ___getAllGeneIDs() : string[] {
     const nodes = this.getNodes('InputNode');
     return Object.keys(nodes)
       .reduce((geneIDs, nodeID) => {
