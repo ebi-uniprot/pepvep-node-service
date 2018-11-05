@@ -156,6 +156,21 @@ export abstract class Node implements NodeInterface {
 
   public addEdge(edge: EdgeInterface) : void {
     /**
+     * First we need to find out what is our 'Target Node'. One simple
+     * solution can be to check if the 'type' of current Node matches
+     * or mismatches with either `edge.source` or `edge.destination`
+     * and then pick the correct target node and reference it here.
+     *
+     * Here we check if the type of this node mismatches with the type
+     * of `edge.source`. If it does, then we pick it as our target node,
+     * otherwise -- the type of this node and `edge.source` are same, we
+     * pick the `edge.destinatioin` as our target node. 
+     */
+    const targetNode: NodeInterface = (this.type !== edge.source.type)
+      ? edge.source
+      : edge.destination;
+
+    /**
      * As similar edges will be stored in categories based on
      * their sub-types, here we need to check if this is the
      * first time an `Edge` from a sub-type is being added to
@@ -166,8 +181,8 @@ export abstract class Node implements NodeInterface {
      * whole category, so later on it can be used to store the
      * edges.
      */
-    if ('undefined' === typeof this._edges[edge.destination.type]) {
-      this._edges[edge.destination.type] = {};
+    if ('undefined' === typeof this._edges[targetNode.type]) {
+      this._edges[targetNode.type] = {};
     }
 
     /**
@@ -178,7 +193,7 @@ export abstract class Node implements NodeInterface {
      *
      * If the node already exists, do nothing and return.
      */
-    if ('undefined' !== typeof this._edges[edge.destination.type][edge.destination.id]) {
+    if ('undefined' !== typeof this._edges[targetNode.type][targetNode.id]) {
       return;
     }
 
@@ -186,10 +201,10 @@ export abstract class Node implements NodeInterface {
      * An `Edge` is being added to the `Node` instance and is stored
      * in its sub-type category, using its unique identifier.
      */
-    this._edges[edge.destination.type][edge.destination.id] = edge;
+    this._edges[targetNode.type][targetNode.id] = edge;
   }
 
-  public removeEdge(target: NodeInterface) : void {
+  public removeEdge(targetNode: NodeInterface) : void {
 
   }
 
