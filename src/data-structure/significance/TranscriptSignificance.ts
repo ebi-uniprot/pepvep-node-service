@@ -6,7 +6,7 @@
  * The getters and setters are there, so in the future a proper
  * data validation layer can be implemented for each field.
  */
-export default class TranscriptConsequence {
+export default class TranscriptSignificance {
   private _biotype: string;
   private _impact: string;
   private _codons: string;
