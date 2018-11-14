@@ -7,7 +7,7 @@ import Helpers from './data-fetch/Helpers'
 import UniProtKB from './data-fetch/UniProtKB';
 import VEP from './data-fetch/VEP';
 
-import SearchResults from './data-process/SearchResults';
+import Search from './data-process/Search';
 
 const app = express();
 const port = 3687;
@@ -42,11 +42,8 @@ app.post('/parser', (req, res) => {
   const organism: string = 'homo_sapiens';
   const input: string = req.body.input;
 
-  // SearchResults.defaultSearch(organism, input)
-  //   .then(results => res.send(results));
-
-  let search = new SearchResults();
-  search.defaultSearch(organism, input)
+  let search = new Search();
+  search.vepInputSearch(organism, input)
     .then(results => res.send(results));
 });
 
