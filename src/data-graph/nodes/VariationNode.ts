@@ -1,9 +1,7 @@
 
 import {
   Node,
-  TranscriptConsequence,
-  ColocatedVariant,
-  ClinicalSignificance
+  TranscriptConsequence
 } from '../index';
 
 /**
@@ -12,18 +10,24 @@ import {
  */
 export default class VariationNode extends Node {
   readonly allele: string;
-  private _aminoAcids: string = null;
+  readonly aminoAcids: string;
+  readonly proteinStart: number;
+  readonly proteinEnd: number;
   private _transcriptConsequences: TranscriptConsequence[] = [];
-  private _colocatedVariants: ColocatedVariant[] = [];
-  private _clinicalSignificances: ClinicalSignificance[] = [];
+  private _positionalSignificances: any[] = [];
 
-  constructor(allele: string) {
+  constructor(
+    allele: string,
+    aminoAcids: string | undefined,
+    proteinStart: number | undefined,
+    proteinEnd: number | undefined
+  ) {
     super(`${allele}-${Math.random()}`);
     this.allele = allele;
+    this.aminoAcids = aminoAcids;
+    this.proteinStart = proteinStart;
+    this.proteinEnd = proteinEnd;
   }
-
-  get aminoAcids() : string { return this._aminoAcids; };
-  set aminoAcids(aminoAcids: string) { this._aminoAcids = aminoAcids; };
 
   get transcriptConsequences() : TranscriptConsequence[] {
     return this._transcriptConsequences;
@@ -31,21 +35,5 @@ export default class VariationNode extends Node {
 
   public addTranscriptConsequence(consequence: TranscriptConsequence) : void {
     this._transcriptConsequences.push(consequence);
-  }
-
-  get colocatedVariants() : ColocatedVariant[] {
-    return this._colocatedVariants;
-  };
-
-  public addColocatedVariant(variant: ColocatedVariant) : void {
-    this._colocatedVariants.push(variant);
-  }
-
-  get clinicalSignificances() : ClinicalSignificance[] {
-    return this._clinicalSignificances;
-  }
-
-  public addClinicalSignificance(significance: ClinicalSignificance) {
-    this._clinicalSignificances.push(significance);
   }
 }

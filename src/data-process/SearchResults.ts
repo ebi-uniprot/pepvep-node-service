@@ -21,7 +21,8 @@ import {
   GeneToChromosomeEdge,
   TranscriptConsequence,
   ColocatedVariant,
-  ClinicalSignificance
+  ClinicalSignificance,
+  SearchResultsTable
 } from '../data-graph';
 
 export default class SearchResults {
@@ -42,16 +43,6 @@ export default class SearchResults {
           // The `InputNode` will be used later to create the results table.
           let inputNode: InputNode = new InputNode(VEPOutput.input);
           this.results.addNode(inputNode);
-
-          // The variation details is constant for all of the results set
-          // we receive per input line, however, the details are only returned
-          // within the `transcript_consequences` object and repeated for
-          // each and every one of them. Therefore, we would need to define the
-          // placeholder variable for the variation node before looping though
-          // the `transcript_consequences` and set the data once in its first
-          // occurance.
-          let variationNode: VariationNode = null;
-          let inputToVariationEdge: InputToVariationEdge = null;
 
           // CHROMOSOME NODE: We will use the Chromosome name (seq_region_name field) to create and identify
           // our chromosome node.
@@ -93,34 +84,17 @@ export default class SearchResults {
                   new GeneToChromosomeEdge(geneNode, chromosomeNode, genomicPosition.start, genomicPosition.end);
                 this.results.addEdge(geneToChromosomeEdge);
 
-                // Check if the VariationNode/InputToVariationEdge is already created. If not,
-                // create one here.
-                if (null === variationNode && null === inputToVariationEdge) {
-                  // VARIATION NODE: We will use Allele (allele_string field) to create and identify our
-                  // variation node. Later we will add the Amino Acids value (amino_acids field) to the
-                  // object, whenever it is availble.
-                  variationNode = new VariationNode(tc.allele_string);
-                  this.results.addNode(variationNode);
+                // VARIATION NODE: We will use Allele (allele_string field) to create and identify our
+                // variation node. Later we will add the Amino Acids value (amino_acids field) to the
+                // object, whenever it is availble.
+                const variationNode: VariationNode =
+                  new VariationNode(tc.allele_string, tc.amino_acids, tc.protein_start, tc.protein_end);
+                this.results.addNode(variationNode);
 
-                  // Connectig this VariationNode to its respective InputNode.
-                  inputToVariationEdge = new InputToVariationEdge(inputNode, variationNode);
-                  this.results.addEdge(inputToVariationEdge);
-                }
-
-                // Add Amino Acids to the `VariationNode`, once and only when it's available.
-                if (null === variationNode.aminoAcids && 'undefined' !== typeof tc.amino_acids) {
-                  variationNode.aminoAcids = tc.amino_acids;
-                }
-
-                // TODO: Don't add duplicated edges, if the same start and end positions is already added.
-                // TODO: See if 'addEdge' method can take care of NOT adding duplicated edges, same as 'addNode'.
-                // If protein start and end positions are available (protein_start and protein_end fields),
-                // then create a `VariationToProtienEdge`.
-                if ('undefined' !== typeof tc.protein_start && 'undefined' !== typeof tc.protein_end) {
-                  const variationToProteinEdge: VariationToProteinEdge =
-                    new VariationToProteinEdge(variationNode, proteinNode, tc.protein_start, tc.protein_end);
-                  this.results.addEdge(variationToProteinEdge);
-                }
+                // Connecting the VariationNode to its respective ProteinNode
+                const variationToProteinEdge: VariationToProteinEdge =
+                    new VariationToProteinEdge(variationNode, proteinNode);
+                this.results.addEdge(variationToProteinEdge);
 
                 // TRANSCRIPT CONSEQUENCE: Since the transcript consequence can have a
                 // variaty of optional details, we won't be inforcing any in the constructor,
@@ -160,8 +134,8 @@ export default class SearchResults {
                   cv.pubmed.forEach(id => colocatedVariant.addPubMedID(id));
                 }
 
-                // Adding this 'Colocated Variant' to the `VariationNode`.
-                variationNode.addColocatedVariant(colocatedVariant);
+                // Adding this 'Colocated Variant' to the `InputNode`.
+                inputNode.addColocatedVariant(colocatedVariant);
 
                 // Here we can look to see if there are any clinical significance details
                 // are available too.
@@ -170,14 +144,13 @@ export default class SearchResults {
                     // CLINICAL SIGNIFICANCE
                     const clinicalSignificance: ClinicalSignificance = new ClinicalSignificance(cs);
 
-                    // Adding this 'Clinical Significance' to the `VariationNode`.
-                    variationNode.addClinicalSignificance(clinicalSignificance);
+                    // Adding this 'Clinical Significance' to the `InputNode`.
+                    inputNode.addClinicalSignificance(clinicalSignificance);
                   });
                 }
               });
           }
-
-        });
+        })
 
         // console.log(this.results.toString());
         // console.log(this.results.toJSON());
@@ -187,6 +160,25 @@ export default class SearchResults {
         console.log(`All Gene IDs:\n`, this.results.getAllGeneIDs());
         console.log(`All Genomic Position:\n`, this.results.getAllGenomicPositions());
 
-      });
+        /**
+         * Here we get the list of our genomic positions and then make a call
+         * to UniProt API to get a list of protein features on these positions.
+         */
+        const genomicPositions: string[] = this.results.getAllGenomicPositions();
+        return UniProtKB.getProteinsByMultiplePositions(genomicPositions);
+      })
+      .then(({ data }) => {
+// console.log("**** Protien's DATA:", JSON.stringify(data));
+
+
+
+        // Temporary here for debugging.
+        // Should be called when all data is already loaded up in the graph.
+        // It should then be returned to be used in the front-end.
+        const searchResultsTable: SearchResultsTable = new SearchResultsTable(this.results);
+        searchResultsTable.generateDataObject();
+
+
+        });
   }
 }

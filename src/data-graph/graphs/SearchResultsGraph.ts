@@ -136,21 +136,4 @@ export default class SearchResultsGraph extends Graph {
         return geneIDs;
       }, [])
   }
-
-  /**
-   * This will extract all of the ENSG IDs related to our original
-   * input variants.
-   */
-  public ___getAllGeneIDs() : string[] {
-    const nodes = this.getNodes('InputNode');
-    return Object.keys(nodes)
-      .reduce((geneIDs, nodeID) => {
-        Object.keys(nodes[nodeID].getEdges('GeneNode'))
-          .map(id => {
-            const edge = <GeneNode>this.getNode('GeneNode', id);
-            geneIDs.push(edge.ensg);
-          })
-        return geneIDs;
-      }, []);
-  }
 }

@@ -25,3 +25,4 @@ export { default as GeneToChromosomeEdge } from './edges/GeneToChromosomeEdge';
 export { default as TranscriptConsequence } from './classes/TranscriptConsequence';
 export { default as ColocatedVariant } from './classes/ColocatedVariant';
 export { default as ClinicalSignificance } from './classes/ClinicalSignificance';
+export { default as SearchResultsTable } from './classes/SearchResultsTable';
