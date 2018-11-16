@@ -54,7 +54,10 @@ export default class SearchResults {
       return null;
     }
 
-    const protein: Protein = new Protein(ensp, enst, accession);
+    const protein: Protein = new Protein(accession);
+    protein.ensp = ensp;
+    protein.enst = enst;
+
     const id: string = this.idGenerator(`${ensp}-${enst}-${accession}`);
     this._proteins[id] = protein;
     return this._proteins[id];

@@ -1,16 +1,20 @@
 import Varition from "./Variation";
 
 export default class Protein {
-  readonly ensp: string;
-  readonly enst: string;
   readonly accession: string;
+  private _ensp: string;
+  private _enst: string;
   private _variations: Varition[] = [];
 
-  constructor(ensp: string, enst: string, accession: string) {
-    this.ensp = ensp;
-    this.enst = enst;
+  constructor(accession: string) {
     this.accession = accession;
   }
+
+  public get ensp() : string { return this._ensp; };
+  public set ensp(ensp: string) { this._ensp = ensp; };
+
+  public get enst() : string { return this._enst; };
+  public set enst(enst: string) { this._enst = enst; };
 
   public addVariation(variation: Varition) {
     this._variations.push(variation);

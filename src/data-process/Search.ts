@@ -31,19 +31,21 @@ export default class Search {
           if ('undefined' !== typeof VEPOutput.transcript_consequences) {
             VEPOutput.transcript_consequences
               .forEach(tc => {
+                /* If entry doesn't have any UniProt/Trembl accessions, ignore and quit */
+                if ('undefined' === typeof tc.swissprot || 0 >= tc.swissprot.length) {
+                  return;
+                }
+
+                if ('undefined' === typeof tc.trembl || 0 >= tc.trembl.length) {
+                  return;
+                }
+
                 // --> GENE
                 const gene: Gene = results.addGene(tc.gene_id, VEPOutput.seq_region_name, VEPOutput.start, VEPOutput.end);
-                /* Connecting the Input instance to this Gene instance */
                 input.addGene(gene);
 
                 // --> PROTEIN
                 const protein: Protein = results.addProtein(tc.protein_id, tc.transcript_id, tc.swissprot, tc.trembl);
-
-                if (null === protein) {
-                  // bailout here
-                  return;
-                }
-
                 gene.addProtein(protein);
               });
           }
