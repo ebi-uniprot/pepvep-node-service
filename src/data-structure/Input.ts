@@ -13,7 +13,7 @@ export default class Input {
     return this._genes;
   }
 
-  public addToGenes(gene: Gene) : void {
+  public addGene(gene: Gene) : void {
     this._genes.push(gene);
   }
 }

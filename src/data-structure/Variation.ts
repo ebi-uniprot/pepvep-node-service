@@ -36,7 +36,7 @@ export default class Variation {
     return this._transcriptSignificance;
   }
 
-  public addToTranscriptSignificances(transcriptSignificance: TranscriptSignificance) {
+  public addTranscriptSignificance(transcriptSignificance: TranscriptSignificance) {
     this._transcriptSignificance.push(transcriptSignificance);
   }
 
@@ -45,7 +45,7 @@ export default class Variation {
     return this._positionalSignificance;
   }
 
-  public addToPositionalSignificances(positionalSignificance: PositionalSignificance) {
+  public addPositionalSignificance(positionalSignificance: PositionalSignificance) {
     this._positionalSignificance.push(positionalSignificance);
   }
 
@@ -54,7 +54,7 @@ export default class Variation {
     return this._clinicalSignificance;
   }
 
-  public addToClinicalSignificances(clinicalSignificance: ClinicalSignificance) {
+  public addClinicalSignificance(clinicalSignificance: ClinicalSignificance) {
     this._clinicalSignificance.push(clinicalSignificance);
   }
 
@@ -63,7 +63,7 @@ export default class Variation {
     return this._colocatedVariants;
   }
 
-  public addToColocatedVariants(colocatedVariant: ColocatedVariant) {
+  public addColocatedVariant(colocatedVariant: ColocatedVariant) {
     this._colocatedVariants.push(colocatedVariant);
   }
 }

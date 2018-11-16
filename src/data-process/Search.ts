@@ -7,6 +7,7 @@ import Significance from './Significance';
 import SearchResults from '../data-structure/SearchResults';
 import Input from '../data-structure/Input';
 import Gene from '../data-structure/Gene';
+import Protein from '../data-structure/Protein';
 
 export default class Search {
   public async vepInputSearch(organism: string, input: string) {
@@ -24,16 +25,26 @@ export default class Search {
         // console.log("VEP data:", JSON.stringify(data));
         data.forEach(VEPOutput => {
           // --> INPUT
-          const input: Input = results.addToInputs(VEPOutput.input);
+          const input: Input = results.addInput(VEPOutput.input);
 
           /* Looping through Transcript Consequences to collect some useful information. */
           if ('undefined' !== typeof VEPOutput.transcript_consequences) {
             VEPOutput.transcript_consequences
               .forEach(tc => {
                 // --> GENE
-                const gene: Gene = results.addToGenes(tc.gene_id, VEPOutput.seq_region_name, VEPOutput.start, VEPOutput.end);
+                const gene: Gene = results.addGene(tc.gene_id, VEPOutput.seq_region_name, VEPOutput.start, VEPOutput.end);
                 /* Connecting the Input instance to this Gene instance */
-                input.addToGenes(gene);
+                input.addGene(gene);
+
+                // --> PROTEIN
+                const protein: Protein = results.addProtein(tc.protein_id, tc.transcript_id, tc.swissprot, tc.trembl);
+
+                if (null === protein) {
+                  // bailout here
+                  return;
+                }
+
+                gene.addProtein(protein);
               });
           }
         });
