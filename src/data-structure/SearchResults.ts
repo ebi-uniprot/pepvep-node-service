@@ -31,9 +31,9 @@ export default class SearchResults {
     return this._inputs[id];
   }
 
-  public addGene(ensg: string, chromosome: string, start: string, end: string) : Gene {
-    const gene: Gene = new Gene(ensg, chromosome, parseInt(start), parseInt(end));
-    const id: string = this.idGenerator(`${ensg}-${chromosome}:${start}-${end}`);
+  public addGene(ensg: string, chromosome: string) : Gene {
+    const gene: Gene = new Gene(ensg, chromosome);
+    const id: string = this.idGenerator(`${ensg}-${chromosome}`);
     
     if ('undefined' === typeof this._genes[id]) {
       this._genes[id] = gene;

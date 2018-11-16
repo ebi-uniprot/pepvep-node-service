@@ -41,7 +41,7 @@ export default class Search {
                 }
 
                 // --> GENE
-                const gene: Gene = results.addGene(tc.gene_id, VEPOutput.seq_region_name, VEPOutput.start, VEPOutput.end);
+                const gene: Gene = results.addGene(tc.gene_id, VEPOutput.seq_region_name);
                 input.addGene(gene);
 
                 // --> PROTEIN
