@@ -7,34 +7,15 @@ export default class Significance {
     callback: Function = null
   ) {
     const accessionList = proteins.map(p => p.accession);
-    console.log(accessionList);
-    const positionalSignificance = await UniProtKB.getProteinFeatures(
-      accessionList
-    ).then(proteins => {
-      //   const matching = proteins.data.reduce((matches, protein) => {
-      //     const matchingGeneCoordinates = this.getMatchingGeneCoordinates(
-      //       protein.gnCoordinate,
-      //       position,
-      //       chromosome
-      //     );
-      //     const coordinatesWithmatchingFeatures = matchingGeneCoordinates.filter(
-      //       geneCoordinate =>
-      //         this.getMatchingFeatures(geneCoordinate.feature, position)
-      //     );
-      //     if (coordinatesWithmatchingFeatures.length > 0) {
-      //       matches.push({
-      //         accession: protein.accession,
-      //         name: protein.name,
-      //         protein: protein.protein,
-      //         gene: protein.gene,
-      //         geneCoordinates: coordinatesWithmatchingFeatures
-      //       });
-      //     }
-      //     return matches;
-      //   }, []);
-      //   return matching;
-    });
-    return positionalSignificance;
+    const something = await UniProtKB.getProteinFeatures(accessionList).then(
+      results => {
+        return results.data.map(proteinResult => {
+          console.log(proteinResult.accession);
+        });
+      }
+    );
+    console.log(something);
+    return something;
   }
 
   private static getMatchingGeneCoordinates(

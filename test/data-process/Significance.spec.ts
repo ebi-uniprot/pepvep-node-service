@@ -11,8 +11,8 @@ describe("Significance", function() {
 
   describe("#getPositionalSignificance()", function() {
     it("should get features which overlap with position", function() {
-      const protein = new Protein("", "", "P05067");
-      const proteinArray = new Array(1).map(p => protein);
+      const accessions = ["P05067", "P85552", "Q8A9S3"];
+      const proteinArray = accessions.map(acc => new Protein("", "", acc));
       return Significance.getPositionalSignificance(proteinArray).then(d => {
         expect(d[0].geneCoordinates[0].feature[0].description).to.equal("TAF.");
       });

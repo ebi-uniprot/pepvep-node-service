@@ -1,11 +1,10 @@
-
-import Varition from './Variation';
+import Varition from "./Variation";
 
 export default class Protein {
   readonly ensp: string;
   readonly enst: string;
   readonly accession: string;
-  private _variations : Varition[] = [];
+  private _variations: Varition[] = [];
 
   constructor(ensp: string, enst: string, accession: string) {
     this.ensp = ensp;
@@ -17,7 +16,11 @@ export default class Protein {
     this._variations.push(variation);
   }
 
-  public getVariations() : Varition[] {
+  public getVariations(): Varition[] {
     return this._variations;
+  }
+
+  public getAccession(): string {
+    return this.accession;
   }
 }

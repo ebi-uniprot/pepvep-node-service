@@ -1,6 +1,7 @@
 import proteinsByPositionResponse from "./proteinsByPositionResponse";
 import proteinsDetailByAccessionResponse from "./proteinsDetailByAccessionResponse";
 import genomicCoordinatesByAccessionResponse from "./genomicCoordinatesByAccessionResponse";
+import featuresByAccessionResponse from "./featuresByAccessionResponse";
 import getProteinVariantsResponse from "./getProteinVariantsResponse";
 import proteinFeaturesResponse from "./proteinFeaturesResponse";
 
@@ -30,8 +31,8 @@ const uniprotMock = () => {
     .reply(200, proteinsDetailByAccessionResponse);
 
   nock("https://www.ebi.ac.uk")
-    .get(`/proteins/api/features&accession=P05067`)
-    .reply(200, genomicCoordinatesByAccessionResponse);
+    .get(`/proteins/api/features?accession=P05067,P85552,Q8A9S3`)
+    .reply(200, featuresByAccessionResponse);
 
   nock("https://www.ebi.ac.uk")
     .get(`/proteins/api/variation/P05067`)
