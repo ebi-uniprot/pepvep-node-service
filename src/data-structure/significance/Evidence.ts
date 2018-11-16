@@ -19,3 +19,5 @@ class Evidence {
     this.sourceAlternativeUrl = sourceAlternativeUrl;
   }
 }
+
+export default Evidence;

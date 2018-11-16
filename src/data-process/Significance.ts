@@ -1,41 +1,22 @@
 import UniProtKB from "../data-fetch/UniProtKB";
 import Protein from "../data-structure/Protein";
+import Feature from "../data-structure/significance/Feature";
+import Evidence from "../data-structure/significance/Evidence";
 
 export default class Significance {
-  public static async getPositionalSignificance(
-    proteins: Array<Protein>,
-    callback: Function = null
-  ) {
+  public static async addPositionalSignificance(proteins: Array<Protein>) {
     const accessionList = proteins.map(p => p.accession);
-    const something = await UniProtKB.getProteinFeatures(accessionList).then(
-      results => {
-        return results.data.map(proteinResult => {
-          console.log(proteinResult.accession);
-        });
-      }
-    );
-    console.log(something);
-    return something;
-  }
-
-  private static getMatchingGeneCoordinates(
-    coordinates,
-    position: number,
-    chromosome: string
-  ) {
-    return coordinates.filter(
-      gnCoordinate =>
-        gnCoordinate.genomicLocation.chromosome === chromosome &&
-        Number(gnCoordinate.genomicLocation.start) <= position &&
-        Number(gnCoordinate.genomicLocation.end) >= position
-    );
-  }
-
-  private static getMatchingFeatures(features, position: Number) {
-    return features.filter(
-      feature =>
-        feature.genomeLocation.begin.position >= position &&
-        feature.genomeLocation.end.position <= position
+    const significance = await UniProtKB.getProteinFeatures(accessionList).then(
+      results =>
+        results.data.forEach(proteinResult => {
+          const protein: Protein = proteins.find(
+            p => p.accession === proteinResult.accession
+          );
+          const variations = protein.getVariations();
+          variations.forEach(variation => {
+            variation.addOverlappingFeatures(proteinResult.features);
+          });
+        })
     );
   }
 

@@ -1,3 +1,4 @@
+import Evidence from "./Evidence";
 class Feature {
   readonly type: string;
   readonly category: string;
@@ -22,3 +23,5 @@ class Feature {
     this.evidences = evidences;
   }
 }
+
+export default Feature;
