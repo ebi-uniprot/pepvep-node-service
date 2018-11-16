@@ -23,8 +23,4 @@ export default class Protein {
   public getVariations(): Varition[] {
     return this._variations;
   }
-
-  public getAccession(): string {
-    return this.accession;
-  }
 }

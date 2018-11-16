@@ -16,25 +16,29 @@ export default class SearchResults {
   private _genes : TypedMap<Gene> = {};
   private _variations : TypedMap<Variation> = {};
 
-  constructor() {
-    console.log("GOT HERE");
-  }
-
   public idGenerator(value: string) : string {
     return crypto.createHash('md5').update(value).digest('hex');
   }
 
   public addInput(rawInput: string) : Input {
     const input: Input = new Input(rawInput);
-    const id: string = this.idGenerator(input.raw); 
-    this._inputs[id] = input;
+    const id: string = this.idGenerator(input.raw);
+
+    if ('undefined' === typeof this._inputs[id]) {
+      this._inputs[id] = input; 
+    }
+
     return this._inputs[id];
   }
 
   public addGene(ensg: string, chromosome: string, start: string, end: string) : Gene {
     const gene: Gene = new Gene(ensg, chromosome, parseInt(start), parseInt(end));
     const id: string = this.idGenerator(`${ensg}-${chromosome}:${start}-${end}`);
-    this._genes[id] = gene;
+    
+    if ('undefined' === typeof this._genes[id]) {
+      this._genes[id] = gene;
+    }
+
     return this._genes[id];
   }
 
@@ -59,7 +63,11 @@ export default class SearchResults {
     protein.enst = enst;
 
     const id: string = this.idGenerator(`${ensp}-${enst}-${accession}`);
-    this._proteins[id] = protein;
+
+    if ('undefined' === typeof this._proteins[id]) {
+      this._proteins[id] = protein;
+    }
+
     return this._proteins[id];
   }
 }
