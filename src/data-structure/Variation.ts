@@ -1,15 +1,11 @@
-import TranscriptSignificance from "./significance/TranscriptSignificance";
-import PositionalSignificance from "./significance/PositionalSignificance";
-import StructuralSignificance from "./significance/StructuralSignificance";
-import ClinicalSignificance from "./significance/ClinicalSignificance";
-import ColocatedVariant from "./significance/ColocatedVariant";
-import Feature from "./significance/Feature";
-import Evidence from "./significance/Evidence";
+import TranscriptSignificance from './significance/TranscriptSignificance';
+import PositionalSignificance from './significance/PositionalSignificance';
+import StructuralSignificance from './significance/StructuralSignificance';
+import ClinicalSignificance from './significance/ClinicalSignificance';
+import ColocatedVariant from './significance/ColocatedVariant';
+import Feature from './significance/Feature';
+import Evidence from './significance/Evidence';
 
-// interface RawFeature {
-//   begin : number;
-//   end: number;
-// }
 export default class Variation {
   readonly allele: string;
   private _aminoAcids: string;
@@ -55,7 +51,7 @@ export default class Variation {
   }
 
   public addTranscriptSignificance(
-    transcriptSignificance: TranscriptSignificance
+    transcriptSignificance: TranscriptSignificance,
   ) {
     this._transcriptSignificance.push(transcriptSignificance);
   }
@@ -66,7 +62,7 @@ export default class Variation {
   }
 
   public addPositionalSignificance(
-    positionalSignificance: PositionalSignificance
+    positionalSignificance: PositionalSignificance,
   ) {
     this._positionalSignificance = positionalSignificance;
   }
@@ -93,9 +89,9 @@ export default class Variation {
     const featuresToAdd = rawFeatures.filter(
       rawFeature =>
         this.proteinStart >= rawFeature.begin &&
-        this.proteinEnd <= rawFeature.end
+        this.proteinEnd <= rawFeature.end,
     );
-    featuresToAdd.forEach(rawFeature => {
+    featuresToAdd.forEach((rawFeature) => {
       const evidences = rawFeature.evidences
         ? rawFeature.evidences.map(
             ev =>
@@ -104,8 +100,8 @@ export default class Variation {
                 ev.source.name,
                 ev.source.id,
                 ev.source.url,
-                ev.source.alternativeUrl
-              )
+                ev.source.alternativeUrl,
+              ),
           )
         : [];
       const featureToAdd = new Feature(
@@ -114,7 +110,7 @@ export default class Variation {
         rawFeature.description,
         rawFeature.begin,
         rawFeature.end,
-        evidences
+        evidences,
       );
       this.getPositionalSignificance().addFeature(featureToAdd);
     });
