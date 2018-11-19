@@ -6,7 +6,8 @@
   "scripts": {
     "start": "nodemon",
     "test": "mocha --require ts-node/register test/**/*.spec.ts",
-    "test-watch": "mocha --require ts-node/register --watch-extensions ts --watch 'test/**/*.spec.ts'"
+    "test-watch": "mocha --require ts-node/register --watch-extensions ts --watch 'test/**/*.spec.ts'",
+    "tslint": "tslint -c tslint.json 'src/**/*.ts' -e 'test/**/*.spec.ts'"
   },
   "repository": {
     "type": "git",
@@ -33,6 +34,8 @@
     "nock": "^9.4.2",
     "nodemon": "^1.18.4",
     "ts-node": "^7.0.0",
+    "tslint": "^5.11.0",
+    "tslint-config-airbnb": "^5.11.1",
     "typescript": "^3.1.1"
   }
 }
