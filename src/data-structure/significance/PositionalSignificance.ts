@@ -1,17 +1,17 @@
-import Feature from "./Feature";
+import Feature from './Feature';
 
 export default class PositionalSignificance {
-  private features: Array<Feature>;
+  private _features: Feature[];
 
   constructor() {
-    this.features = new Array();
+    this._features = [];
   }
 
   public addFeature(feature: Feature) {
-    this.features.push(feature);
+    this._features.push(feature);
   }
 
   public getFeatures() {
-    return this.features;
+    return this._features;
   }
 }
