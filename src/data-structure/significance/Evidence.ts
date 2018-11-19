@@ -1,5 +1,6 @@
+
 class Evidence {
-  code: string; //should be Enum
+  code: string; // should be Enum
   sourceName: string;
   sourceId: string;
   sourceUrl: string;
@@ -10,7 +11,7 @@ class Evidence {
     sourceName: string,
     sourceId: string,
     sourceUrl: string,
-    sourceAlternativeUrl: string
+    sourceAlternativeUrl: string,
   ) {
     this.code = code;
     this.sourceName = sourceName;
