@@ -4,7 +4,8 @@ export default class Helpers {
     return ('string' === typeof elements) ?
       elements :
       elements
-      .reduce((commaSeparated: any, current: string, index: number) => {
+      .reduce((accu: any, current: string, index: number) => {
+        let commaSeparated: string = '';
 
         if (0 < index) {
           commaSeparated += ',';
@@ -13,12 +14,12 @@ export default class Helpers {
         commaSeparated += current;
 
         return commaSeparated;
-      }, '');
+      });
   }
 
-  public static parseProteinChangeInput(input: string): Array < Object > {
+  public static parseProteinChangeInput(input: string): any[] {
     const rows = input.split('\n');
-    return rows.map(row => {
+    return rows.map((row) => {
       const regExp = /^(\S+)(\s{1})([a-zA-Z])(\d+)([a-zA-Z])$/;
       const matches = row.match(regExp);
       if (!matches) {
@@ -28,8 +29,8 @@ export default class Helpers {
         accession: matches[1],
         WT: matches[3],
         position: matches[4],
-        variant: matches[5]
-      }
+        variant: matches[5],
+      };
     });
   }
 }
