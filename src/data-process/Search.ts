@@ -24,14 +24,14 @@ export default class Search {
     await VEP.variantConsequencesAllInputs(organism, input)
       .then(({ data }) => {
         // console.log("VEP data:", JSON.stringify(data));
-        data.forEach(VEPOutput => {
+        data.forEach((vepOutput) => {
           // --> INPUT
-          const input: Input = results.addInput(VEPOutput.input);
+          const input: Input = results.addInput(vepOutput.input);
 
           /* Looping through Transcript Consequences to collect some useful information. */
-          if ('undefined' !== typeof VEPOutput.transcript_consequences) {
-            VEPOutput.transcript_consequences
-              .forEach(tc => {
+          if ('undefined' !== typeof vepOutput.transcript_consequences) {
+            vepOutput.transcript_consequences
+              .forEach((tc) => {
                 /* If entry doesn't have any UniProt/Trembl accessions, ignore and quit */
                 if ('undefined' === typeof tc.swissprot || 0 >= tc.swissprot.length) {
                   return;
@@ -42,15 +42,17 @@ export default class Search {
                 }
 
                 // --> GENE
-                const gene: Gene = results.addGene(tc.gene_id, VEPOutput.seq_region_name);
+                const gene: Gene = results.addGene(tc.gene_id, vepOutput.seq_region_name);
                 input.addGene(gene);
 
                 // --> PROTEIN
-                const protein: Protein = results.addProtein(tc.protein_id, tc.transcript_id, tc.swissprot, tc.trembl);
+                const protein: Protein =
+                  results.addProtein(tc.protein_id, tc.transcript_id, tc.swissprot, tc.trembl);
                 gene.addProtein(protein);
 
                 // --> VARIATION
-                const variation: Variation = results.addVariation(tc.allele_string, VEPOutput.input);
+                const variation: Variation =
+                  results.addVariation(tc.allele_string, vepOutput.input);
                 protein.addVariation(variation);
               });
           }
