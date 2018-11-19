@@ -1,11 +1,12 @@
-import Evidence from "./Evidence";
+import Evidence from './Evidence';
+
 class Feature {
   readonly type: string;
   readonly category: string;
   readonly description: string;
   readonly begin: number;
   readonly end: number;
-  readonly evidences: Array<Evidence>;
+  readonly evidences: Evidence[];
 
   constructor(
     type: string,
@@ -13,7 +14,7 @@ class Feature {
     description: string,
     begin: number,
     end: number,
-    evidences: Array<Evidence>
+    evidences: Evidence[],
   ) {
     this.type = type;
     this.category = category;
