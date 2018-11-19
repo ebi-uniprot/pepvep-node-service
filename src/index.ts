@@ -3,7 +3,7 @@ import * as bodyParser from 'body-parser';
 import * as cookieParser from 'cookie-parser';
 import axios from 'axios';
 
-import Helpers from './data-fetch/Helpers'
+import Helpers from './data-fetch/Helpers';
 import UniProtKB from './data-fetch/UniProtKB';
 import VEP from './data-fetch/VEP';
 
@@ -21,7 +21,7 @@ app.use((req, res, next) => {
 
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({
-  extended: false
+  extended: false,
 }));
 app.use(bodyParser.json());
 
@@ -42,7 +42,7 @@ app.post('/parser', (req, res) => {
   const organism: string = 'homo_sapiens';
   const input: string = req.body.input;
 
-  let search = new Search();
+  const search = new Search();
   search.vepInputSearch(organism, input)
     .then(results => res.send(results));
 });
