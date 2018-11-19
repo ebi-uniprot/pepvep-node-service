@@ -4,7 +4,7 @@ import VEP from '../data-fetch/VEP';
 
 export default class VCF {
   public static async processVCFInput(species: string, variants: string[]) {
-    let VCFResults: any[] = [];
+    const vcfResults: any[] = [];
 
     const emptyRow = () => ({
       proteinAccession: undefined,
@@ -20,26 +20,26 @@ export default class VCF {
     let allele = undefined;
     let start = undefined;
     let end = undefined;
-    let VEPData = undefined;
-    let UNIData = undefined;
+    let vepData = undefined;
+    let uniprotData = undefined;
 
-    let consequences = {};
+    const consequences = {};
 
     await VEP.variantConsequencesBatch(species, variants)
     .then(({ data }) => {
-      data = data[0];
-      chromosome = data.seq_region_name;
-      const position: number = (data.start <= data.end)
-        ? data.start
-        : data.end;
+      const result = data[0];
+      chromosome = result.seq_region_name;
+      const position: number = (result.start <= result.end)
+        ? result.start
+        : result.end;
 
-      allele = data.allele_string;
-      start = data.start;
-      end = data.end;
-      VEPData = data;
+      allele = result.allele_string;
+      start = result.start;
+      end = result.end;
+      vepData = result;
 
-      data.transcript_consequences
-        .forEach(item => {
+      result.transcript_consequences
+        .forEach((item) => {
           const id = item.transcript_id;
           const impact = item.impact;
 
@@ -53,34 +53,34 @@ export default class VCF {
       return UniProtKB.getProteinsByPosition(chromosome, position);
     })
     .then(({ data }) => {
-      data = data[0];
+      const result = data[0];
 
-      UNIData = data;
+      uniprotData = result;
 
-      if ('undefined' !== typeof data) {
+      if ('undefined' !== typeof result) {
 
-        data.gnCoordinate
-          .forEach(item => {
-            let row: any = emptyRow();
+        result.gnCoordinate
+          .forEach((item) => {
+            const row: any = emptyRow();
 
             row.allele = allele;
             row.start = start;
             row.end = end;
             row.chromosome = chromosome;
-            row.proteinAccession = data.accession;
-            row.proteinName = data.name;
-            row.geneName = data.gene[0].value;
+            row.proteinAccession = result.accession;
+            row.proteinName = result.name;
+            row.geneName = result.gene[0].value;
             row.transcriptId = item.ensemblTranscriptId;
             row.impact = consequences[item.ensemblTranscriptId].join(',');
-            row.VEP = VEPData;
-            row.UNI = UNIData;
+            row.VEP = vepData;
+            row.UNI = uniprotData;
 
-            VCFResults.push(row);
+            vcfResults.push(row);
           });
       }
     })
     .catch(err => console.log(err));
 
-    return VCFResults;
+    return vcfResults;
   }
 }
