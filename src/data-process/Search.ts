@@ -8,6 +8,7 @@ import SearchResults from '../data-structure/SearchResults';
 import Input from '../data-structure/Input';
 import Gene from '../data-structure/Gene';
 import Protein from '../data-structure/Protein';
+import Variation from '../data-structure/Variation';
 
 export default class Search {
   public async vepInputSearch(organism: string, input: string) {
@@ -47,6 +48,10 @@ export default class Search {
                 // --> PROTEIN
                 const protein: Protein = results.addProtein(tc.protein_id, tc.transcript_id, tc.swissprot, tc.trembl);
                 gene.addProtein(protein);
+
+                // --> VARIATION
+                const variation: Variation = results.addVariation(tc.allele_string, VEPOutput.input);
+                protein.addVariation(variation);
               });
           }
         });

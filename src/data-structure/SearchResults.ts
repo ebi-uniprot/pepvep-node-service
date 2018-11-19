@@ -70,4 +70,17 @@ export default class SearchResults {
 
     return this._proteins[id];
   }
+
+  public addVariation(allele: string, input: string) : Variation {
+    const variation: Variation = new Variation(allele);
+    // We are going to use the original raw `input` value to generate a unique key
+    // for this variation instance.
+    const id: string = this.idGenerator(input);
+
+    if ('undefined' === typeof this._variations[id]) {
+      this._variations[id] = variation;
+    }
+
+    return this._variations[id];
+  }
 }

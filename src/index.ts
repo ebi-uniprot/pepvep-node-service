@@ -32,8 +32,8 @@ app.get('/is-alive', (req, res) => res.send('Node service is alive.'));
 app.get('/protein/:accessions', (req, res) => {
   const accessions: string[] = req.params.accessions.split(',');
 
-  UniProtKB.impactSearchByProteinAccessions(accessions)
-    .then(results => res.send(results));
+  // UniProtKB.impactSearchByProteinAccessions(accessions)
+  //   .then(results => res.send(results));
 });
 
 // Default VEP Input
