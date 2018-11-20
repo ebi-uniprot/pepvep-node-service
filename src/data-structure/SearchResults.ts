@@ -72,6 +72,10 @@ export default class SearchResults {
     return this._proteins[id];
   }
 
+  public getProteinsAsArray() : Protein[] {
+    return Object.values(this._proteins);
+  }
+
   public addVariation(allele: string, input: string) : Variation {
     const variation: Variation = new Variation(allele);
     // We are going to use the original raw `input` value to generate a unique key
@@ -83,5 +87,53 @@ export default class SearchResults {
     }
 
     return this._variations[id];
+  }
+
+  public generateResultTableData() {
+    const json = {};
+
+    Object.keys(this._inputs)
+      .forEach((groupId) => {
+        if ('undefined' === typeof json[groupId]) {
+          json[groupId] = {
+            key: groupId,
+            input: this._inputs[groupId].raw,
+            rows: this._inputs[groupId]
+              .getGenes()
+              .reduce(
+                (accu, gene) => {
+                  const row = {
+                    gene: {},
+                    protein: {},
+                  };
+
+                  row.gene['ensgId'] = gene.ensg;
+                  row.gene['chromosome'] = gene.chromosome;
+
+                  gene.getProteins()
+                    .forEach((protein) => {
+                      row.gene['enstId'] = protein.enst;
+
+                      protein.getVariations()
+                        .forEach((variation) => {
+                          row.gene['allele'] = variation.allele;
+                          row.gene['start'] = variation.genomicVariationStart;
+                          row.gene['end'] = variation.genomicVariationEnd;
+                          row.protein['variant'] = variation.aminoAcids;
+                          row.protein['start'] = variation.proteinStart;
+                          row.protein['end'] = variation.proteinEnd;
+                        });
+                    });
+
+                  accu.push(row);
+                  return accu;
+                },
+                [],
+            ),
+          };
+        }
+      });
+
+    return json;
   }
 }

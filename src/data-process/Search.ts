@@ -21,7 +21,7 @@ export default class Search {
      * Note: this has to change later as we would need to handle both
      * Genomic (VEP) and Protein (UniProt) input variants.
      */
-    await VEP.variantConsequencesAllInputs(organism, input)
+    return await VEP.variantConsequencesAllInputs(organism, input)
       .then(({ data }) => {
         // console.log("VEP data:", JSON.stringify(data));
         data.forEach((vepOutput) => {
@@ -52,12 +52,25 @@ export default class Search {
 
                 // --> VARIATION
                 const variation: Variation =
-                  results.addVariation(tc.allele_string, vepOutput.input);
+                  results.addVariation(tc.variant_allele, vepOutput.input);
+
+                variation.proteinStart = parseInt(tc.protein_start, 10);
+                variation.proteinEnd = parseInt(tc.protein_end, 10);
+                variation.genomicVariationStart = parseInt(vepOutput.start, 10);
+                variation.genomicVariationEnd = parseInt(vepOutput.end, 10);
+                variation.aminoAcids = tc.amino_acids;
                 protein.addVariation(variation);
               });
           }
+
         });
 
+        return Significance.addPositionalSignificance(results.getProteinsAsArray());
+      })
+      .then((response) => {
+        // console.log(">>> ", JSON.stringify(results));
+
+        return results.generateResultTableData();
       });
 
   }

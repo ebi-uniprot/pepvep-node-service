@@ -11,6 +11,8 @@ export default class Variation {
   private _aminoAcids: string;
   private _proteinStart: number;
   private _proteinEnd: number;
+  private _genomicVariationStart: number;
+  private _genomicVariationEnd: number;
   private _transcriptSignificance: TranscriptSignificance[] = [];
   private _positionalSignificance: PositionalSignificance;
   private _clinicalSignificance: ClinicalSignificance[] = [];
@@ -43,6 +45,24 @@ export default class Variation {
   }
   public set proteinEnd(end: number) {
     this._proteinEnd = end;
+  }
+
+  // Genomic Variation Start
+  public get genomicVariationStart() : number {
+    return this._genomicVariationStart;
+  }
+
+  public set genomicVariationStart(start: number) {
+    this._genomicVariationStart = start;
+  }
+
+  // Genomic Variation End
+  public get genomicVariationEnd() : number {
+    return this._genomicVariationEnd;
+  }
+
+  public set genomicVariationEnd(end: number) {
+    this._genomicVariationEnd = end;
   }
 
   // Transcript Significances
