@@ -7,7 +7,8 @@
     "start": "nodemon",
     "test": "mocha --require ts-node/register test/**/*.spec.ts",
     "test-watch": "mocha --require ts-node/register --watch-extensions ts --watch 'test/**/*.spec.ts'",
-    "tslint": "tslint -c tslint.json 'src/**/*.ts' -e 'test/**/*.spec.ts'"
+    "tslint": "tslint -c tslint.json 'src/**/*.ts' -e 'test/**/*.spec.ts'",
+    "debug": "node --inspect -r ts-node/register src/index.ts"
   },
   "repository": {
     "type": "git",
