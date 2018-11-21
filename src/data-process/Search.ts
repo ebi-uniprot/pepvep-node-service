@@ -9,6 +9,7 @@ import Input from '../data-structure/Input';
 import Gene from '../data-structure/Gene';
 import Protein from '../data-structure/Protein';
 import Variation from '../data-structure/Variation';
+import TranscriptSignificance from '../data-structure/significance/TranscriptSignificance';
 
 export default class Search {
   public async vepInputSearch(organism: string, input: string) {
@@ -59,6 +60,22 @@ export default class Search {
                 variation.genomicVariationStart = parseInt(vepOutput.start, 10);
                 variation.genomicVariationEnd = parseInt(vepOutput.end, 10);
                 variation.aminoAcids = tc.amino_acids;
+
+                const transcriptSignificance: TranscriptSignificance = new TranscriptSignificance();
+                transcriptSignificance.biotype = tc.biotype;
+                transcriptSignificance.impact = tc.impact;
+                transcriptSignificance.codons = tc.codons;
+                transcriptSignificance.polyphenPrediction = tc.polyphen_prediction;
+                transcriptSignificance.polyphenScore = tc.polyphen_score;
+                transcriptSignificance.siftPrediction = tc.sift_prediction;
+                transcriptSignificance.siftScore = tc.sift_score;
+
+                if ('undefined' !== typeof tc.consequence_terms) {
+                  tc.consequence_terms
+                    .forEach(term => transcriptSignificance.addConsequenceTerm(term));
+                }
+
+                variation.addTranscriptSignificance(transcriptSignificance);
                 protein.addVariation(variation);
               });
           }

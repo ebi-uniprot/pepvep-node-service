@@ -42,4 +42,17 @@ export default class TranscriptSignificance {
   public addConsequenceTerm(term: string) {
     this._consequenceTerms.push(term);
   }
+
+  public toJSON() {
+    return {
+      biotype: this.biotype,
+      impact: this.impact,
+      codons: this.codons,
+      polyphenPrediction: this.polyphenPrediction,
+      polyphenScore: this.polyphenScore,
+      siftPrediction: this.siftPrediction,
+      siftScore: this.siftScore,
+      consequenceTerms: this.consequenceTerms,
+    }
+  }
 }

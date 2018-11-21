@@ -105,6 +105,7 @@ export default class SearchResults {
                   const row = {
                     gene: {},
                     protein: {},
+                    significances: {},
                   };
 
                   row.gene['ensgId'] = gene.ensg;
@@ -119,9 +120,25 @@ export default class SearchResults {
                           row.gene['allele'] = variation.allele;
                           row.gene['start'] = variation.genomicVariationStart;
                           row.gene['end'] = variation.genomicVariationEnd;
+                          row.protein['accession'] = protein.accession;
                           row.protein['variant'] = variation.aminoAcids;
                           row.protein['start'] = variation.proteinStart;
                           row.protein['end'] = variation.proteinEnd;
+
+                          const positinalSignificances: any = {
+                            features: variation.getPositionalSignificance().getFeatures(),
+                          };
+
+                          row.significances['positional'] = (0 < positinalSignificances.features.length)
+                            ? positinalSignificances
+                            : undefined;
+
+                          const transcriptSignificances = variation.getTranscriptSignificance()
+                            .map(ts => ts.toJSON());
+
+                          row.significances['transcript'] = (0 < transcriptSignificances.length)
+                            ? transcriptSignificances
+                            : undefined;
                         });
                     });
 
