@@ -102,7 +102,7 @@ export default class SearchResults {
               .getGenes()
               .reduce(
                 (accu, gene) => {
-                  const row = {
+                  const row: any = {
                     gene: {},
                     protein: {},
                     significances: {},
@@ -117,13 +117,13 @@ export default class SearchResults {
 
                       protein.getVariations()
                         .forEach((variation) => {
-                          row.gene['allele'] = variation.allele;
-                          row.gene['start'] = variation.genomicVariationStart;
-                          row.gene['end'] = variation.genomicVariationEnd;
-                          row.protein['accession'] = protein.accession;
-                          row.protein['variant'] = variation.aminoAcids;
-                          row.protein['start'] = variation.proteinStart;
-                          row.protein['end'] = variation.proteinEnd;
+                          row.gene.allele = variation.allele;
+                          row.gene.start = variation.genomicVariationStart;
+                          row.gene.end = variation.genomicVariationEnd;
+                          row.protein.accession = protein.accession;
+                          row.protein.variant = variation.aminoAcids;
+                          row.protein.start = variation.proteinStart;
+                          row.protein.end = variation.proteinEnd;
 
                           const positinalSignificances: any = {
                             features: variation.getPositionalSignificance().getFeatures(),

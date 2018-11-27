@@ -7,8 +7,9 @@ export default class Significance {
   public static async addPositionalSignificance(proteins: Protein[]) {
     const accessionList = proteins.map(p => p.accession);
     const significance = await UniProtKB.getProteinFeatures(accessionList).then(
-      results =>
-        results.data.forEach((proteinResult) => {
+      results => {
+console.log("FEATURES:", results);
+        return results.data.forEach((proteinResult) => {
           const protein: Protein = proteins.find(
             p => p.accession === proteinResult.accession,
           );
@@ -16,7 +17,8 @@ export default class Significance {
           variations.forEach((variation) => {
             variation.addOverlappingFeatures(proteinResult.features);
           });
-        }),
+        })
+      }
     );
   }
 
