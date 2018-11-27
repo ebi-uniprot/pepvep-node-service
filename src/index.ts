@@ -2,6 +2,7 @@ import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import * as cookieParser from 'cookie-parser';
 import axios from 'axios';
+import * as path from 'path';
 
 import Helpers from './data-fetch/Helpers';
 import UniProtKB from './data-fetch/UniProtKB';
@@ -53,5 +54,7 @@ app.post('/protein-variants', (req, res) => {
   UniProtKB.proteinsDetailByAccession(queryItems.map(d => d['accession']))
     .then(results => res.send(results));
 });
+
+app.get('/', (req, res) => res.sendFile(path.join(__dirname + '../www/index.html')));
 
 app.listen(port, () => console.log(`server listening on http://localhost:${port}/`));
