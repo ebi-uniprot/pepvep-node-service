@@ -55,6 +55,6 @@ app.post('/protein-variants', (req, res) => {
     .then(results => res.send(results));
 });
 
-app.get('/', (req, res) => res.sendFile(path.join(__dirname + '/../www/index.html')));
+app.get('/', (req, res) => res.sendFile(path.join(__dirname + '/../../www/index.html')));
 
 app.listen(port, () => console.log(`server listening on http://localhost:${port}/`));
