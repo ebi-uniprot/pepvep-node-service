@@ -8,7 +8,7 @@ export default class Significance {
     const accessionList = proteins.map(p => p.accession);
     const significance = await UniProtKB.getProteinFeatures(accessionList).then(
       results => {
-console.log("FEATURES:", results);
+// console.log("FEATURES:", results);
         return results.data.forEach((proteinResult) => {
           const protein: Protein = proteins.find(
             p => p.accession === proteinResult.accession,
