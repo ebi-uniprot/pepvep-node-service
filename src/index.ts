@@ -21,6 +21,7 @@ app.use((req, res, next) => {
 });
 
 app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, '/../../www')));  // to server front-end files from server
 app.use(bodyParser.urlencoded({
   extended: false,
 }));
@@ -55,6 +56,7 @@ app.post('/protein-variants', (req, res) => {
     .then(results => res.send(results));
 });
 
+// To serve front-end from 'www' folder
 app.get('/', (req, res) => res.sendFile(path.join(__dirname + '/../../www/index.html')));
 
 app.listen(port, () => console.log(`server listening on http://localhost:${port}/`));
