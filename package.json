@@ -8,7 +8,11 @@
     "test": "mocha --require ts-node/register test/**/*.spec.ts",
     "test-watch": "mocha --require ts-node/register --watch-extensions ts --watch 'test/**/*.spec.ts'",
     "tslint": "tslint -c tslint.json 'src/**/*.ts' -e 'test/**/*.spec.ts'",
-    "debug": "node --inspect -r ts-node/register src/index.ts"
+    "debug": "node --inspect -r ts-node/register src/index.ts",
+    "start-service": "./node_modules/pm2/bin/pm2 start src/index.ts",
+    "stop-service": "./node_modules/pm2/bin/pm2 stop index",
+    "show-service": "./node_modules/pm2/bin/pm2 show index",
+    "fix-pm2-typescript": "./node_modules/pm2/bin/pm2 install typescript"
   },
   "repository": {
     "type": "git",
@@ -36,7 +40,8 @@
     "mocha": "^5.2.0",
     "nock": "^9.4.2",
     "nodemon": "^1.18.4",
-    "ts-node": "^7.0.0",
+    "pm2": "^3.2.2",
+    "ts-node": "^7.0.1",
     "tslint": "^5.11.0",
     "tslint-config-airbnb": "^5.11.1",
     "typescript": "^3.1.1"
