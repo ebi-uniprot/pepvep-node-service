@@ -1,5 +1,6 @@
 
 import * as crypto from 'crypto';
+import * as values from 'object.values';
 
 import Input from './Input';
 import Protein from './Protein';
@@ -73,7 +74,7 @@ export default class SearchResults {
   }
 
   public getProteinsAsArray() : Protein[] {
-    return Object.values(this._proteins);
+    return values(this._proteins);
   }
 
   public addVariation(allele: string, input: string) : Variation {
