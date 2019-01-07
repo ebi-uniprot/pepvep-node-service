@@ -4,22 +4,12 @@ import Feature from '../data-structure/significance/Feature';
 import Evidence from '../data-structure/significance/Evidence';
 
 export default class Significance {
-  public static async addPositionalSignificance(proteins: Protein[]) {
-    const accessionList = proteins.map(p => p.accession);
-    const significance = await UniProtKB.getProteinFeatures(accessionList).then(
-      results => {
-// console.log("FEATURES:", results);
-        return results.data.forEach((proteinResult) => {
-          const protein: Protein = proteins.find(
-            p => p.accession === proteinResult.accession,
-          );
-          const variations = protein.getVariations();
-          variations.forEach((variation) => {
-            variation.addOverlappingFeatures(proteinResult.features);
-          });
-        })
-      }
-    );
+  public static async addPositionalSignificance (proteins: Protein[], featuresResults: any) {
+    const protein: Protein = proteins
+      .find(p => (p.accession === featuresResults.accession));
+
+    protein.getVariations()
+      .forEach(v => v.addOverlappingFeatures(featuresResults.features));
   }
 
   public static parseHGVS(hgvsString: string) {
@@ -34,20 +24,20 @@ export default class Significance {
     };
   }
 
-  //   public static async getClinicalSignificance(
-  //     accession: string,
-  //     chromosome: string,
-  //     position: number,
-  //     allele: string
-  //   ) {
-  //     const variants = await UniProtKB.getProteinVariants(accession);
-  //     return variants.data.features.filter(variant => {
-  //       if (!variant.genomicLocation) {
-  //         return;
-  //       }
-  //       const hgvs = this.parseHGVS(variant.genomicLocation);
-  //       //TODO we need to add the chromosome number
-  //       return hgvs.position === position && hgvs.allele === allele;
-  //     });
-  //   }
+  // public static async getClinicalSignificance(
+  //   accession: string,
+  //   chromosome: string,
+  //   position: number,
+  //   allele: string
+  // ) {
+  //   const variants = await UniProtKB.getProteinVariants(accession);
+  //   return variants.data.features.filter(variant => {
+  //     if (!variant.genomicLocation) {
+  //       return;
+  //     }
+  //     const hgvs = this.parseHGVS(variant.genomicLocation);
+  //     //TODO we need to add the chromosome number
+  //     return hgvs.position === position && hgvs.allele === allele;
+  //   });
+  // }
 }

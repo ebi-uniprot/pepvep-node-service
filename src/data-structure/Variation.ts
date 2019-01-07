@@ -6,6 +6,38 @@ import ColocatedVariant from './significance/ColocatedVariant';
 import Feature from './significance/Feature';
 import Evidence from './significance/Evidence';
 
+const specialFeatureTypes: string[] = ["MUTAGEN", "CONFLICT"];
+const featureTypes: any = {
+  "SIGNAL": "Single Peptide",
+  "PROPEP": "Propeptide",
+  "CHAIN": "Chain",
+  "DOMAIN": "Functional Domain",
+  "ACT_SITE": "Active Site Residue",
+  "METAL": "Metal Ion Binding Site Residue",
+  "SITE": "Functionally Important Residue",
+  "MOD_RES": "PTM Modified Residue",
+  "CARBOHYD": "PTM Carbohydrate",
+  "DISULFID": "PTM Disulfide Bond Residue",
+  "MUTAGEN": "Mutated Residue",
+  "INIT_MET": "Cleaved Initiator Methionine",
+  "TRANSIT": "Cleaved Transit Peptide",
+  "TOPO_DOM": "Transmembrane Protein Topological Region",
+  "TRANSMEM": "Helical Transmembrane Peptide",
+  "REPEAT": "Repeated Sequence",
+  "CA_BIND": "Calcium Binding Residue",
+  "ZN_FING": "Zinc Finger Residue",
+  "DNA_BIND": "DNA Binding Residue",
+  "NP_BIND": "Nucleotide Phosphate Binding Residue",
+  "COILED": "Coiled-coil Region",
+  "MOTIF": "Functional Motif",
+  "COMPBIAS": "AA Composition Bias",
+  "BINDING": "Binding Site Residue",
+  "NON_STD": "Non-standard Amino Acid",
+  "LIPID": "PTM bound Lipid",
+  "CROSSLINK": "Covalent Link To Another Protein",
+  "CONFLICT": "Difference In Reported Protein Sequences",
+};
+
 export default class Variation {
   readonly allele: string;
   private _aminoAcids: string;
@@ -105,26 +137,48 @@ export default class Variation {
     this._colocatedVariants.push(colocatedVariant);
   }
 
-  public addOverlappingFeatures(rawFeatures) {
-    const featuresToAdd = rawFeatures.filter(
-      rawFeature =>
-        this.proteinStart >= rawFeature.begin &&
-        this.proteinEnd <= rawFeature.end,
-    );
-    featuresToAdd.forEach((rawFeature) => {
-      const evidences = rawFeature.evidences
-        ? rawFeature.evidences.map(
-            ev =>
-              new Evidence(
-                ev.code,
-                ev.source.name,
-                ev.source.id,
-                ev.source.url,
-                ev.source.alternativeUrl,
-              ),
-          )
-        : [];
-      const featureToAdd = new Feature(
+  public addOverlappingFeatures(rawFeatures: any) {
+    rawFeatures.forEach((rawFeature) => {
+      // overal range.
+      const maxStarts: number = Math.max(this.proteinStart,rawFeature.begin);
+      const minEnds: number = Math.min(this.proteinEnd, rawFeature.end);
+
+      if (0 < maxStarts - minEnds) {
+        // not in range.
+        return;
+      }
+
+      // feature type.
+      if ("undefined" === typeof featureTypes[rawFeature.type]) {
+        // not a type that we are interested in.
+        return;
+      }
+
+      // TODO: Where should the following data be collected? How is it represented?
+      // special types.
+      if (specialFeatureTypes.includes(rawFeature.type)) {
+        // collect this somewhere...
+      }
+
+      // evidence.
+      const evidences: Evidence[] = [];
+
+      if ("undefined" !== typeof rawFeature.evidences) {
+        rawFeature.evidences.forEach(ev => {
+          const evidence: Evidence = new Evidence(
+            ev.code,
+            ev.source.name,
+            ev.source.id,
+            ev.source.url,
+            ev.source.alternativeUrl,
+          );
+
+          evidences.push(evidence);
+        });
+      }
+
+      // feature.
+      const feature: Feature = new Feature(
         rawFeature.type,
         rawFeature.category,
         rawFeature.description,
@@ -132,7 +186,9 @@ export default class Variation {
         rawFeature.end,
         evidences,
       );
-      this.getPositionalSignificance().addFeature(featureToAdd);
+
+      this.getPositionalSignificance()
+        .addFeature(feature);
     });
   }
 }

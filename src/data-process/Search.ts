@@ -82,10 +82,21 @@ export default class Search {
 
         });
 
-        return Significance.addPositionalSignificance(results.getProteinsAsArray());
+        const accessions: string[] = results.getProteinsAsArray()
+          .map(p => p.accession);
+
+        return UniProtKB.getProteinFeatures(accessions);
       })
       .then((response) => {
-        // console.log(">>> ", JSON.stringify(results));
+        // console.log(">>> PROTEIN FEATURES >>> ", JSON.stringify(response.data));
+
+        const proteins: Protein[] = results.getProteinsAsArray();
+
+        response.data.forEach((proteinFeaturesResult) => {
+          Significance.addPositionalSignificance(proteins, proteinFeaturesResult);
+        });
+
+        console.log(">>> RESULTS. >>> ", JSON.stringify(results));
 
         return results.generateResultTableData();
       });
