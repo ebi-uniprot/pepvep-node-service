@@ -47,7 +47,8 @@ export default class Variation {
   private _genomicVariationEnd: number;
   private _transcriptSignificance: TranscriptSignificance[] = [];
   private _positionalSignificance: PositionalSignificance;
-  private _clinicalSignificance: ClinicalSignificance[] = [];
+  private _clinicalSignificance: ClinicalSignificance;
+  private _structuralSignificances: StructuralSignificance[] = [];
   private _colocatedVariants: ColocatedVariant[] = [];
 
   constructor(allele: string) {
@@ -120,12 +121,21 @@ export default class Variation {
   }
 
   // Clinical Significances
-  public getClinicalSignificances(): ClinicalSignificance[] {
+  public getClinicalSignificances(): ClinicalSignificance {
     return this._clinicalSignificance;
   }
 
   public addClinicalSignificance(clinicalSignificance: ClinicalSignificance) {
-    this._clinicalSignificance.push(clinicalSignificance);
+    this._clinicalSignificance = clinicalSignificance;
+  }
+
+  // Structural Significances
+  public getStructuralSignificances() : StructuralSignificance[] {
+    return this._structuralSignificances;
+  }
+
+  public addStructuralSignificance(structuralSignificance: StructuralSignificance) {
+    this._structuralSignificances.push(structuralSignificance);
   }
 
   // Colocated Variants
@@ -137,10 +147,18 @@ export default class Variation {
     this._colocatedVariants.push(colocatedVariant);
   }
 
+  // Check if this variation overlaps with the suplied range.
+  public isInRange(start: number, end: number) : boolean {
+    const maxStarts: number = Math.max(this.proteinStart, start);
+    const minEnds: number = Math.min(this.proteinEnd, end);
+
+    return (0 >= maxStarts - minEnds);
+  }
+
   public addOverlappingFeatures(rawFeatures: any) {
     rawFeatures.forEach((rawFeature) => {
       // overal range.
-      const maxStarts: number = Math.max(this.proteinStart,rawFeature.begin);
+      const maxStarts: number = Math.max(this.proteinStart, rawFeature.begin);
       const minEnds: number = Math.min(this.proteinEnd, rawFeature.end);
 
       if (0 < maxStarts - minEnds) {
@@ -149,7 +167,7 @@ export default class Variation {
       }
 
       // feature type.
-      if ("undefined" === typeof featureTypes[rawFeature.type]) {
+      if ('undefined' === typeof featureTypes[rawFeature.type]) {
         // not a type that we are interested in.
         return;
       }
@@ -163,8 +181,13 @@ export default class Variation {
       // evidence.
       const evidences: Evidence[] = [];
 
-      if ("undefined" !== typeof rawFeature.evidences) {
+      if ('undefined' !== typeof rawFeature.evidences) {
         rawFeature.evidences.forEach(ev => {
+          // TODO: ev.source is 'undefined' in some cases.
+          if ('undefined' === typeof ev.source) {
+            return;
+          }
+
           const evidence: Evidence = new Evidence(
             ev.code,
             ev.source.name,

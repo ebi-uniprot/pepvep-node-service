@@ -20,7 +20,12 @@ export default class Protein {
     this._variations.push(variation);
   }
 
-  public getVariations(): Variation[] {
+  public getVariations() : Variation[] {
     return this._variations;
+  }
+
+  public getVariationsInRange(start: number, end: number) : Variation[] {
+    return this._variations
+      .filter(v => v.isInRange(start, end));
   }
 }

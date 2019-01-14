@@ -1,24 +1,5 @@
 export default class Helpers {
 
-  public static stringOrArrayToCommaSeparated(elements: string | string[]): string {
-    return ('string' === typeof elements)
-      ? elements
-      : elements.reduce(
-        (accu: string, current: string, index: number) => {
-          let commaSeparated: string =  accu;
-
-          if (0 < index) {
-            commaSeparated += ',';
-          }
-
-          commaSeparated += current;
-
-          return commaSeparated;
-        },
-        '',
-      );
-  }
-
   public static parseProteinChangeInput(input: string): any[] {
     const rows = input.split('\n');
     return rows.map((row) => {

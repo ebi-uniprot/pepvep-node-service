@@ -6,6 +6,10 @@ import Input from './Input';
 import Protein from './Protein';
 import Gene from './Gene';
 import Variation from './Variation';
+import ClinicalSignificance from './significance/ClinicalSignificance';
+import PositionalSignificance from './significance/PositionalSignificance';
+import StructuralSignificance from './significance/StructuralSignificance';
+import TranscriptSignificance from './significance/TranscriptSignificance';
 
 interface TypedMap<T> {
   [id: string] : T;
@@ -77,6 +81,18 @@ export default class SearchResults {
     return values(this._proteins);
   }
 
+  public getAccessionsAsArray() : string[] {
+    return this.getProteinsAsArray()
+      .map(p => p.accession)
+      .reduce((accessions, current) => {
+        if (!accessions.includes(current)) {
+          accessions.push(current);
+        }
+
+        return accessions;
+      }, []);
+  }
+
   public addVariation(allele: string, input: string) : Variation {
     const variation: Variation = new Variation(allele);
     // We are going to use the original raw `input` value to generate a unique key
@@ -88,6 +104,54 @@ export default class SearchResults {
     }
 
     return this._variations[id];
+  }
+
+  public getProteinByAccession(accession: string) : Protein {
+    return this.getProteinsAsArray()
+      .find(p => (accession === p.accession))
+  }
+
+  public getProteinVariationsInRange(accession: string, start: number, end: number) : Variation[] {
+    const protein: Protein = this.getProteinByAccession(accession);
+
+    if ('undefined' === typeof protein) {
+      return [];
+    }
+
+    return protein
+      .getVariations()
+      .map((v) => (v.isInRange(start, end)) ? v : null)
+      .filter(v => v !== null)
+  }
+
+  public getAccessionToVariationMap() {
+    const map = {};
+
+    Object.keys(this._inputs)
+      .forEach((groupId) => {
+        this._inputs[groupId]
+          .getGenes()
+          .forEach((gene) => {
+            gene.getProteins()
+              .forEach((protein) => {
+                protein.getVariations()
+                  .forEach((variation) => {
+                    const { accession } = protein;
+                    const {
+                      aminoAcids,
+                      proteinStart,
+                      proteinEnd,
+                    } = variation;
+
+                    const key: string = `${accession}-${proteinStart}:${proteinEnd}-${aminoAcids}`;
+
+                    map[key] = variation;
+                  });
+              });
+          });
+      });
+
+      return map;
   }
 
   public generateResultTableData() {
@@ -134,11 +198,27 @@ export default class SearchResults {
                             ? positinalSignificances
                             : undefined;
 
-                          const transcriptSignificances = variation.getTranscriptSignificance()
+                          const transcriptSignificances = variation
+                            .getTranscriptSignificance()
                             .map(ts => ts.toJSON());
 
                           row.significances['transcript'] = (0 < transcriptSignificances.length)
                             ? transcriptSignificances
+                            : undefined;
+
+                          const clinicalSignificances: ClinicalSignificance = variation
+                            .getClinicalSignificances();
+
+                          row.significances['clinical'] = (clinicalSignificances)
+                            ? clinicalSignificances.toJSON()
+                            : undefined;
+
+                          const structuralSignificances = variation
+                            .getStructuralSignificances()
+                            .map(ss => ss.toJSON());
+
+                          row.significances['structural'] = (0 < structuralSignificances.length)
+                            ? structuralSignificances
                             : undefined;
                         });
                     });

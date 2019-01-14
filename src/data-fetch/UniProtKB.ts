@@ -21,11 +21,9 @@ const customAxios = axios.create({
 const taxID = '9606';
 
 export default class UniProtKB {
-  public static async proteinsDetailByAccession(accessions: string[]) {
-    const queryString: string = Helpers.stringOrArrayToCommaSeparated(accessions);
+  public static async getProteinDetailByAccession(accessions: string[]) {
     const url: string =
-      `https://www.ebi.ac.uk/proteins/api/proteins?format=json&accession=${queryString}`;
-
+      `https://www.ebi.ac.uk/proteins/api/proteins?format=json&accession=${accessions.join(',')}`;
     return await customAxios.get(url);
   }
 
@@ -39,7 +37,7 @@ export default class UniProtKB {
   public static async getProteinVariants(accessions: string[]) {
     const accessionsString: string = accessions.join(',');
     // TODO this call is limited to 100 only, we need to do it in batches
-    const url: string = `https://www.ebi.ac.uk/proteins/api/variation/${accessionsString}`;
+    const url: string = `https://www.ebi.ac.uk/proteins/api/variation?offset=0&size=100&accession=${accessionsString}`;
     return await customAxios.get(url);
   }
 }

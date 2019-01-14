@@ -13,14 +13,23 @@
  */
 export default class ClinicalSignificance {
   readonly raw: string;
-  readonly value: string;
+  readonly value: string[];
+  readonly association: any[];
 
-  constructor(raw: string) {
+  constructor(raw: string, association: any[]) {
     this.raw = raw;
     this.value = this.parseInput(raw);
+    this.association = association;
   }
 
-  private parseInput(raw: string) : string {
-    return raw;
+  private parseInput(raw: string) : string[] {
+    return raw.split(',');
+  }
+
+  public toJSON() {
+    return {
+      categories: this.value,
+      association: this.association,
+    }
   }
 }

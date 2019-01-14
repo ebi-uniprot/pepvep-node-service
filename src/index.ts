@@ -49,12 +49,12 @@ app.post('/parser', (req, res) => {
     .then(results => res.send(results));
 });
 
-app.post('/protein-variants', (req, res) => {
-  const proteinVariants: string = req.body.input;
-  const queryItems = Helpers.parseProteinChangeInput(proteinVariants);
-  UniProtKB.proteinsDetailByAccession(queryItems.map(d => d['accession']))
-    .then(results => res.send(results));
-});
+// app.post('/protein-variants', (req, res) => {
+//   const proteinVariants: string = req.body.input;
+//   const queryItems = Helpers.parseProteinChangeInput(proteinVariants);
+//   UniProtKB.proteinsDetailByAccession(queryItems.map(d => d['accession']))
+//     .then(results => res.send(results));
+// });
 
 // To serve front-end from 'www' folder
 app.get('*', (req, res) => res.sendFile(path.join(__dirname + '/../../www/index.html')));

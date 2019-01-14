@@ -10,6 +10,9 @@ import Gene from '../data-structure/Gene';
 import Protein from '../data-structure/Protein';
 import Variation from '../data-structure/Variation';
 import TranscriptSignificance from '../data-structure/significance/TranscriptSignificance';
+import ClinicalSignificance from '../data-structure/significance/ClinicalSignificance';
+import StructuralSignificance from '../data-structure/significance/StructuralSignificance';
+import PositionalSignificance from '../data-structure/significance/PositionalSignificance';
 
 export default class Search {
   public async vepInputSearch(organism: string, input: string) {
@@ -82,24 +85,137 @@ export default class Search {
 
         });
 
-        const accessions: string[] = results.getProteinsAsArray()
-          .map(p => p.accession);
-
-        return UniProtKB.getProteinFeatures(accessions);
+        // return UniProtKB.getProteinFeatures(results.getAccessionsAsArray());
+        return UniProtKB.getProteinDetailByAccession(results.getAccessionsAsArray());
       })
       .then((response) => {
-        // console.log(">>> PROTEIN FEATURES >>> ", JSON.stringify(response.data));
-
         const proteins: Protein[] = results.getProteinsAsArray();
 
         response.data.forEach((proteinFeaturesResult) => {
           Significance.addPositionalSignificance(proteins, proteinFeaturesResult);
         });
 
-        console.log(">>> RESULTS. >>> ", JSON.stringify(results));
+        return UniProtKB.getProteinVariants(results.getAccessionsAsArray());
+      })
+      .then((response) => {
+        response.data.forEach((proteinVariationResult) => {
+          const clinicalSignificances: ClinicalSignificance[] = [];
+
+          proteinVariationResult.features.forEach((feature) => {
+            const { accession } = proteinVariationResult;
+            const {
+              type,
+              begin,
+              end,
+              wildType,
+              alternativeSequence,
+              genomicLocation,
+              association,
+              clinicalSignificances,
+            } = feature;
+
+            if ('VARIANT' !== type) {
+              return;
+            }
+
+            if ('undefined' === typeof genomicLocation) {
+              return;
+            }
+
+            if ('undefined' === typeof association) {
+              return;
+            }
+
+            if ('undefined' === typeof clinicalSignificances) {
+              return;
+            }
+
+            const key: string =
+              `${accession}-${begin}:${end}-${wildType}/${alternativeSequence}`;
+
+            const accessionToVariationMap = results.getAccessionToVariationMap();
+            const variation: Variation = accessionToVariationMap[key];
+
+            if ('undefined' === typeof variation) {
+              return;
+            }
+
+            const diseaseAssociation: any[] = association
+              .filter(a => a.disease);
+
+            if (0 >= diseaseAssociation.length) {
+              return;
+            }
+
+            const cs: ClinicalSignificance = new ClinicalSignificance(clinicalSignificances, diseaseAssociation);
+            variation.addClinicalSignificance(cs);
+          });
+        });
+
+        return UniProtKB.getProteinDetailByAccession(results.getAccessionsAsArray());
+      })
+      .then((response) => {
+        // Structural Significances
+        response.data.forEach((proteinDetails) => {
+          const structuralSignificance: StructuralSignificance[] = [];
+          let inRange: boolean = false;
+
+          if ('undefined' === typeof proteinDetails.dbReferences || 0 >= proteinDetails.dbReferences.length) {
+            return;
+          }
+
+          proteinDetails.dbReferences.forEach((dbRef) => {
+            const { id, type, properties } = dbRef;
+
+            if ('undefined' === typeof properties) {
+              return;
+            }
+
+            const { method, chains } = properties;
+
+            if ('PDB' !== type) {
+              return;
+            }
+
+            if (!['X-ray', 'NMR', 'Model'].includes(method)) {
+              return;
+            }
+
+            const rangeRegExp = /([0-9]*)-([0-9]*)/g;
+
+            let range;
+            while (null !== (range = rangeRegExp.exec(chains))) {
+              const rangeStart = parseInt(range[1]);
+              const rangeEnd = parseInt(range[2]);
+
+              const structuralSignificance: StructuralSignificance =
+                new StructuralSignificance(id, method, [rangeStart, rangeEnd]);
+
+              const variations: Variation[] = results
+                .getProteinVariationsInRange(proteinDetails.accession, rangeStart, rangeEnd);
+
+              variations
+                .forEach(v => {
+                  if (v.isInRange(rangeStart, rangeEnd)) {
+                    v.addStructuralSignificance(structuralSignificance);
+                  }
+                });
+
+            }
+          });
+        });
+
+        // Positional Significances/Features
+        response.data.forEach((proteinDetails) => {
+
+        });
+
+// console.log(">>> RESULTS. >>> ", JSON.stringify(results));
 
         return results.generateResultTableData();
-      });
-
+      })
+      // .catch(error => {
+      //   console.log(error.response)
+      // })
   }
 }
