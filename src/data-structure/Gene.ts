@@ -4,7 +4,7 @@ import Protein from './Protein';
 export default class Gene {
   readonly ensg: string;
   readonly chromosome: string;
-  private _proteins: Protein[] = [];
+  private _proteins: any = {};
 
   constructor(ensg: string, chromosome: string) {
     this.ensg = ensg;
@@ -12,10 +12,15 @@ export default class Gene {
   }
 
   public getProteins() : Protein[] {
-    return this._proteins;
+    return Object.values(this._proteins);
   }
 
-  public addProtein(protein: Protein) {
-    this._proteins.push(protein);
+  public addProtein(protein: Protein) : void {
+    const { accession, enst, ensp } = protein;
+    const key: string = `${accession}-${ensp}-${enst}`;
+
+    if ('undefined' === typeof this._proteins[key]) {
+      this._proteins[key] = protein;
+    }
   }
 }

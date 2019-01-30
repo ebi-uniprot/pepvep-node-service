@@ -27,7 +27,7 @@ export default class Search {
      */
     return await VEP.variantConsequencesAllInputs(organism, input)
       .then(({ data }) => {
-        // console.log("VEP data:", JSON.stringify(data));
+
         data.forEach((vepOutput) => {
           // --> INPUT
           const input: Input = results.addInput(vepOutput.input);
@@ -103,6 +103,7 @@ export default class Search {
 
           proteinVariationResult.features.forEach((feature) => {
             const { accession } = proteinVariationResult;
+
             const {
               type,
               begin,
@@ -200,7 +201,6 @@ export default class Search {
                     v.addStructuralSignificance(structuralSignificance);
                   }
                 });
-
             }
           });
         });

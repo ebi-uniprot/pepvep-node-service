@@ -39,7 +39,6 @@ export default class SearchResults {
   public addGene(ensg: string, chromosome: string) : Gene {
     const gene: Gene = new Gene(ensg, chromosome);
     const id: string = this.idGenerator(`${ensg}-${chromosome}`);
-
     if ('undefined' === typeof this._genes[id]) {
       this._genes[id] = gene;
     }
@@ -97,7 +96,7 @@ export default class SearchResults {
     const variation: Variation = new Variation(allele);
     // We are going to use the original raw `input` value to generate a unique key
     // for this variation instance.
-    const id: string = this.idGenerator(input);
+    const id: string = this.idGenerator(input + Math.random().toString());
 
     if ('undefined' === typeof this._variations[id]) {
       this._variations[id] = variation;
@@ -136,13 +135,19 @@ export default class SearchResults {
               .forEach((protein) => {
                 protein.getVariations()
                   .forEach((variation) => {
-                    const { accession } = protein;
+                    const {
+                      accession,
+                      ensp,
+                      enst,
+                    } = protein;
+
                     const {
                       aminoAcids,
                       proteinStart,
                       proteinEnd,
                     } = variation;
 
+                    // const key: string = `${accession}-${proteinStart}:${proteinEnd}-${aminoAcids}-${ensp}-${enst}`;
                     const key: string = `${accession}-${proteinStart}:${proteinEnd}-${aminoAcids}`;
 
                     map[key] = variation;
@@ -167,17 +172,16 @@ export default class SearchResults {
               .getGenes()
               .reduce(
                 (accu, gene) => {
-                  const row: any = {
-                    gene: {},
-                    protein: {},
-                    significances: {},
-                  };
-
-                  row.gene['ensgId'] = gene.ensg;
-                  row.gene['chromosome'] = gene.chromosome;
-
                   gene.getProteins()
                     .forEach((protein) => {
+                      const row: any = {
+                        gene: {},
+                        protein: {},
+                        significances: {},
+                      };
+
+                      row.gene['ensgId'] = gene.ensg;
+                      row.gene['chromosome'] = gene.chromosome;
                       row.gene['enstId'] = protein.enst;
 
                       protein.getVariations()
@@ -221,9 +225,10 @@ export default class SearchResults {
                             ? structuralSignificances
                             : undefined;
                         });
+                      
+                      accu.push(row);
                     });
 
-                  accu.push(row);
                   return accu;
                 },
                 [],
