@@ -21,6 +21,7 @@ app.use((req, res, next) => {
 });
 
 app.use(express.static('public'));
+app.use('/uniprot/pepvep', express.static(path.join(__dirname, '/../../www')));  // to server front-end files from server
 app.use(express.static(path.join(__dirname, '/../../www')));  // to server front-end files from server
 app.use(bodyParser.urlencoded({
   extended: false,
