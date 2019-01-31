@@ -31,7 +31,7 @@ export default class Search {
         data.forEach((vepOutput) => {
           // --> INPUT
           const input: Input = results.addInput(vepOutput.input);
-
+// console.log('---> VEP output:', JSON.stringify(vepOutput));
           /* Looping through Transcript Consequences to collect some useful information. */
           if ('undefined' !== typeof vepOutput.transcript_consequences) {
             vepOutput.transcript_consequences
@@ -47,6 +47,8 @@ export default class Search {
 
                 // --> GENE
                 const gene: Gene = results.addGene(tc.gene_id, vepOutput.seq_region_name);
+                gene.symbol = tc.gene_symbol;
+                gene.source = tc.gene_symbol_source;
                 input.addGene(gene);
 
                 // --> PROTEIN
@@ -56,18 +58,18 @@ export default class Search {
 
                 // --> VARIATION
                 const variation: Variation =
-                  results.addVariation(tc.variant_allele, vepOutput.input);
+                  results.addVariation(vepOutput.allele_string, vepOutput.input);
 
                 variation.proteinStart = parseInt(tc.protein_start, 10);
                 variation.proteinEnd = parseInt(tc.protein_end, 10);
                 variation.genomicVariationStart = parseInt(vepOutput.start, 10);
                 variation.genomicVariationEnd = parseInt(vepOutput.end, 10);
                 variation.aminoAcids = tc.amino_acids;
+                variation.codons = tc.codons;
 
                 const transcriptSignificance: TranscriptSignificance = new TranscriptSignificance();
                 transcriptSignificance.biotype = tc.biotype;
                 transcriptSignificance.impact = tc.impact;
-                transcriptSignificance.codons = tc.codons;
                 transcriptSignificance.polyphenPrediction = tc.polyphen_prediction;
                 transcriptSignificance.polyphenScore = tc.polyphen_score;
                 transcriptSignificance.siftPrediction = tc.sift_prediction;
@@ -90,9 +92,23 @@ export default class Search {
       })
       .then((response) => {
         const proteins: Protein[] = results.getProteinsAsArray();
-
+// console.log("==> protein detail:", JSON.stringify(response.data));
         response.data.forEach((proteinFeaturesResult) => {
           Significance.addPositionalSignificance(proteins, proteinFeaturesResult);
+
+          results
+            .getProteinsByAccession(proteinFeaturesResult.accession)
+            .forEach(p => {
+              if ('undefined' !== typeof p) {
+                p.name = {
+                  full: proteinFeaturesResult.protein.recommendedName.fullName && proteinFeaturesResult.protein.recommendedName.fullName.value,
+                  short: proteinFeaturesResult.protein.recommendedName.shortName && proteinFeaturesResult.protein.recommendedName.shortName.value,
+                };
+
+                p.taxonomy = proteinFeaturesResult.organism.taxonomy;
+                p.length = proteinFeaturesResult.sequence.length;
+              }
+            });
         });
 
         return UniProtKB.getProteinVariants(results.getAccessionsAsArray());

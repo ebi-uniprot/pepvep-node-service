@@ -105,22 +105,24 @@ export default class SearchResults {
     return this._variations[id];
   }
 
-  public getProteinByAccession(accession: string) : Protein {
+  public getProteinsByAccession(accession: string) : Protein[] {
     return this.getProteinsAsArray()
-      .find(p => (accession === p.accession))
+      .filter(p => (accession === p.accession))
   }
 
   public getProteinVariationsInRange(accession: string, start: number, end: number) : Variation[] {
-    const protein: Protein = this.getProteinByAccession(accession);
+    const variations: Variation[] = [];
 
-    if ('undefined' === typeof protein) {
-      return [];
-    }
+    this.getProteinsByAccession(accession)
+      .forEach(protein => {
+        protein
+          .getVariations()
+          .map((v) => (v.isInRange(start, end)) ? v : null)
+          .filter(v => v !== null)
+          .forEach(v => variations.push(v));
+      });
 
-    return protein
-      .getVariations()
-      .map((v) => (v.isInRange(start, end)) ? v : null)
-      .filter(v => v !== null)
+    return variations;
   }
 
   public getAccessionToVariationMap() {
@@ -183,6 +185,8 @@ export default class SearchResults {
                       row.gene['ensgId'] = gene.ensg;
                       row.gene['chromosome'] = gene.chromosome;
                       row.gene['enstId'] = protein.enst;
+                      row.gene['symbol'] = gene.symbol;
+                      row.gene['source'] = gene.source;
 
                       protein.getVariations()
                         .forEach((variation) => {
@@ -190,9 +194,11 @@ export default class SearchResults {
                           row.gene.start = variation.genomicVariationStart;
                           row.gene.end = variation.genomicVariationEnd;
                           row.protein.accession = protein.accession;
-                          row.protein.variant = variation.aminoAcids;
+                          row.protein.variant = variation.codons;
                           row.protein.start = variation.proteinStart;
                           row.protein.end = variation.proteinEnd;
+                          row.protein.name = protein.name;
+                          row.protein.length = protein.length;
 
                           const positinalSignificances: any = {
                             features: variation.getPositionalSignificance().getFeatures(),

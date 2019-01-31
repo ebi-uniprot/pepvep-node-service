@@ -4,6 +4,9 @@ export default class Protein {
   readonly accession: string;
   private _ensp: string;
   private _enst: string;
+  private _taxonomy: number;
+  private _recommendedName: any;    // { full: string, short: string }
+  private _length: number;
   private _variations: Variation[] = [];
 
   constructor(accession: string) {
@@ -15,6 +18,15 @@ export default class Protein {
 
   public get enst() : string { return this._enst; }
   public set enst(enst: string) { this._enst = enst; }
+
+  public get taxonomy() : number { return this._taxonomy; }
+  public set taxonomy(id: number) { this._taxonomy = id; }
+
+  public get name() : any { return this._recommendedName; }
+  public set name(recommendedName: any) { this._recommendedName = recommendedName; }
+
+  public get length() : number { return this._length; }
+  public set length(length: number) { this._length = length; }
 
   public addVariation(variation: Variation) {
     this._variations.push(variation);

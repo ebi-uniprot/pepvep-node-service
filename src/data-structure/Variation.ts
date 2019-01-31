@@ -41,6 +41,7 @@ const featureTypes: any = {
 export default class Variation {
   readonly allele: string;
   private _aminoAcids: string;
+  private _codons: string;
   private _proteinStart: number;
   private _proteinEnd: number;
   private _genomicVariationStart: number;
@@ -57,15 +58,23 @@ export default class Variation {
   }
 
   // Amino Acids
-  public get aminoAcids(): string {
+  public get aminoAcids() : string {
     return this._aminoAcids;
   }
   public set aminoAcids(aminoAcids: string) {
     this._aminoAcids = aminoAcids;
   }
 
+  // Codons
+  public get codons() : string {
+    return this._codons;
+  }
+  public set codons(codons: string) {
+    this._codons = codons;
+  }
+
   // Protien Start
-  public get proteinStart(): number {
+  public get proteinStart() : number {
     return this._proteinStart;
   }
   public set proteinStart(start: number) {
@@ -73,7 +82,7 @@ export default class Variation {
   }
 
   // Protein End
-  public get proteinEnd(): number {
+  public get proteinEnd() : number {
     return this._proteinEnd;
   }
   public set proteinEnd(end: number) {
@@ -99,7 +108,7 @@ export default class Variation {
   }
 
   // Transcript Significances
-  public getTranscriptSignificance(): TranscriptSignificance[] {
+  public getTranscriptSignificance() : TranscriptSignificance[] {
     return this._transcriptSignificance;
   }
 
@@ -110,7 +119,7 @@ export default class Variation {
   }
 
   // Positional Significances
-  public getPositionalSignificance(): PositionalSignificance {
+  public getPositionalSignificance() : PositionalSignificance {
     return this._positionalSignificance;
   }
 
@@ -121,7 +130,7 @@ export default class Variation {
   }
 
   // Clinical Significances
-  public getClinicalSignificances(): ClinicalSignificance {
+  public getClinicalSignificances() : ClinicalSignificance {
     return this._clinicalSignificance;
   }
 
@@ -139,7 +148,7 @@ export default class Variation {
   }
 
   // Colocated Variants
-  public getColocatedVariants(): ColocatedVariant[] {
+  public getColocatedVariants() : ColocatedVariant[] {
     return this._colocatedVariants;
   }
 

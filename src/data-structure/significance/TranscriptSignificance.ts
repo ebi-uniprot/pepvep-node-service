@@ -9,7 +9,6 @@
 export default class TranscriptSignificance {
   private _biotype: string;
   private _impact: string;
-  private _codons: string;
   private _polyphenPrediction: string;
   private _polyphenScore: number;
   private _siftPrediction: string;
@@ -21,9 +20,6 @@ export default class TranscriptSignificance {
 
   get impact() : string { return this._impact; }
   set impact(type: string) { this._impact = type; }
-
-  get codons() : string { return this._codons; }
-  set codons(codons: string) { this._codons = codons; }
 
   get polyphenPrediction() : string { return this._polyphenPrediction; }
   set polyphenPrediction(prediction: string) { this._polyphenPrediction = prediction; }
@@ -47,7 +43,6 @@ export default class TranscriptSignificance {
     return {
       biotype: this.biotype,
       impact: this.impact,
-      codons: this.codons,
       polyphenPrediction: this.polyphenPrediction,
       polyphenScore: this.polyphenScore,
       siftPrediction: this.siftPrediction,
