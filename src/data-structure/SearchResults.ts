@@ -194,7 +194,8 @@ export default class SearchResults {
                           row.gene.start = variation.genomicVariationStart;
                           row.gene.end = variation.genomicVariationEnd;
                           row.protein.accession = protein.accession;
-                          row.protein.variant = variation.codons;
+                          row.protein.variant = variation.aminoAcids;
+                          row.protein.threeLetterCodes = variation.threeLetterCode;
                           row.protein.start = variation.proteinStart;
                           row.protein.end = variation.proteinEnd;
                           row.protein.name = protein.name;

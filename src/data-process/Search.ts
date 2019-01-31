@@ -92,7 +92,7 @@ export default class Search {
       })
       .then((response) => {
         const proteins: Protein[] = results.getProteinsAsArray();
-// console.log("==> protein detail:", JSON.stringify(response.data));
+
         response.data.forEach((proteinFeaturesResult) => {
           Significance.addPositionalSignificance(proteins, proteinFeaturesResult);
 

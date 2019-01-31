@@ -7,7 +7,7 @@ import Feature from './significance/Feature';
 import Evidence from './significance/Evidence';
 
 const specialFeatureTypes: string[] = ["MUTAGEN", "CONFLICT"];
-const featureTypes: any = {
+export const featureTypes: any = {
   "SIGNAL": "Single Peptide",
   "PROPEP": "Propeptide",
   "CHAIN": "Chain",
@@ -36,12 +36,39 @@ const featureTypes: any = {
   "LIPID": "PTM bound Lipid",
   "CROSSLINK": "Covalent Link To Another Protein",
   "CONFLICT": "Difference In Reported Protein Sequences",
+  "HELIX": "Alpha-helix",
+  "STRAND": "Beta-strand",
+};
+
+const threeLetterCode: any = {
+ 'A': 'Ala',
+ 'R': 'Arg',
+ 'N': 'Asn',
+ 'D': 'Asp',
+ 'B': 'Asx',
+ 'C': 'Cys',
+ 'E': 'Glu',
+ 'Q': 'Gln',
+ 'Z': 'Glx',
+ 'G': 'Gly',
+ 'H': 'His',
+ 'I': 'Ile',
+ 'L': 'Leu',
+ 'K': 'Lys',
+ 'M': 'Met',
+ 'F': 'Phe',
+ 'P': 'Pro',
+ 'S': 'Ser',
+ 'T': 'Thr',
+ 'W': 'Trp',
+ 'Y': 'Tyr',
+ 'V': 'Val',
 };
 
 export default class Variation {
   readonly allele: string;
   private _aminoAcids: string;
-  private _codons: string;
+  private _threeLetterCodes: string;
   private _proteinStart: number;
   private _proteinEnd: number;
   private _genomicVariationStart: number;
@@ -63,15 +90,20 @@ export default class Variation {
   }
   public set aminoAcids(aminoAcids: string) {
     this._aminoAcids = aminoAcids;
+
+    const oneLetterCodes = aminoAcids.split('/');
+    const left: string = threeLetterCode[oneLetterCodes[0]];
+    const right: string = threeLetterCode[oneLetterCodes[1]];
+    this._threeLetterCodes = `${left}/${right}`;
   }
 
   // Codons
-  public get codons() : string {
-    return this._codons;
+  public get threeLetterCode() : string {
+    return this._threeLetterCodes;
   }
-  public set codons(codons: string) {
-    this._codons = codons;
-  }
+  // public set codons(codons: string) {
+  //   this._codons = codons;
+  // }
 
   // Protien Start
   public get proteinStart() : number {
@@ -212,6 +244,7 @@ export default class Variation {
       // feature.
       const feature: Feature = new Feature(
         rawFeature.type,
+        rawFeature.typeDescription,
         rawFeature.category,
         rawFeature.description,
         rawFeature.begin,

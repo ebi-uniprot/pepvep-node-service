@@ -2,6 +2,7 @@ import Evidence from './Evidence';
 
 class Feature {
   readonly type: string;
+  readonly typeDescription: string;
   readonly category: string;
   readonly description: string;
   readonly begin: number;
@@ -10,6 +11,7 @@ class Feature {
 
   constructor(
     type: string,
+    typeDescription: string,
     category: string,
     description: string,
     begin: number,
@@ -17,6 +19,7 @@ class Feature {
     evidences: Evidence[],
   ) {
     this.type = type;
+    this.typeDescription = typeDescription;
     this.category = category;
     this.description = description;
     this.begin = begin;
