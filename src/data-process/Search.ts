@@ -64,8 +64,8 @@ export default class Search {
                 variation.genomicVariationStart = parseInt(vepOutput.start, 10);
                 variation.genomicVariationEnd = parseInt(vepOutput.end, 10);
                 variation.aminoAcids = tc.amino_acids || '';
-                variation.codons = tc.codons;
-                variation.baseAndAllele = vepOutput.allele_string;
+                variation.codons = tc.codons || '';
+                variation.baseAndAllele = vepOutput.allele_string || '';
                 variation.buildHGVSg(gene.ensg);
                 variation.canonical = (1 === tc.canonical) ? true : false;
                 variation.hgvsp = tc.hgvsp;
