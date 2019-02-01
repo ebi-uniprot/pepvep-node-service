@@ -37,11 +37,10 @@ export default class Search {
             vepOutput.transcript_consequences
               .forEach((tc) => {
                 /* If entry doesn't have any UniProt/Trembl accessions, ignore and quit */
-                if ('undefined' === typeof tc.swissprot || 0 >= tc.swissprot.length) {
-                  return;
-                }
-
-                if ('undefined' === typeof tc.trembl || 0 >= tc.trembl.length) {
+                if (
+                  ('undefined' === typeof tc.swissprot || 0 >= tc.swissprot.length) &&
+                  ('undefined' === typeof tc.trembl || 0 >= tc.trembl.length)
+                ) {
                   return;
                 }
 
@@ -64,7 +63,7 @@ export default class Search {
                 variation.proteinEnd = parseInt(tc.protein_end, 10);
                 variation.genomicVariationStart = parseInt(vepOutput.start, 10);
                 variation.genomicVariationEnd = parseInt(vepOutput.end, 10);
-                variation.aminoAcids = tc.amino_acids;
+                variation.aminoAcids = tc.amino_acids || '';
                 variation.codons = tc.codons;
                 variation.baseAndAllele = vepOutput.allele_string;
                 variation.buildHGVSg(gene.ensg);
@@ -92,13 +91,17 @@ export default class Search {
 
         });
 
-        // return UniProtKB.getProteinFeatures(results.getAccessionsAsArray());
         return UniProtKB.getProteinDetailByAccession(results.getAccessionsAsArray());
       })
       .then((response) => {
         const proteins: Protein[] = results.getProteinsAsArray();
 
         response.data.forEach((proteinFeaturesResult) => {
+
+          if ('undefined' === typeof proteinFeaturesResult.features) {
+            proteinFeaturesResult.features = [];
+          }
+
           Significance.addPositionalSignificance(proteins, proteinFeaturesResult);
 
           results
@@ -106,8 +109,14 @@ export default class Search {
             .forEach(p => {
               if ('undefined' !== typeof p) {
                 p.name = {
-                  full: proteinFeaturesResult.protein.recommendedName.fullName && proteinFeaturesResult.protein.recommendedName.fullName.value,
-                  short: proteinFeaturesResult.protein.recommendedName.shortName && proteinFeaturesResult.protein.recommendedName.shortName.value,
+                  full: proteinFeaturesResult.protein && 
+                    proteinFeaturesResult.protein.recommendedName &&
+                    proteinFeaturesResult.protein.recommendedName.fullName && 
+                    proteinFeaturesResult.protein.recommendedName.fullName.value || 'NA',
+                  short: proteinFeaturesResult.protein &&
+                    proteinFeaturesResult.protein.recommendedName &&
+                    proteinFeaturesResult.protein.recommendedName.shortName &&
+                    proteinFeaturesResult.protein.recommendedName.shortName.value || 'NA',
                 };
 
                 p.taxonomy = proteinFeaturesResult.organism.taxonomy;
@@ -235,8 +244,15 @@ export default class Search {
 
         return results.generateResultTableData();
       })
-      // .catch(error => {
-      //   console.log(error.response)
-      // })
+      .catch(error => {
+
+        if ('undefined' !== typeof error.response) {
+          console.log("===> EXCEPTION:", error.response);
+        }
+
+        else {
+          console.log("===> EXCEPTION:", error);
+        }
+      })
   }
 }
