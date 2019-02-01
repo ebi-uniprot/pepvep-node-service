@@ -66,6 +66,10 @@ export default class Search {
                 variation.genomicVariationEnd = parseInt(vepOutput.end, 10);
                 variation.aminoAcids = tc.amino_acids;
                 variation.codons = tc.codons;
+                variation.baseAndAllele = vepOutput.allele_string;
+                variation.buildHGVSg(gene.ensg);
+                variation.canonical = (1 === tc.canonical) ? true : false;
+                variation.hgvsp = tc.hgvsp;
 
                 const transcriptSignificance: TranscriptSignificance = new TranscriptSignificance();
                 transcriptSignificance.biotype = tc.biotype;
@@ -74,6 +78,7 @@ export default class Search {
                 transcriptSignificance.polyphenScore = tc.polyphen_score;
                 transcriptSignificance.siftPrediction = tc.sift_prediction;
                 transcriptSignificance.siftScore = tc.sift_score;
+                transcriptSignificance.mostSevereConsequence = vepOutput.most_severe_consequence;
 
                 if ('undefined' !== typeof tc.consequence_terms) {
                   tc.consequence_terms

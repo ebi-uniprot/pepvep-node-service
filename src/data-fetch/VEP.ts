@@ -24,6 +24,19 @@ export default class VEP {
       variants: [input],
       protein: true,
       uniprot: true,
+      hgvs: true,
+      canonical: true,
+      Blosum62: true,
+      af: true,
+      af_1kg: 1,
+      af_esp: 1,
+      af_gnomad: 1,
+      conservation: 1,
+      appris: true,
+      dbNSFP: 'LRT_score,LRT_pred,MutationTaster_score,MutationTaster_pred,FATHMM_score,FATHMM_pred,PROVEAN_score,PROVEAN_pred,MutPred_score,CADD_raw,CADD_phred',
+      tsl: true,
+      numbers: true,
+      miRNA: true,
     });
   }
 

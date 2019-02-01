@@ -67,12 +67,18 @@ const threeLetterCode: any = {
 
 export default class Variation {
   readonly allele: string;
+  private _baseAndAllele: string;
   private _aminoAcids: string;
   private _threeLetterCodes: string;
+  private _codons: string;
   private _proteinStart: number;
   private _proteinEnd: number;
   private _genomicVariationStart: number;
   private _genomicVariationEnd: number;
+  private _hgvsg: string;
+  private _hgvsp: string;
+  // private _mostSevereConsequence: string;
+  private _canonical: boolean;
   private _transcriptSignificance: TranscriptSignificance[] = [];
   private _positionalSignificance: PositionalSignificance;
   private _clinicalSignificance: ClinicalSignificance;
@@ -82,6 +88,14 @@ export default class Variation {
   constructor(allele: string) {
     this.allele = allele;
     this._positionalSignificance = new PositionalSignificance();
+  }
+
+  // Full Allele with Base
+  public get baseAndAllele() : string {
+    return this._baseAndAllele;
+  }
+  public set baseAndAllele(fullAllele: string) {
+    this._baseAndAllele = fullAllele;
   }
 
   // Amino Acids
@@ -97,13 +111,18 @@ export default class Variation {
     this._threeLetterCodes = `${left}/${right}`;
   }
 
-  // Codons
-  public get threeLetterCode() : string {
+  // Three Letter Codes
+  public get threeLetterCodes() : string {
     return this._threeLetterCodes;
   }
-  // public set codons(codons: string) {
-  //   this._codons = codons;
-  // }
+
+  // Codons
+  public get codons() : string {
+    return this._codons;
+  }
+  public set codons(codons: string) {
+    this._codons = codons;
+  }
 
   // Protien Start
   public get proteinStart() : number {
@@ -137,6 +156,37 @@ export default class Variation {
 
   public set genomicVariationEnd(end: number) {
     this._genomicVariationEnd = end;
+  }
+
+  // // Most Severe Consequence
+  // public get mostSevereConsequence() : string {
+  //   return this._mostSevereConsequence;
+  // }
+  // public set mostSevereConsequence(consequence: string) {
+  //   this._mostSevereConsequence = consequence;
+  // }
+
+  // HGVSg
+  public get hgvsg() : string {
+    return this._hgvsg;
+  }
+
+  // HGVSP
+  public get hgvsp() : string {
+    return this._hgvsp;
+  }
+
+  public set hgvsp(hgvsp: string) {
+    this._hgvsp = hgvsp;
+  }
+
+  // Canonical
+  public get canonical() : boolean {
+    return this._canonical;
+  }
+
+  public set canonical(canonical: boolean) {
+    this._canonical = canonical;
   }
 
   // Transcript Significances
@@ -256,4 +306,18 @@ export default class Variation {
         .addFeature(feature);
     });
   }
+
+  public buildHGVSg(geneId: string) : void {
+    const allele: string = this.allele.replace('/', '>');
+    const hgvsg: string = `${geneId}:g.${this.genomicVariationStart}${allele}`;
+    this._hgvsg = hgvsg;
+  }
+
+  // public toJSON() : any {
+  //   return {
+  //     allele: this.allele,
+  //     baseAndAllele: this.baseAndAllele,
+
+  //   }
+  // }
 }

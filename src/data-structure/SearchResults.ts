@@ -193,13 +193,19 @@ export default class SearchResults {
                           row.gene.allele = variation.allele;
                           row.gene.start = variation.genomicVariationStart;
                           row.gene.end = variation.genomicVariationEnd;
+                          // row.gene.mostSevereConsequence = variation.mostSevereConsequence;
+                          row.gene.hgvsg = variation.hgvsg;
+                          row.gene.hgvsp = variation.hgvsp;
+                          row.gene.codons = variation.codons;
                           row.protein.accession = protein.accession;
                           row.protein.variant = variation.aminoAcids;
-                          row.protein.threeLetterCodes = variation.threeLetterCode;
+                          row.protein.threeLetterCodes = variation.threeLetterCodes;
                           row.protein.start = variation.proteinStart;
                           row.protein.end = variation.proteinEnd;
                           row.protein.name = protein.name;
                           row.protein.length = protein.length;
+                          // row.variation = variation
+                          row.protein.canonical = variation.canonical;                      
 
                           const positinalSignificances: any = {
                             features: variation.getPositionalSignificance().getFeatures(),

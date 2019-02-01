@@ -13,6 +13,7 @@ export default class TranscriptSignificance {
   private _polyphenScore: number;
   private _siftPrediction: string;
   private _siftScore: number;
+  private _mostSevereConsequence: string;
   private _consequenceTerms: string[] = [];
 
   get biotype() : string { return this._biotype; }
@@ -33,6 +34,14 @@ export default class TranscriptSignificance {
   get siftScore() : number { return this._siftScore; }
   set siftScore(score: number) { this._siftScore = score; }
 
+  // Most Severe Consequence
+  public get mostSevereConsequence() : string {
+    return this._mostSevereConsequence;
+  }
+  public set mostSevereConsequence(consequence: string) {
+    this._mostSevereConsequence = consequence;
+  }
+
   get consequenceTerms() : string[] { return this._consequenceTerms; }
 
   public addConsequenceTerm(term: string) {
@@ -47,6 +56,7 @@ export default class TranscriptSignificance {
       polyphenScore: this.polyphenScore,
       siftPrediction: this.siftPrediction,
       siftScore: this.siftScore,
+      mostSevereConsequence: this.mostSevereConsequence,
       consequenceTerms: this.consequenceTerms,
     }
   }
