@@ -59,13 +59,17 @@ export default class Search {
                 const variation: Variation =
                   results.addVariation(vepOutput.allele_string, vepOutput.input);
 
-                variation.proteinStart = parseInt(tc.protein_start, 10);
-                variation.proteinEnd = parseInt(tc.protein_end, 10);
+                variation.proteinStart = (tc.protein_start)
+                  ? parseInt(tc.protein_start, 10)
+                  : undefined;
+                variation.proteinEnd = (tc.protein_end)
+                  ? parseInt(tc.protein_end, 10)
+                  : undefined;
                 variation.genomicVariationStart = parseInt(vepOutput.start, 10);
                 variation.genomicVariationEnd = parseInt(vepOutput.end, 10);
-                variation.aminoAcids = tc.amino_acids || '';
-                variation.codons = tc.codons || '';
-                variation.baseAndAllele = vepOutput.allele_string || '';
+                variation.aminoAcids = tc.amino_acids;
+                variation.codons = tc.codons;
+                variation.baseAndAllele = vepOutput.allele_string;
                 variation.buildHGVSg(gene.ensg);
                 variation.canonical = (1 === tc.canonical) ? true : false;
                 variation.hgvsp = tc.hgvsp;
@@ -91,7 +95,9 @@ export default class Search {
 
         });
 
-        return UniProtKB.getProteinDetailByAccession(results.getAccessionsAsArray());
+        const shouldExcludeNonPositional: boolean = true;
+        return UniProtKB
+          .getProteinDetailByAccession(results.getAccessionsAsArray(shouldExcludeNonPositional));
       })
       .then((response) => {
         const proteins: Protein[] = results.getProteinsAsArray();

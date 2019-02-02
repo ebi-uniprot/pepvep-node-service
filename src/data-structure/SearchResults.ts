@@ -76,12 +76,18 @@ export default class SearchResults {
     return this._proteins[id];
   }
 
-  public getProteinsAsArray() : Protein[] {
+  public getProteinsAsArray(shouldExcludeNonPositional: boolean = false) : Protein[] {
+
+    if (shouldExcludeNonPositional) {
+      return Object.values(this._proteins)
+        .filter(p => p.hasVariationWithProteinPosition());
+    }
+
     return values(this._proteins);
   }
 
-  public getAccessionsAsArray() : string[] {
-    return this.getProteinsAsArray()
+  public getAccessionsAsArray(shouldExcludeNonPositional: boolean = false) : string[] {
+    return this.getProteinsAsArray(shouldExcludeNonPositional)
       .map(p => p.accession)
       .reduce((accessions, current) => {
         if (!accessions.includes(current)) {

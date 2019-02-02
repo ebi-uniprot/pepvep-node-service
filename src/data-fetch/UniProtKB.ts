@@ -11,12 +11,13 @@ const agent = tunnel.httpsOverHttp({
   },
 });
 
-const customAxios = axios.create({
+const customAxios2 = axios.create({
     baseURL: 'https://rest.ensembl.org:443',
     httpsAgent: agent,
     proxy: false,
 });
 
+const customAxios = axios;
 
 const taxID = '9606';
 

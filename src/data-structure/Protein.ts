@@ -40,4 +40,12 @@ export default class Protein {
     return this._variations
       .filter(v => v.isInRange(start, end));
   }
+
+  public hasVariationWithProteinPosition() : boolean {
+    return this._variations
+      .some(v => {
+console.log('------------> ', v.proteinStart);
+        return ('undefined' !== typeof v.proteinStart && null !== v.proteinStart && NaN !== v.proteinStart);
+      });
+  }
 }

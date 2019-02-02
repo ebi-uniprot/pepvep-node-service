@@ -8,7 +8,7 @@ import Evidence from './significance/Evidence';
 
 const specialFeatureTypes: string[] = ["MUTAGEN", "CONFLICT"];
 export const featureTypes: any = {
-  "SIGNAL": "Single Peptide",
+  "SIGNAL": "Signal Peptide",
   "PROPEP": "Propeptide",
   "CHAIN": "Chain",
   "DOMAIN": "Functional Domain",
@@ -38,6 +38,7 @@ export const featureTypes: any = {
   "CONFLICT": "Difference In Reported Protein Sequences",
   "HELIX": "Alpha-helix",
   "STRAND": "Beta-strand",
+  "PEPTIDE": "Peptide",
 };
 
 const threeLetterCode: any = {
@@ -103,6 +104,11 @@ export default class Variation {
     return this._aminoAcids;
   }
   public set aminoAcids(aminoAcids: string) {
+
+    if ('undefined' === typeof aminoAcids || null === aminoAcids) {
+      return;
+    }
+
     this._aminoAcids = aminoAcids;
 
     const oneLetterCodes = aminoAcids.split('/');
