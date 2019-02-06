@@ -9,13 +9,11 @@ const agent = tunnel.httpsOverHttp({
   },
 });
 
-const customAxios2 = axios.create({
+const customAxios = axios.create({
     baseURL: 'https://rest.ensembl.org:443',
     httpsAgent: agent,
     proxy: false,
 });
-
-const customAxios = axios;
 
 export default class VEP {
   public static async variantConsequencesAllInputs(organism: string, input: string) {

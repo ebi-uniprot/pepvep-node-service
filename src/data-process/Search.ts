@@ -100,9 +100,9 @@ export default class Search {
           .getProteinDetailByAccession(results.getAccessionsAsArray(shouldExcludeNonPositional));
       })
       .then((response) => {
-        const proteins: Protein[] = results.getProteinsAsArray();
-
         response.data.forEach((proteinFeaturesResult) => {
+
+        const proteins: Protein[] = results.getProteinsByAccession(proteinFeaturesResult.accession);
 
           if ('undefined' === typeof proteinFeaturesResult.features) {
             proteinFeaturesResult.features = [];

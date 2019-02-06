@@ -6,19 +6,20 @@ import { featureTypes } from '../data-structure/Variation';
 
 export default class Significance {
   public static async addPositionalSignificance (proteins: Protein[], featuresResults: any) {
-    const protein: Protein = proteins
-      .find(p => (p.accession === featuresResults.accession));
+    proteins
+      .filter(p => (p.accession === featuresResults.accession))
+      .forEach(p => {
+        const features = featuresResults.features
+        .map(feature => {
+          return {
+            ...feature,
+            typeDescription: featureTypes[feature.type],
+          };
+        });
 
-    const features = featuresResults.features
-      .map(feature => {
-        return {
-          ...feature,
-          typeDescription: featureTypes[feature.type],
-        };
-      });
-
-    protein.getVariations()
-      .forEach(v => v.addOverlappingFeatures(features));
+        p.getVariations()
+          .forEach(v => v.addOverlappingFeatures(features));
+        })
   }
 
   public static parseHGVS(hgvsString: string) {

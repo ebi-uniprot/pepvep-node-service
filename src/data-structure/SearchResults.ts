@@ -155,8 +155,8 @@ export default class SearchResults {
                       proteinEnd,
                     } = variation;
 
-                    // const key: string = `${accession}-${proteinStart}:${proteinEnd}-${aminoAcids}-${ensp}-${enst}`;
-                    const key: string = `${accession}-${proteinStart}:${proteinEnd}-${aminoAcids}`;
+                    const key: string = `${accession}-${proteinStart}:${proteinEnd}-${aminoAcids}-${ensp}-${enst}`;
+                    // const key: string = `${accession}-${proteinStart}:${proteinEnd}-${aminoAcids}`;
 
                     map[key] = variation;
                   });
