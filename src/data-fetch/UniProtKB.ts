@@ -13,7 +13,7 @@ if (process.env.NODE_ENV && process.env.NODE_ENV !== 'development') {
   });
 
   customAxios = axios.create({
-    baseURL: 'https://rest.ensembl.org:443',
+    baseURL: 'https://rest.ensembl.org',
     httpsAgent: agent,
     proxy: false,
   });
