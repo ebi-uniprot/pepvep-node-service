@@ -4,7 +4,8 @@ import * as tunnel from 'tunnel';
 
 let customAxios: any = axios;
 
-if (process.env.NODE_ENV && process.env.NODE_ENV !== 'development') {
+if (process.env.NODE_ENV !== 'development') {
+console.log(">>> custom axios");
   const agent = tunnel.httpsOverHttp({
     proxy: {
       host: 'www-proxy.ebi.ac.uk',
@@ -15,7 +16,7 @@ if (process.env.NODE_ENV && process.env.NODE_ENV !== 'development') {
   customAxios = axios.create({
     baseURL: 'https://rest.ensembl.org:443',
     httpsAgent: agent,
-    // proxy: false,
+    proxy: false,
     // proxy: {
     //   host: 'www-proxy.ebi.ac.uk',
     //   port: 3128,
