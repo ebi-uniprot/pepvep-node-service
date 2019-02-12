@@ -31,7 +31,7 @@ export default class Search {
         data.forEach((vepOutput) => {
           // --> INPUT
           const input: Input = results.addInput(vepOutput.input);
-// console.log('---> VEP output:', JSON.stringify(vepOutput));
+// console.log('        ---> VEP output:', JSON.stringify(vepOutput));
           /* Looping through Transcript Consequences to collect some useful information. */
           if ('undefined' !== typeof vepOutput.transcript_consequences) {
             vepOutput.transcript_consequences
@@ -101,7 +101,7 @@ export default class Search {
       })
       .then((response) => {
         response.data.forEach((proteinFeaturesResult) => {
-
+// console.log("      >>> Protein Features:", JSON.stringify(proteinFeaturesResult));
         const proteins: Protein[] = results.getProteinsByAccession(proteinFeaturesResult.accession);
 
           if ('undefined' === typeof proteinFeaturesResult.features) {

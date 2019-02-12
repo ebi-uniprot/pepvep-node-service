@@ -1,21 +1,23 @@
 import axios from 'axios';
 import Helpers from './Helpers';
-
-
 import * as tunnel from 'tunnel';
 
-const agent = tunnel.httpsOverHttp({
-  proxy: {
-    host: 'www-proxy.ebi.ac.uk',
-    port: 3128,
-  },
-});
+let customAxios: any = axios;
 
-const customAxios = axios.create({
+if (process.env.NODE_ENV && process.env.NODE_ENV !== 'development') {
+  const agent = tunnel.httpsOverHttp({
+    proxy: {
+      host: 'www-proxy.ebi.ac.uk',
+      port: 3128,
+    },
+  });
+
+  customAxios = axios.create({
     baseURL: 'https://rest.ensembl.org:443',
     httpsAgent: agent,
     proxy: false,
-});
+  });
+}
 
 const taxID = '9606';
 

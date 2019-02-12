@@ -155,8 +155,8 @@ export default class SearchResults {
                       proteinEnd,
                     } = variation;
 
-                    const key: string = `${accession}-${proteinStart}:${proteinEnd}-${aminoAcids}-${ensp}-${enst}`;
-                    // const key: string = `${accession}-${proteinStart}:${proteinEnd}-${aminoAcids}`;
+                    // const key: string = `${accession}-${proteinStart}:${proteinEnd}-${aminoAcids}-${ensp}-${enst}`;
+                    const key: string = `${accession}-${proteinStart}:${proteinEnd}-${aminoAcids}`;
 
                     map[key] = variation;
                   });
@@ -257,5 +257,33 @@ export default class SearchResults {
       });
 
     return json;
+  }
+
+  public generateDownloadableData() {
+    const data: any[] = [];
+
+    Object.keys(this._inputs)
+      .forEach((groupId) => {
+        // User Input/Query
+        const input: string = this._inputs[groupId].raw;
+
+        this._inputs[groupId]
+          .getGenes()
+          .forEach((gene) => {
+            // Gene ID
+            const geneId: string = gene.ensg;
+
+            // Chromosome
+            const sequenceRegionName: string = gene.chromosome;
+
+            // Gene Symbol
+            const geneSymbol: string = gene.symbol;
+
+            
+          });
+
+      });
+
+    return data;
   }
 }
