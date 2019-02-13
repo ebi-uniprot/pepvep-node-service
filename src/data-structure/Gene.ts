@@ -1,5 +1,6 @@
 
 import Protein from './Protein';
+import * as values from 'object.values';
 
 export default class Gene {
   readonly ensg: string;
@@ -20,7 +21,7 @@ export default class Gene {
   public set source(source: string) { this._source = source; }
 
   public getProteins() : Protein[] {
-    return Object.values(this._proteins);
+    return values(this._proteins);
   }
 
   public addProtein(protein: Protein) : void {

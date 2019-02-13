@@ -79,7 +79,7 @@ export default class SearchResults {
   public getProteinsAsArray(shouldExcludeNonPositional: boolean = false) : Protein[] {
 
     if (shouldExcludeNonPositional) {
-      return Object.values(this._proteins)
+      return values(this._proteins)
         .filter(p => p.hasVariationWithProteinPosition());
     }
 

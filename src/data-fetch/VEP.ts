@@ -16,10 +16,6 @@ console.log(">>> custom axios");
     baseURL: 'https://rest.ensembl.org:443',
     httpsAgent: agent,
     proxy: false,
-    // proxy: {
-    //   host: 'www-proxy.ebi.ac.uk',
-    //   port: 3128,
-    // },
   });
 }
 

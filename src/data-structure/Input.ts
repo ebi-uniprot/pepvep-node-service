@@ -1,5 +1,6 @@
 
 import Gene from './Gene';
+import * as values from 'object.values';
 
 export default class Input {
   readonly raw: string;
@@ -10,7 +11,7 @@ export default class Input {
   }
 
   public getGenes() : Gene[] {
-    return Object.values(this._genes);
+    return values(this._genes);
   }
 
   public addGene(gene: Gene) : void {
