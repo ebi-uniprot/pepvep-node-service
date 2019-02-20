@@ -4,7 +4,6 @@ import * as tunnel from 'tunnel';
 let customAxios: any = axios;
 
 if (process.env.NODE_ENV !== 'development') {
-console.log(">>> custom axios");
   const agent = tunnel.httpsOverHttp({
     proxy: {
       host: 'www-proxy.ebi.ac.uk',

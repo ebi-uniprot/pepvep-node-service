@@ -15,9 +15,9 @@ import StructuralSignificance from '../data-structure/significance/StructuralSig
 import PositionalSignificance from '../data-structure/significance/PositionalSignificance';
 
 export default class Search {
-  public async vepInputSearch(organism: string, input: string) {
+  public async vepInputSearch(organism: string, input: string, download: boolean = false) {
     // --> RESULTS
-    const results: SearchResults = new SearchResults();
+    const results: SearchResults = new SearchResults(input);
 
     /**
      * Assuming the input is one of the default VEP inputs, we would
@@ -247,6 +247,10 @@ export default class Search {
         });
 
 // console.log(">>> RESULTS. >>> ", JSON.stringify(results));
+
+        if (download === true) {
+          return results.generateDownloadableData();
+        }
 
         return results.generateResultTableData();
       })

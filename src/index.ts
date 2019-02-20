@@ -39,14 +39,33 @@ app.get('/protein/:accessions', (req, res) => {
   //   .then(results => res.send(results));
 });
 
+// Data process
+const process = (input: string, download: boolean = false) => {
+  const organism: string = 'homo_sapiens';
+
+  const search = new Search();
+  return search.vepInputSearch(organism, input, download);
+}
+
 // Default VEP Input
 app.post('/parser', (req, res) => {
   // console.log("input:", req.body.input);
-  const organism: string = 'homo_sapiens';
   const input: string = req.body.input;
+  const downloadResults: boolean = false;
 
-  const search = new Search();
-  search.vepInputSearch(organism, input)
+  process(input, downloadResults)
+    .then(results => res.send(results));
+});
+
+// Download
+app.post('/download', (req, res) => {
+  const input: string = req.body.input;
+  const downloadResults: boolean = true;
+
+  res.setHeader('Content-disposition', 'attachment; filename=pepvep-data.csv');
+  res.set('Content-Type', 'text/csv');
+
+  process(input, downloadResults)
     .then(results => res.send(results));
 });
 

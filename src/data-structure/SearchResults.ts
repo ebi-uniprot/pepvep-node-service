@@ -16,10 +16,10 @@ interface TypedMap<T> {
 }
 
 export default class SearchResults {
-  private _inputs : TypedMap<Input> = {};
-  private _proteins : TypedMap<Protein> = {};
-  private _genes : TypedMap<Gene> = {};
-  private _variations : TypedMap<Variation> = {};
+  private _inputs: TypedMap<Input> = {};
+  private _proteins: TypedMap<Protein> = {};
+  private _genes: TypedMap<Gene> = {};
+  private _variations: TypedMap<Variation> = {};
 
   public idGenerator(value: string) : string {
     return crypto.createHash('md5').update(value).digest('hex');
@@ -261,6 +261,7 @@ export default class SearchResults {
 
   public generateDownloadableData() {
     const data: any[] = [];
+    let counter = 0;
 
     Object.keys(this._inputs)
       .forEach((groupId) => {
@@ -279,11 +280,41 @@ export default class SearchResults {
             // Gene Symbol
             const geneSymbol: string = gene.symbol;
 
+            // Gene Source
+            const geneSource: string = gene.source;
+
+            // Proteins...
+            gene.getProteins()
+              .forEach((protein) => {
+// console.log("row:", ++counter);
+
+                const row = {};
+                row['input'] = input;
+                row['gene_id'] = geneId;
+                row['sequence_region_name'] = sequenceRegionName;
+                row['gene_symbol'] = geneSymbol;
+                row['gene_source'] = geneSource;
+
+
+                data.push(row);
+              });
             
           });
 
       });
 
-    return data;
+    return this.jsonToCSV(data);
+  }
+
+  jsonToCSV(json: any[]) : string {
+    return json
+      .reduce((csv, row) => {
+        csv += Object.values(row)
+          .join(',');
+
+        csv += `\n`;
+
+        return csv;
+      }, '');
   }
 }
