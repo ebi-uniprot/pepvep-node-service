@@ -17,7 +17,7 @@ import PositionalSignificance from '../data-structure/significance/PositionalSig
 export default class Search {
   public async vepInputSearch(organism: string, input: string, download: boolean = false) {
     // --> RESULTS
-    const results: SearchResults = new SearchResults(input);
+    const results: SearchResults = new SearchResults();
 
     /**
      * Assuming the input is one of the default VEP inputs, we would
