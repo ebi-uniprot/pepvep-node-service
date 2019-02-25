@@ -7,6 +7,9 @@ export default class Protein {
   private _taxonomy: number;
   private _recommendedName: any;    // { full: string, short: string }
   private _length: number;
+  private _swissprotAccessions: string[] = [];
+  private _tremblAccessions: string[] = [];
+  private _uniparcAccessions: string[] = [];
   private _variations: Variation[] = [];
 
   constructor(accession: string) {
@@ -27,6 +30,15 @@ export default class Protein {
 
   public get length() : number { return this._length; }
   public set length(length: number) { this._length = length; }
+
+  public get swissprotAccessions() : string[] { return this._swissprotAccessions; }
+  public set swissprotAccessions(accessions: string[]) { this._swissprotAccessions = accessions; }
+
+  public get tremblAccessions() : string[] { return this._tremblAccessions; }
+  public set tremblAccessions(accessions: string[]) { this._tremblAccessions = accessions; }
+
+  public get uniparcAccessions() : string[] { return this._uniparcAccessions; }
+  public set uniparcAccessions(accessions: string[]) { this._uniparcAccessions = accessions; }
 
   public addVariation(variation: Variation) {
     this._variations.push(variation);

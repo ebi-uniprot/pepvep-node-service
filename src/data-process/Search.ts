@@ -47,12 +47,21 @@ export default class Search {
                 // --> GENE
                 const gene: Gene = results.addGene(tc.gene_id, vepOutput.seq_region_name);
                 gene.symbol = tc.gene_symbol;
-                gene.source = tc.gene_symbol_source;
+                gene.symbolSource = tc.gene_symbol_source;
+                gene.assemblyName = vepOutput.assembly_name;
+                gene.strand = vepOutput.strand;
+                gene.hgncId = tc.hgnc_id;
                 input.addGene(gene);
 
                 // --> PROTEIN
                 const protein: Protein =
-                  results.addProtein(tc.protein_id, tc.transcript_id, tc.swissprot, tc.trembl);
+                  results.addProtein(
+                    tc.protein_id,
+                    tc.transcript_id,
+                    tc.swissprot,
+                    tc.trembl,
+                    tc.uniparc,
+                  );
                 gene.addProtein(protein);
 
                 // --> VARIATION
@@ -70,11 +79,19 @@ export default class Search {
                 variation.aminoAcids = tc.amino_acids;
                 variation.codons = tc.codons;
                 variation.baseAndAllele = vepOutput.allele_string;
+                variation.variantAllele = tc.variant_allele;
                 variation.buildHGVSg(gene.ensg);
                 variation.canonical = (1 === tc.canonical) ? true : false;
                 variation.hgvsp = tc.hgvsp;
+                variation.hgvsc = tc.hgvsc;
+                variation.cdnaStart = tc.cdna_start;
+                variation.cdnaEnd = tc.cdna_end;
+                variation.cdsStart = tc.cds_start;
+                variation.cdsEnd = tc.cds_end;
+                variation.exon = tc.exon;
 
-                const transcriptSignificance: TranscriptSignificance = new TranscriptSignificance();
+                const transcriptSignificance: TranscriptSignificance =
+                  new TranscriptSignificance();
                 transcriptSignificance.biotype = tc.biotype;
                 transcriptSignificance.impact = tc.impact;
                 transcriptSignificance.polyphenPrediction = tc.polyphen_prediction;
@@ -82,6 +99,20 @@ export default class Search {
                 transcriptSignificance.siftPrediction = tc.sift_prediction;
                 transcriptSignificance.siftScore = tc.sift_score;
                 transcriptSignificance.mostSevereConsequence = vepOutput.most_severe_consequence;
+                transcriptSignificance.mutationTasterPrediction = tc.mutationtaster_pred;
+                transcriptSignificance.mutationTasterScore = tc.mutationtaster_score;
+                transcriptSignificance.lrtPrediction = tc.lrt_pred;
+                transcriptSignificance.lrtScore = tc.lrt_score;
+                transcriptSignificance.fathmmPrediction = tc.fathmm_pred;
+                transcriptSignificance.fathmmScore = tc.fathmm_score;
+                transcriptSignificance.proveanPrediction = tc.provean_pred;
+                transcriptSignificance.proveanScore = tc.provean_score;
+                transcriptSignificance.caddPhred = tc.cadd_phred;
+                transcriptSignificance.caddRaw = tc.cadd_raw;
+                transcriptSignificance.appris = tc.appris;
+                transcriptSignificance.mutPredScore = tc.mutpred_score;
+                transcriptSignificance.blosum62 = tc.blosum62;
+                transcriptSignificance.tsl = tc.tsl;
 
                 if ('undefined' !== typeof tc.consequence_terms) {
                   tc.consequence_terms

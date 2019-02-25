@@ -49,14 +49,15 @@ export default class SearchResults {
   public addProtein(
     ensp: string,
     enst: string,
-    uniprotAccessions: string[],
+    swissprotAccessions: string[],
     tremblAccessions: string[],
+    uniparcAccessions: string[],
   ) : Protein | null {
     // choosing what accession should be used for this protein
     let accession: string;
 
-    if ('undefined' !== typeof uniprotAccessions && 0 < uniprotAccessions.length) {
-      accession = uniprotAccessions[0];
+    if ('undefined' !== typeof swissprotAccessions && 0 < swissprotAccessions.length) {
+      accession = swissprotAccessions[0];
     } else if ('undefined' !== typeof tremblAccessions && 0 < tremblAccessions.length) {
       accession = tremblAccessions[0];
     } else {
@@ -66,6 +67,9 @@ export default class SearchResults {
     const protein: Protein = new Protein(accession);
     protein.ensp = ensp;
     protein.enst = enst;
+    protein.swissprotAccessions = swissprotAccessions;
+    protein.tremblAccessions = tremblAccessions;
+    protein.uniparcAccessions = uniparcAccessions;
 
     const id: string = this.idGenerator(`${ensp}-${enst}-${accession}`);
 
@@ -192,7 +196,7 @@ export default class SearchResults {
                       row.gene['chromosome'] = gene.chromosome;
                       row.gene['enstId'] = protein.enst;
                       row.gene['symbol'] = gene.symbol;
-                      row.gene['source'] = gene.source;
+                      row.gene['source'] = gene.symbolSource;
 
                       protein.getVariations()
                         .forEach((variation) => {
@@ -261,47 +265,335 @@ export default class SearchResults {
 
   public generateDownloadableData() {
     const data: any[] = [];
-    let counter = 0;
 
     Object.keys(this._inputs)
       .forEach((groupId) => {
-        // User Input/Query
-        const input: string = this._inputs[groupId].raw;
-
         this._inputs[groupId]
           .getGenes()
           .forEach((gene) => {
-            // Gene ID
-            const geneId: string = gene.ensg;
-
-            // Chromosome
-            const sequenceRegionName: string = gene.chromosome;
-
-            // Gene Symbol
-            const geneSymbol: string = gene.symbol;
-
-            // Gene Source
-            const geneSource: string = gene.source;
-
-            // Proteins...
             gene.getProteins()
               .forEach((protein) => {
-// console.log("row:", ++counter);
+                const row = {
+                  input: this._inputs[groupId].raw,
+                  most_sever_consequence: null,
+                  assembly: gene.assemblyName,
+                  chromosome: gene.chromosome,
+                  genomic_start: null,
+                  genomic_end: null,
+                  allele_string: null,
+                  variant_allele: null,
+                  gene_symbol: gene.symbol,
+                  gene_symbol_source: gene.symbolSource,
+                  hgnc_id: gene.hgncId,
+                  gene_id: gene.ensg,
+                  transcript_id: protein.enst,
+                  translation_id: protein.ensp,
+                  biotype: null,
+                  impact: null,
+                  consequence_terms: null,
+                  swissprot_accessions: (protein.swissprotAccessions || []).join(';'),
+                  trembl_accessions: (protein.tremblAccessions || []).join(';'),
+                  protein_start: null,
+                  protein_end: null,
+                  amino_acid_change: null,
+                  associated_to_disease: null,
+                  disease_categories: null,
+                  polyphen_prediction: null,
+                  polyphen_score: null,
+                  mutation_taster_prediction: null,
+                  mutation_taster_score: null,
+                  lrt_prediction: null,
+                  lrt_score: null,
+                  fathmm_prediction: null,
+                  fathmm_score: null,
+                  provean_prediction: null,
+                  provean_score: null,
+                  cadd_raw: null,
+                  cadd_phred: null,
+                  sift_prediction: null,
+                  sift_score: null,
+                  mutpred_score: null,
+                  blosum62: null,
+                  appris: null,
+                  tsl: null,
+                  strand: gene.strand,
+                  codons: null,
+                  cdna_start: null,
+                  cdna_end: null,
+                  cds_start: null,
+                  cds_end: null,
+                  exon: null,
+                  uniparc_accessions: (protein.uniparcAccessions || []).join(';'),
+                  hgvs_c: null,
+                  hgvs_p: null,
+                  hgvs_g: null,
+                  disease_associations: [],
+                  proteinAnnotations: [],
+                };
 
-                const row = {};
-                row['input'] = input;
-                row['gene_id'] = geneId;
-                row['sequence_region_name'] = sequenceRegionName;
-                row['gene_symbol'] = geneSymbol;
-                row['gene_source'] = geneSource;
+                protein.getVariations()
+                  .forEach((variation) => {
+                    if (!row.genomic_start && variation.genomicVariationStart) {
+                      row.genomic_start = variation.genomicVariationStart;
+                    }
 
+                    if (!row.genomic_end && variation.genomicVariationEnd) {
+                      row.genomic_end = variation.genomicVariationEnd;
+                    }
 
+                    if (!row.protein_start && variation.proteinStart) {
+                      row.protein_start = variation.proteinStart;
+                    }
+
+                    if (!row.protein_end && variation.proteinEnd) {
+                      row.protein_end = variation.proteinEnd;
+                    }
+
+                    if (variation.getTranscriptSignificance().length > 0) {
+                      const transcriptConsequence = variation
+                          .getTranscriptSignificance()[0];
+
+                      if (transcriptConsequence) {
+                        if (!row.most_sever_consequence) {
+                          row.most_sever_consequence = transcriptConsequence
+                            .mostSevereConsequence;
+                        }
+
+                        if (!row.impact) {
+                          row.impact = transcriptConsequence
+                            .impact.toLowerCase();
+                        }
+
+                        if (!row.consequence_terms) {
+                          row.consequence_terms = transcriptConsequence
+                            .consequenceTerms.join(';');
+                        }
+
+                        if (!row.polyphen_prediction) {
+                          row.polyphen_prediction = transcriptConsequence
+                            .polyphenPrediction;
+                        }
+
+                        if (!row.polyphen_score) {
+                          row.polyphen_score = transcriptConsequence
+                            .polyphenScore;
+                        }
+
+                        if (!row.mutation_taster_prediction) {
+                          row.mutation_taster_prediction = transcriptConsequence
+                            .mutationTasterPrediction;
+                        }
+
+                        if (!row.mutation_taster_score) {
+                          row.mutation_taster_score = transcriptConsequence
+                            .mutationTasterScore;
+                        }
+
+                        if (!row.lrt_prediction) {
+                          row.lrt_prediction = transcriptConsequence
+                            .lrtPrediction;
+                        }
+
+                        if (!row.lrt_score) {
+                          row.lrt_score = transcriptConsequence
+                            .lrtScore;
+                        }
+
+                        if (!row.fathmm_prediction) {
+                          row.fathmm_prediction = transcriptConsequence
+                            .fathmmPrediction;
+                        }
+
+                        if (!row.fathmm_score) {
+                          row.fathmm_score = transcriptConsequence
+                            .fathmmScore;
+                        }
+
+                        if (!row.provean_prediction) {
+                          row.provean_prediction = transcriptConsequence
+                            .proveanPrediction;
+                        }
+
+                        if (!row.provean_score) {
+                          row.provean_score = transcriptConsequence
+                            .proveanScore;
+                        }
+
+                        if (!row.biotype) {
+                          row.biotype = transcriptConsequence.biotype;
+                        }
+
+                        if (!row.cadd_phred) {
+                          row.cadd_phred = transcriptConsequence.caddPhred;
+                        }
+
+                        if (!row.cadd_raw) {
+                          row.cadd_raw = transcriptConsequence.caddRaw;
+                        }
+
+                        if (!row.appris) {
+                          row.appris = transcriptConsequence.appris;
+                        }
+
+                        if (!row.sift_prediction) {
+                          row.sift_prediction = transcriptConsequence
+                            .siftPrediction;
+                        }
+
+                        if (!row.sift_score) {
+                          row.sift_score = transcriptConsequence.siftScore;
+                        }
+
+                        if (!row.mutpred_score) {
+                          row.mutpred_score = transcriptConsequence
+                            .mutPredScore;
+                        }
+
+                        if (!row.blosum62) {
+                          row.blosum62 = transcriptConsequence.blosum62;
+                        }
+
+                        if (!row.tsl) {
+                          row.tsl = transcriptConsequence.tsl;
+                        }
+                      }
+                    }
+
+                    if (!row.allele_string && variation.baseAndAllele) {
+                      row.allele_string = variation.baseAndAllele;
+                    }
+
+                    if (!row.amino_acid_change && variation.aminoAcids) {
+                      row.amino_acid_change = variation.aminoAcids;
+                    }
+
+                    if (!row.variant_allele && variation.variantAllele) {
+                      row.variant_allele = variation.variantAllele;
+                    }
+
+                    if (!row.hgvs_c && variation.hgvsc) {
+                      row.hgvs_c = variation.hgvsc;
+                    }
+
+                    if (!row.hgvs_p && variation.hgvsp) {
+                      row.hgvs_p = variation.hgvsp;
+                    }
+
+                    if (!row.hgvs_g && variation.hgvsg) {
+                      row.hgvs_g = variation.hgvsg;
+                    }
+
+                    if (!row.codons) {
+                      row.codons = variation.codons;
+                    }
+
+                    if (!row.cdna_start) {
+                      row.cdna_start = variation.cdnaStart;
+                    }
+
+                    if (!row.cdna_end) {
+                      row.cdna_end = variation.cdnaEnd;
+                    }
+
+                    if (!row.cds_start) {
+                      row.cds_start = variation.cdsStart;
+                    }
+
+                    if (!row.cds_end) {
+                      row.cds_end = variation.cdsEnd;
+                    }
+
+                    if (!row.exon) {
+                      row.exon = variation.exon;
+                    }
+
+                    variation.getPositionalSignificance()
+                      .getFeatures()
+                      .forEach((feature) => {
+                        let featureDetails = `type=${feature.type}`;
+                        featureDetails += `,category=${feature.category}`;
+                        featureDetails += (feature.description)
+                          ? `,description=${feature.description.replace(/,/ig, '')}`
+                          : '';
+                        featureDetails += `,start=${feature.begin}`;
+                        featureDetails += `,end=${feature.end}`;
+
+                        const featureEvidences = [];
+                        feature.evidences
+                          .forEach((featureEvidence) => {
+                            featureEvidences.push(
+                              `${featureEvidence.sourceName}:${featureEvidence.sourceId}`
+                            );
+                          });
+
+                        if (featureEvidences.length > 0) {
+                          featureDetails += `,evidences=${featureEvidences.join(';')}`;
+                        }
+
+                        row.proteinAnnotations.push(featureDetails);
+                      });
+
+                    const clinicalSignificances = variation.getClinicalSignificances();
+
+                    if (clinicalSignificances) {
+                      if (clinicalSignificances.association.length > 0) {
+                        row.associated_to_disease = 'Yes';
+
+                        clinicalSignificances.association
+                          .forEach((disease) => {
+                            let diseaseDetails = `disease=${disease.disease}`;
+                            diseaseDetails += (disease.name)
+                              ? `,name=${disease.name.replace(/,/ig, '')}`
+                              : '';
+                            diseaseDetails += (disease.description)
+                              ? `,description=${disease.description.replace(/,/ig, '')}`
+                              : '';
+
+                            const diseaseEvidences = [];
+                            disease.evidences
+                              .forEach((diseaseEvidence) => {
+                                diseaseEvidences.push(
+                                  `${diseaseEvidence.source.name}:${diseaseEvidence.source.id}`
+                                );
+                              });
+
+                            if (diseaseEvidences.length > 0) {
+                              diseaseDetails += `,evidences=${diseaseEvidences.join(';')}`
+                            }
+
+                            row.disease_associations.push(diseaseDetails);
+                          });
+                      }
+                      row.disease_categories = clinicalSignificances.value.join(',');
+                    }
+                  });
+
+                // Add the row to the results
                 data.push(row);
               });
-            
           });
-
       });
+
+    if (data.length === 0) {
+      return '';
+    }
+
+    // Add "double-qoutes" to all fields
+    data.forEach((row) => {
+      Object.keys(row)
+        .forEach((key) => {
+          if (row[key]) {
+            if (key === 'proteinAnnotations') {
+              row.proteinAnnotations = row.proteinAnnotations.join('|');
+            }
+
+            row[key] = JSON.stringify(row[key].toString());
+          }
+        });
+    });
+
+    // Create the headers dynamically
+    data.unshift(Object.keys(data[0]).map(k => k.toUpperCase()));
 
     return this.jsonToCSV(data);
   }

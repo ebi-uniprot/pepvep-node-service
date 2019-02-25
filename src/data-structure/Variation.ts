@@ -69,6 +69,7 @@ const threeLetterCode: any = {
 export default class Variation {
   readonly allele: string;
   private _baseAndAllele: string;
+  private _variantAllele: string;
   private _aminoAcids: string;
   private _threeLetterCodes: string;
   private _codons: string;
@@ -78,8 +79,14 @@ export default class Variation {
   private _genomicVariationEnd: number;
   private _hgvsg: string;
   private _hgvsp: string;
+  private _hgvsc: string;
   // private _mostSevereConsequence: string;
   private _canonical: boolean;
+  private _cdnaStart: number;
+  private _cdnaEnd: number;
+  private _cdsStart: number;
+  private _cdsEnd: number;
+  private _exon: string;
   private _transcriptSignificance: TranscriptSignificance[] = [];
   private _positionalSignificance: PositionalSignificance;
   private _clinicalSignificance: ClinicalSignificance;
@@ -97,6 +104,14 @@ export default class Variation {
   }
   public set baseAndAllele(fullAllele: string) {
     this._baseAndAllele = fullAllele;
+  }
+
+  // Variant Allele
+  public get variantAllele() : string {
+    return this._variantAllele;
+  }
+  public set variantAllele(allele: string) {
+    this._variantAllele = allele;
   }
 
   // Amino Acids
@@ -186,6 +201,15 @@ export default class Variation {
     this._hgvsp = hgvsp;
   }
 
+  // HGVSC
+  public get hgvsc() : string {
+    return this._hgvsc;
+  }
+
+  public set hgvsc(hgvsc: string) {
+    this._hgvsc = hgvsc;
+  }
+
   // Canonical
   public get canonical() : boolean {
     return this._canonical;
@@ -193,6 +217,46 @@ export default class Variation {
 
   public set canonical(canonical: boolean) {
     this._canonical = canonical;
+  }
+
+  // CDNA Start
+  public get cdnaStart() : number {
+    return this._cdnaStart;
+  }
+  public set cdnaStart(start: number) {
+    this._cdnaStart = start;
+  }
+
+  // CDNA End
+  public get cdnaEnd() : number {
+    return this._cdnaEnd;
+  }
+  public set cdnaEnd(end: number) {
+    this._cdnaEnd = end;
+  }
+
+  // CDS Start
+  public get cdsStart() : number {
+    return this._cdsStart;
+  }
+  public set cdsStart(start: number) {
+    this._cdsStart = start;
+  }
+
+  // CDS End
+  public get cdsEnd() : number {
+    return this._cdsEnd;
+  }
+  public set cdsEnd(end: number) {
+    this._cdsEnd = end;
+  }
+
+  // Exon
+  public get exon() : string {
+    return this._exon;
+  }
+  public set exon(exon: string) {
+    this._exon = exon;
   }
 
   // Transcript Significances
