@@ -601,7 +601,7 @@ export default class SearchResults {
   jsonToCSV(json: any[]) : string {
     return json
       .reduce((csv, row) => {
-        csv += Object.values(row)
+        csv += values(row)
           .join(',');
 
         csv += `\n`;
