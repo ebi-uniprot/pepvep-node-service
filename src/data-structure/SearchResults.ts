@@ -10,6 +10,7 @@ import ClinicalSignificance from './significance/ClinicalSignificance';
 import PositionalSignificance from './significance/PositionalSignificance';
 import StructuralSignificance from './significance/StructuralSignificance';
 import TranscriptSignificance from './significance/TranscriptSignificance';
+import Helpers from '../data-fetch/Helpers';
 
 interface TypedMap<T> {
   [id: string] : T;
@@ -328,7 +329,7 @@ export default class SearchResults {
                   hgvs_p: null,
                   hgvs_g: null,
                   disease_associations: [],
-                  proteinAnnotations: [],
+                  protein_annotations: [],
                 };
 
                 protein.getVariations()
@@ -360,18 +361,22 @@ export default class SearchResults {
                         }
 
                         if (!row.impact) {
-                          row.impact = transcriptConsequence
-                            .impact.toLowerCase();
+                          row.impact = Helpers.toHummanReadable(
+                            transcriptConsequence.impact, true, true, true,
+                          );
                         }
 
                         if (!row.consequence_terms) {
                           row.consequence_terms = transcriptConsequence
-                            .consequenceTerms.join(';');
+                            .consequenceTerms
+                            .map(term => Helpers.toHummanReadable(term, true, true, true))
+                            .join('; ');
                         }
 
                         if (!row.polyphen_prediction) {
-                          row.polyphen_prediction = transcriptConsequence
-                            .polyphenPrediction;
+                          row.polyphen_prediction = Helpers.toHummanReadable(
+                            transcriptConsequence.polyphenPrediction, true, true, true,
+                          );
                         }
 
                         if (!row.polyphen_score) {
@@ -420,7 +425,9 @@ export default class SearchResults {
                         }
 
                         if (!row.biotype) {
-                          row.biotype = transcriptConsequence.biotype;
+                          row.biotype = Helpers.toHummanReadable(
+                            transcriptConsequence.biotype, true, true, true
+                          );
                         }
 
                         if (!row.cadd_phred) {
@@ -436,8 +443,9 @@ export default class SearchResults {
                         }
 
                         if (!row.sift_prediction) {
-                          row.sift_prediction = transcriptConsequence
-                            .siftPrediction;
+                          row.sift_prediction = Helpers.toHummanReadable(
+                            transcriptConsequence.siftPrediction, true, true, true,
+                          );
                         }
 
                         if (!row.sift_score) {
@@ -510,8 +518,12 @@ export default class SearchResults {
                     variation.getPositionalSignificance()
                       .getFeatures()
                       .forEach((feature) => {
-                        let featureDetails = `type=${feature.type}`;
-                        featureDetails += `,category=${feature.category}`;
+                        let featureDetails = `type=${
+                          Helpers.toHummanReadable(feature.type, true, true, true)
+                        }`;
+                        featureDetails += `,category=${
+                          Helpers.toHummanReadable(feature.category, true, true, true)
+                        }`;
                         featureDetails += (feature.description)
                           ? `,description=${feature.description.replace(/,/ig, '')}`
                           : '';
@@ -530,7 +542,7 @@ export default class SearchResults {
                           featureDetails += `,evidences=${featureEvidences.join(';')}`;
                         }
 
-                        row.proteinAnnotations.push(featureDetails);
+                        row.protein_annotations.push(featureDetails);
                       });
 
                     const clinicalSignificances = variation.getClinicalSignificances();
@@ -564,7 +576,10 @@ export default class SearchResults {
                             row.disease_associations.push(diseaseDetails);
                           });
                       }
-                      row.disease_categories = clinicalSignificances.value.join(',');
+                      row.disease_categories = clinicalSignificances
+                        .value
+                        .map(category => Helpers.toHummanReadable(category, true, true, true))
+                        .join(', ');
                     }
                   });
 
@@ -583,8 +598,8 @@ export default class SearchResults {
       Object.keys(row)
         .forEach((key) => {
           if (row[key]) {
-            if (key === 'proteinAnnotations') {
-              row.proteinAnnotations = row.proteinAnnotations.join('|');
+            if (key === 'protein_annotations') {
+              row.protein_annotations = row.protein_annotations.join('|');
             }
 
             row[key] = JSON.stringify(row[key].toString());
