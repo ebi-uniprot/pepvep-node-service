@@ -20,15 +20,6 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.static('public'));
-app.use('/uniprot/pepvep', express.static(path.join(__dirname, '/../../www')));  // to server front-end files from server
-app.use(express.static(path.join(__dirname, '/../../www')));  // to server front-end files from server
-app.use(bodyParser.urlencoded({
-  extended: false,
-}));
-app.use(bodyParser.json());
-
-
 // Enforce a forward-slash at the end of URL
 app.use((req, res, next) => {
 console.log("path:", req.path);
@@ -42,6 +33,17 @@ console.log('new path:', newUri);
     next();
   }
 });
+
+app.use(express.static('public'));
+app.use('/uniprot/pepvep', express.static(path.join(__dirname, '/../../www')));  // to server front-end files from server
+app.use(express.static(path.join(__dirname, '/../../www')));  // to server front-end files from server
+app.use(bodyParser.urlencoded({
+  extended: false,
+}));
+app.use(bodyParser.json());
+
+
+
 
 
 // Is Alive?
