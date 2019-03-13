@@ -20,30 +20,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// Enforce a forward-slash at the end of URL
-app.use((req, res, next) => {
-// console.log("----> req:", JSON.stringify(req));
-// console.log("path:", req.path);
-// console.log("last char:", req.path.substr(-1));
-//   if (req.path.substr(-1) !== '/') {
-//     const query = req.url.slice(req.path.length);
-//     const newUri = req.path + '/' + query;
-// console.log('new path:', newUri);
-//     // res.redirect(301, newUri);
-//   } else {
-//     next();
-//   }
-
-  console.log("req.baseUrl:", req.baseUrl);
-  console.log("req.hostname:", req.hostname);
-  console.log("req.originalUrl:", req.originalUrl);
-  console.log("req.path:", req.path);
-  console.log("req.query:", req.query);
-  console.log("req.route:", req.route);
-  console.log("------------");
-  next();
-});
-
 app.use(express.static('public'));
 app.use('/uniprot/pepvep', express.static(path.join(__dirname, '/../../www')));  // to server front-end files from server
 app.use(express.static(path.join(__dirname, '/../../www')));  // to server front-end files from server
@@ -51,10 +27,6 @@ app.use(bodyParser.urlencoded({
   extended: false,
 }));
 app.use(bodyParser.json());
-
-
-
-
 
 // Is Alive?
 app.get('/is-alive', (req, res) => res.send('Node service is alive.'));
