@@ -22,6 +22,7 @@ app.use((req, res, next) => {
 
 // Enforce a forward-slash at the end of URL
 app.use((req, res, next) => {
+console.log("url:", req.url);
 console.log("path:", req.path);
 console.log("last char:", req.path.substr(-1));
   if (req.path.substr(-1) !== '/') {
