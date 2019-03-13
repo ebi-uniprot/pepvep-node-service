@@ -22,17 +22,17 @@ app.use((req, res, next) => {
 
 // Enforce a forward-slash at the end of URL
 app.use((req, res, next) => {
-console.log("url:", req.url);
-console.log("path:", req.path);
-console.log("last char:", req.path.substr(-1));
-  if (req.path.substr(-1) !== '/') {
-    const query = req.url.slice(req.path.length);
-    const newUri = req.path + '/' + query;
-console.log('new path:', newUri);
-    // res.redirect(301, newUri);
-  } else {
-    next();
-  }
+console.log("----> req:", JSON.stringify(req));
+// console.log("path:", req.path);
+// console.log("last char:", req.path.substr(-1));
+//   if (req.path.substr(-1) !== '/') {
+//     const query = req.url.slice(req.path.length);
+//     const newUri = req.path + '/' + query;
+// console.log('new path:', newUri);
+//     // res.redirect(301, newUri);
+//   } else {
+//     next();
+//   }
 });
 
 app.use(express.static('public'));
