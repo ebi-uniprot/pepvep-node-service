@@ -15,6 +15,6 @@ export default class StructuralSignificance {
       id: this.id,
       method: this.method,
       range: this.range,
-    }
+    };
   }
 }
