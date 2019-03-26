@@ -21,8 +21,10 @@ app.use((req, res, next) => {
 });
 
 app.use(express.static('public'));
-app.use('/uniprot/pepvep', express.static(path.join(__dirname, '/../../www')));  // to server front-end files from server
-app.use(express.static(path.join(__dirname, '/../../www')));  // to server front-end files from server
+// to server front-end files from server
+app.use('/uniprot/pepvep', express.static(path.join(__dirname, '/../../www')));
+// to server front-end files from server
+app.use(express.static(path.join(__dirname, '/../../www')));
 app.use(bodyParser.urlencoded({
   extended: false,
 }));
@@ -45,7 +47,7 @@ const process = (input: string, download: boolean = false) => {
 
   const search = new Search();
   return search.vepInputSearch(organism, input, download);
-}
+};
 
 // Default VEP Input
 app.post('/parser', (req, res) => {
@@ -77,6 +79,6 @@ app.post('/download', (req, res) => {
 // });
 
 // To serve front-end from 'www' folder
-app.get('*', (req, res) => res.sendFile(path.join(__dirname + '/../../www/index.html')));
+app.get('*', (req, res) => res.sendFile(path.join(`${__dirname}/../../www/index.html`)));
 
 app.listen(port, () => console.log(`server listening on http://localhost:${port}/`));
