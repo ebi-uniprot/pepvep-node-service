@@ -1,4 +1,3 @@
-
 import Gene from './Gene';
 import * as values from 'object.values';
 
@@ -17,7 +16,7 @@ export default class Input {
   public addGene(gene: Gene) : void {
     const { ensg } = gene;
 
-    if ('undefined' === typeof this._genes[ensg]) {
+    if (typeof this._genes[ensg] === 'undefined') {
       this._genes[ensg] = gene;
     }
   }

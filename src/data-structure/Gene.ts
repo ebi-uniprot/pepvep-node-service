@@ -1,4 +1,3 @@
-
 import Protein from './Protein';
 import * as values from 'object.values';
 
@@ -40,7 +39,7 @@ export default class Gene {
     const { accession, enst, ensp } = protein;
     const key: string = `${accession}-${ensp}-${enst}`;
 
-    if ('undefined' === typeof this._proteins[key]) {
+    if (typeof this._proteins[key] === 'undefined') {
       this._proteins[key] = protein;
     }
   }

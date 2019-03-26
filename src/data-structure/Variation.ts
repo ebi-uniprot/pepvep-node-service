@@ -80,7 +80,6 @@ export default class Variation {
   private _hgvsg: string;
   private _hgvsp: string;
   private _hgvsc: string;
-  // private _mostSevereConsequence: string;
   private _canonical: boolean;
   private _cdnaStart: number;
   private _cdnaEnd: number;
@@ -120,7 +119,7 @@ export default class Variation {
   }
   public set aminoAcids(aminoAcids: string) {
 
-    if ('undefined' === typeof aminoAcids || null === aminoAcids) {
+    if (typeof aminoAcids === 'undefined' || aminoAcids === null) {
       return;
     }
 
@@ -178,14 +177,6 @@ export default class Variation {
   public set genomicVariationEnd(end: number) {
     this._genomicVariationEnd = end;
   }
-
-  // // Most Severe Consequence
-  // public get mostSevereConsequence() : string {
-  //   return this._mostSevereConsequence;
-  // }
-  // public set mostSevereConsequence(consequence: string) {
-  //   this._mostSevereConsequence = consequence;
-  // }
 
   // HGVSg
   public get hgvsg() : string {
@@ -313,7 +304,7 @@ export default class Variation {
     const maxStarts: number = Math.max(this.proteinStart, start);
     const minEnds: number = Math.min(this.proteinEnd, end);
 
-    return (0 >= maxStarts - minEnds);
+    return (maxStarts - minEnds <= 0);
   }
 
   public addOverlappingFeatures(rawFeatures: any) {
@@ -322,13 +313,13 @@ export default class Variation {
       const maxStarts: number = Math.max(this.proteinStart, rawFeature.begin);
       const minEnds: number = Math.min(this.proteinEnd, rawFeature.end);
 
-      if (0 < maxStarts - minEnds) {
+      if (maxStarts - minEnds > 0) {
         // not in range.
         return;
       }
 
       // feature type.
-      if ('undefined' === typeof featureTypes[rawFeature.type]) {
+      if (typeof featureTypes[rawFeature.type] === 'undefined') {
         // not a type that we are interested in.
         return;
       }
@@ -342,10 +333,10 @@ export default class Variation {
       // evidence.
       const evidences: Evidence[] = [];
 
-      if ('undefined' !== typeof rawFeature.evidences) {
+      if (typeof rawFeature.evidences !== 'undefined') {
         rawFeature.evidences.forEach((ev) => {
           // TODO: ev.source is 'undefined' in some cases.
-          if ('undefined' === typeof ev.source) {
+          if (typeof ev.source === 'undefined') {
             return;
           }
 

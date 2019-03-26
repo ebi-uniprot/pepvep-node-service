@@ -1,4 +1,3 @@
-
 export default class StructuralSignificance {
   readonly id: string;
   readonly method: string;

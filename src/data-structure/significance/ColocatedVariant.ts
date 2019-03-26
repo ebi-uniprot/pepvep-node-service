@@ -1,4 +1,3 @@
-
 /**
  * To define an object that holds relevant details regarding
  * colocated variants of a variation.

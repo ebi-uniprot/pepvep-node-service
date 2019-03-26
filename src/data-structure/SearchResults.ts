@@ -1,4 +1,3 @@
-
 import * as crypto from 'crypto';
 import * as values from 'object.values';
 
@@ -30,7 +29,7 @@ export default class SearchResults {
     const input: Input = new Input(rawInput);
     const id: string = this.idGenerator(input.raw);
 
-    if ('undefined' === typeof this._inputs[id]) {
+    if (typeof this._inputs[id] === 'undefined') {
       this._inputs[id] = input;
     }
 
@@ -40,7 +39,7 @@ export default class SearchResults {
   public addGene(ensg: string, chromosome: string) : Gene {
     const gene: Gene = new Gene(ensg, chromosome);
     const id: string = this.idGenerator(`${ensg}-${chromosome}`);
-    if ('undefined' === typeof this._genes[id]) {
+    if (typeof this._genes[id] === 'undefined') {
       this._genes[id] = gene;
     }
 
@@ -57,9 +56,9 @@ export default class SearchResults {
     // choosing what accession should be used for this protein
     let accession: string;
 
-    if ('undefined' !== typeof swissprotAccessions && 0 < swissprotAccessions.length) {
+    if (typeof swissprotAccessions !== 'undefined' && swissprotAccessions.length > 0) {
       accession = swissprotAccessions[0];
-    } else if ('undefined' !== typeof tremblAccessions && 0 < tremblAccessions.length) {
+    } else if (typeof tremblAccessions !== 'undefined' && tremblAccessions.length > 0) {
       accession = tremblAccessions[0];
     } else {
       return null;
@@ -74,7 +73,7 @@ export default class SearchResults {
 
     const id: string = this.idGenerator(`${ensp}-${enst}-${accession}`);
 
-    if ('undefined' === typeof this._proteins[id]) {
+    if (typeof this._proteins[id] === 'undefined') {
       this._proteins[id] = protein;
     }
 
@@ -112,7 +111,7 @@ export default class SearchResults {
     // for this variation instance.
     const id: string = this.idGenerator(input + Math.random().toString());
 
-    if ('undefined' === typeof this._variations[id]) {
+    if (typeof this._variations[id] === 'undefined') {
       this._variations[id] = variation;
     }
 
@@ -124,7 +123,11 @@ export default class SearchResults {
       .filter(p => (accession === p.accession));
   }
 
-  public getProteinVariationsInRange(accession: string, start: number, end: number) : Variation[] {
+  public getProteinVariationsInRange(
+    accession: string,
+    start: number,
+    end: number,
+  ) : Variation[] {
     const variations: Variation[] = [];
 
     this.getProteinsByAccession(accession)
@@ -163,6 +166,7 @@ export default class SearchResults {
                       proteinEnd,
                     } = variation;
 
+                    // tslint:disable:max-line-length
                     const key: string = `${accession}-${proteinStart}:${proteinEnd}-${aminoAcids}`;
 
                     map[key] = variation;
@@ -179,7 +183,7 @@ export default class SearchResults {
 
     Object.keys(this._inputs)
       .forEach((groupId) => {
-        if ('undefined' === typeof json[groupId]) {
+        if (typeof json[groupId] === 'undefined') {
           json[groupId] = {
             key: groupId,
             input: this._inputs[groupId].raw,

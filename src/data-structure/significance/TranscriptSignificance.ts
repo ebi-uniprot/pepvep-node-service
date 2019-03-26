@@ -1,4 +1,3 @@
-
 /**
  * To define an object that holds various (optional) details
  * about a variation's positional consequences.

@@ -1,4 +1,3 @@
-
 /**
  * To define an object that holds relevant infromation regarding
  * the clinical significances of a variation.

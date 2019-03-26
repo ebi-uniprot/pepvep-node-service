@@ -1,4 +1,3 @@
-
 class Evidence {
   code: string; // should be Enum
   sourceName: string;

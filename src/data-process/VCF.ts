@@ -1,4 +1,3 @@
-
 import UniProtKB from '../data-fetch/UniProtKB';
 import VEP from '../data-fetch/VEP';
 
@@ -43,7 +42,7 @@ export default class VCF {
           const id = item.transcript_id;
           const impact = item.impact;
 
-          if ('undefined' === typeof consequences[id]) {
+          if (typeof consequences[id] === 'undefined') {
             consequences[id] = [];
           }
 
@@ -57,8 +56,7 @@ export default class VCF {
 
       uniprotData = result;
 
-      if ('undefined' !== typeof result) {
-
+      if (typeof result !== 'undefined') {
         result.gnCoordinate
           .forEach((item) => {
             const row: any = emptyRow();
