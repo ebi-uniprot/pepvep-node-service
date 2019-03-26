@@ -94,13 +94,16 @@ export default class SearchResults {
   public getAccessionsAsArray(shouldExcludeNonPositional: boolean = false) : string[] {
     return this.getProteinsAsArray(shouldExcludeNonPositional)
       .map(p => p.accession)
-      .reduce((accessions, current) => {
-        if (!accessions.includes(current)) {
-          accessions.push(current);
-        }
+      .reduce(
+        (accessions, current) => {
+          if (!accessions.includes(current)) {
+            accessions.push(current);
+          }
 
-        return accessions;
-      }, []);
+          return accessions;
+        },
+        [],
+      );
   }
 
   public addVariation(allele: string, input: string) : Variation {
@@ -118,17 +121,17 @@ export default class SearchResults {
 
   public getProteinsByAccession(accession: string) : Protein[] {
     return this.getProteinsAsArray()
-      .filter(p => (accession === p.accession))
+      .filter(p => (accession === p.accession));
   }
 
   public getProteinVariationsInRange(accession: string, start: number, end: number) : Variation[] {
     const variations: Variation[] = [];
 
     this.getProteinsByAccession(accession)
-      .forEach(protein => {
+      .forEach((protein) => {
         protein
           .getVariations()
-          .map((v) => (v.isInRange(start, end)) ? v : null)
+          .map(v => (v.isInRange(start, end)) ? v : null)
           .filter(v => v !== null)
           .forEach(v => variations.push(v));
       });
@@ -160,7 +163,6 @@ export default class SearchResults {
                       proteinEnd,
                     } = variation;
 
-                    // const key: string = `${accession}-${proteinStart}:${proteinEnd}-${aminoAcids}-${ensp}-${enst}`;
                     const key: string = `${accession}-${proteinStart}:${proteinEnd}-${aminoAcids}`;
 
                     map[key] = variation;
@@ -169,7 +171,7 @@ export default class SearchResults {
           });
       });
 
-      return map;
+    return map;
   }
 
   public generateResultTableData() {
@@ -216,15 +218,16 @@ export default class SearchResults {
                           row.protein.name = protein.name;
                           row.protein.length = protein.length;
                           // row.variation = variation
-                          row.protein.canonical = variation.canonical;                      
+                          row.protein.canonical = variation.canonical;
 
                           const positinalSignificances: any = {
                             features: variation.getPositionalSignificance().getFeatures(),
                           };
 
-                          row.significances['positional'] = (0 < positinalSignificances.features.length)
-                            ? positinalSignificances
-                            : undefined;
+                          row.significances['positional'] =
+                            (0 < positinalSignificances.features.length)
+                              ? positinalSignificances
+                              : undefined;
 
                           const transcriptSignificances = variation
                             .getTranscriptSignificance()
@@ -249,7 +252,7 @@ export default class SearchResults {
                             ? structuralSignificances
                             : undefined;
                         });
-                      
+
                       accu.push(row);
                     });
 
@@ -426,7 +429,7 @@ export default class SearchResults {
 
                         if (!row.biotype) {
                           row.biotype = Helpers.toHummanReadable(
-                            transcriptConsequence.biotype, true, true, true
+                            transcriptConsequence.biotype, true, true, true,
                           );
                         }
 
@@ -534,7 +537,7 @@ export default class SearchResults {
                         feature.evidences
                           .forEach((featureEvidence) => {
                             featureEvidences.push(
-                              `${featureEvidence.sourceName}:${featureEvidence.sourceId}`
+                              `${featureEvidence.sourceName}:${featureEvidence.sourceId}`,
                             );
                           });
 
@@ -565,12 +568,12 @@ export default class SearchResults {
                             disease.evidences
                               .forEach((diseaseEvidence) => {
                                 diseaseEvidences.push(
-                                  `${diseaseEvidence.source.name}:${diseaseEvidence.source.id}`
+                                  `${diseaseEvidence.source.name}:${diseaseEvidence.source.id}`,
                                 );
                               });
 
                             if (diseaseEvidences.length > 0) {
-                              diseaseDetails += `,evidences=${diseaseEvidences.join(';')}`
+                              diseaseDetails += `,evidences=${diseaseEvidences.join(';')}`;
                             }
 
                             row.disease_associations.push(diseaseDetails);
@@ -615,13 +618,18 @@ export default class SearchResults {
 
   jsonToCSV(json: any[]) : string {
     return json
-      .reduce((csv, row) => {
-        csv += values(row)
-          .join(',');
+      .reduce(
+        (csv, row) => {
+          let output = csv;
 
-        csv += `\n`;
+          output += values(row)
+            .join(',');
 
-        return csv;
-      }, '');
+          output += '\n';
+
+          return output;
+        },
+        '',
+      );
   }
 }
