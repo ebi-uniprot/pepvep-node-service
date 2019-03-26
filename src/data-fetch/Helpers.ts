@@ -44,7 +44,7 @@ export default class Helpers {
       return input;
     }
 
-    let output: string = input
+    const output: string = input
       .replace(/[_-]/g, ' ');
 
     if (capitaliseAllWords) {
