@@ -133,7 +133,8 @@ export default class Search {
       .then((response) => {
         response.data.forEach((proteinFeaturesResult) => {
 // console.log("      >>> Protein Features:", JSON.stringify(proteinFeaturesResult));
-        const proteins: Protein[] = results.getProteinsByAccession(proteinFeaturesResult.accession);
+          const proteins: Protein[] =
+            results.getProteinsByAccession(proteinFeaturesResult.accession);
 
           if ('undefined' === typeof proteinFeaturesResult.features) {
             proteinFeaturesResult.features = [];
@@ -143,12 +144,12 @@ export default class Search {
 
           results
             .getProteinsByAccession(proteinFeaturesResult.accession)
-            .forEach(p => {
+            .forEach((p) => {
               if ('undefined' !== typeof p) {
                 p.name = {
-                  full: proteinFeaturesResult.protein && 
+                  full: proteinFeaturesResult.protein &&
                     proteinFeaturesResult.protein.recommendedName &&
-                    proteinFeaturesResult.protein.recommendedName.fullName && 
+                    proteinFeaturesResult.protein.recommendedName.fullName &&
                     proteinFeaturesResult.protein.recommendedName.fullName.value || 'NA',
                   short: proteinFeaturesResult.protein &&
                     proteinFeaturesResult.protein.recommendedName &&
@@ -215,7 +216,9 @@ export default class Search {
               return;
             }
 
-            const cs: ClinicalSignificance = new ClinicalSignificance(clinicalSignificances, diseaseAssociation);
+            const cs: ClinicalSignificance =
+              new ClinicalSignificance(clinicalSignificances, diseaseAssociation);
+
             variation.addClinicalSignificance(cs);
           });
         });
@@ -226,9 +229,11 @@ export default class Search {
         // Structural Significances
         response.data.forEach((proteinDetails) => {
           const structuralSignificance: StructuralSignificance[] = [];
-          let inRange: boolean = false;
 
-          if ('undefined' === typeof proteinDetails.dbReferences || 0 >= proteinDetails.dbReferences.length) {
+          if (
+            typeof proteinDetails.dbReferences === 'undefined' ||
+            proteinDetails.dbReferences.length <= 0
+          ) {
             return;
           }
 
@@ -253,8 +258,8 @@ export default class Search {
 
             let range;
             while (null !== (range = rangeRegExp.exec(chains))) {
-              const rangeStart = parseInt(range[1]);
-              const rangeEnd = parseInt(range[2]);
+              const rangeStart = parseInt(range[1], 10);
+              const rangeEnd = parseInt(range[2], 10);
 
               const structuralSignificance: StructuralSignificance =
                 new StructuralSignificance(id, method, [rangeStart, rangeEnd]);
@@ -263,7 +268,7 @@ export default class Search {
                 .getProteinVariationsInRange(proteinDetails.accession, rangeStart, rangeEnd);
 
               variations
-                .forEach(v => {
+                .forEach((v) => {
                   if (v.isInRange(rangeStart, rangeEnd)) {
                     v.addStructuralSignificance(structuralSignificance);
                   }
@@ -285,15 +290,13 @@ export default class Search {
 
         return results.generateResultTableData();
       })
-      .catch(error => {
+      .catch((error) => {
 
         if ('undefined' !== typeof error.response) {
-          console.log("===> EXCEPTION:", error.response);
+          console.log('===> EXCEPTION:', error.response);
+        } else {
+          console.log('===> EXCEPTION:', error);
         }
-
-        else {
-          console.log("===> EXCEPTION:", error);
-        }
-      })
+      });
   }
 }
