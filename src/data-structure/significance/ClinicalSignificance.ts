@@ -30,6 +30,6 @@ export default class ClinicalSignificance {
     return {
       categories: this.value,
       association: this.association,
-    }
+    };
   }
 }
