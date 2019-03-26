@@ -23,14 +23,15 @@ const taxID = '9606';
 
 export default class UniProtKB {
   public static async getProteinDetailByAccession(accessions: string[]) {
-    const url: string =
-      `https://www.ebi.ac.uk/proteins/api/proteins?format=json&accession=${accessions.join(',')}`;
+    // tslint:disable:max-line-length
+    const url: string = `https://www.ebi.ac.uk/proteins/api/proteins?format=json&accession=${accessions.join(',')}`;
     return await customAxios.get(url);
   }
 
   public static async getProteinFeatures(accessions: string[]) {
     const accessionsString: string = accessions.join(',');
     // TODO this call is limited to 100 only, we need to do it in batches
+    // tslint:disable:max-line-length
     const url: string = `https://www.ebi.ac.uk/proteins/api/features?accession=${accessionsString}`;
     return await customAxios.get(url);
   }
@@ -38,6 +39,7 @@ export default class UniProtKB {
   public static async getProteinVariants(accessions: string[]) {
     const accessionsString: string = accessions.join(',');
     // TODO this call is limited to 100 only, we need to do it in batches
+    // tslint:disable:max-line-length
     const url: string = `https://www.ebi.ac.uk/proteins/api/variation?offset=0&size=100&accession=${accessionsString}`;
     return await customAxios.get(url);
   }
