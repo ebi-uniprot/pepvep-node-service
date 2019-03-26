@@ -156,6 +156,6 @@ export default class TranscriptSignificance {
       mutPredScore: this.mutPredScore,
       blosum62: this.blosum62,
       tsl: this.tsl,
-    }
+    };
   }
 }
