@@ -55,8 +55,11 @@ export default class Protein {
 
   public hasVariationWithProteinPosition() : boolean {
     return this._variations
-      .some(v => {
-        return ('undefined' !== typeof v.proteinStart && null !== v.proteinStart && NaN !== v.proteinStart);
-      });
+      .some(
+        v => (
+          typeof v.proteinStart !== 'undefined' &&
+          v.proteinStart !== null && v.proteinStart !== NaN
+        ),
+      );
   }
 }
