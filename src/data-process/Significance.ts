@@ -8,9 +8,9 @@ export default class Significance {
   public static async addPositionalSignificance (proteins: Protein[], featuresResults: any) {
     proteins
       .filter(p => (p.accession === featuresResults.accession))
-      .forEach(p => {
+      .forEach((p) => {
         const features = featuresResults.features
-        .map(feature => {
+        .map((feature) => {
           return {
             ...feature,
             typeDescription: featureTypes[feature.type],
@@ -19,7 +19,7 @@ export default class Significance {
 
         p.getVariations()
           .forEach(v => v.addOverlappingFeatures(features));
-        })
+      });
   }
 
   public static parseHGVS(hgvsString: string) {
