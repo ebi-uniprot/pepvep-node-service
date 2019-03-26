@@ -6,64 +6,64 @@ import ColocatedVariant from './significance/ColocatedVariant';
 import Feature from './significance/Feature';
 import Evidence from './significance/Evidence';
 
-const specialFeatureTypes: string[] = ["MUTAGEN", "CONFLICT"];
+const specialFeatureTypes: string[] = ['MUTAGEN', 'CONFLICT'];
 export const featureTypes: any = {
-  "SIGNAL": "Signal Peptide",
-  "PROPEP": "Propeptide",
-  "CHAIN": "Chain",
-  "DOMAIN": "Functional Domain",
-  "ACT_SITE": "Active Site Residue",
-  "METAL": "Metal Ion Binding Site Residue",
-  "SITE": "Functionally Important Residue",
-  "MOD_RES": "PTM Modified Residue",
-  "CARBOHYD": "PTM Carbohydrate",
-  "DISULFID": "PTM Disulfide Bond Residue",
-  "MUTAGEN": "Mutated Residue",
-  "INIT_MET": "Cleaved Initiator Methionine",
-  "TRANSIT": "Cleaved Transit Peptide",
-  "TOPO_DOM": "Transmembrane Protein Topological Region",
-  "TRANSMEM": "Helical Transmembrane Peptide",
-  "REPEAT": "Repeated Sequence",
-  "CA_BIND": "Calcium Binding Residue",
-  "ZN_FING": "Zinc Finger Residue",
-  "DNA_BIND": "DNA Binding Residue",
-  "NP_BIND": "Nucleotide Phosphate Binding Residue",
-  "COILED": "Coiled-coil Region",
-  "MOTIF": "Functional Motif",
-  "COMPBIAS": "AA Composition Bias",
-  "BINDING": "Binding Site Residue",
-  "NON_STD": "Non-standard Amino Acid",
-  "LIPID": "PTM bound Lipid",
-  "CROSSLINK": "Covalent Link To Another Protein",
-  "CONFLICT": "Difference In Reported Protein Sequences",
-  "HELIX": "Alpha-helix",
-  "STRAND": "Beta-strand",
-  "PEPTIDE": "Peptide",
+  SIGNAL: 'Signal Peptide',
+  PROPEP: 'Propeptide',
+  CHAIN: 'Chain',
+  DOMAIN: 'Functional Domain',
+  ACT_SITE: 'Active Site Residue',
+  METAL: 'Metal Ion Binding Site Residue',
+  SITE: 'Functionally Important Residue',
+  MOD_RES: 'PTM Modified Residue',
+  CARBOHYD: 'PTM Carbohydrate',
+  DISULFID: 'PTM Disulfide Bond Residue',
+  MUTAGEN: 'Mutated Residue',
+  INIT_MET: 'Cleaved Initiator Methionine',
+  TRANSIT: 'Cleaved Transit Peptide',
+  TOPO_DOM: 'Transmembrane Protein Topological Region',
+  TRANSMEM: 'Helical Transmembrane Peptide',
+  REPEAT: 'Repeated Sequence',
+  CA_BIND: 'Calcium Binding Residue',
+  ZN_FING: 'Zinc Finger Residue',
+  DNA_BIND: 'DNA Binding Residue',
+  NP_BIND: 'Nucleotide Phosphate Binding Residue',
+  COILED: 'Coiled-coil Region',
+  MOTIF: 'Functional Motif',
+  COMPBIAS: 'AA Composition Bias',
+  BINDING: 'Binding Site Residue',
+  NON_STD: 'Non-standard Amino Acid',
+  LIPID: 'PTM bound Lipid',
+  CROSSLINK: 'Covalent Link To Another Protein',
+  CONFLICT: 'Difference In Reported Protein Sequences',
+  HELIX: 'Alpha-helix',
+  STRAND: 'Beta-strand',
+  PEPTIDE: 'Peptide',
 };
 
 const threeLetterCode: any = {
- 'A': 'Ala',
- 'R': 'Arg',
- 'N': 'Asn',
- 'D': 'Asp',
- 'B': 'Asx',
- 'C': 'Cys',
- 'E': 'Glu',
- 'Q': 'Gln',
- 'Z': 'Glx',
- 'G': 'Gly',
- 'H': 'His',
- 'I': 'Ile',
- 'L': 'Leu',
- 'K': 'Lys',
- 'M': 'Met',
- 'F': 'Phe',
- 'P': 'Pro',
- 'S': 'Ser',
- 'T': 'Thr',
- 'W': 'Trp',
- 'Y': 'Tyr',
- 'V': 'Val',
+  A: 'Ala',
+  R: 'Arg',
+  N: 'Asn',
+  D: 'Asp',
+  B: 'Asx',
+  C: 'Cys',
+  E: 'Glu',
+  Q: 'Gln',
+  Z: 'Glx',
+  G: 'Gly',
+  H: 'His',
+  I: 'Ile',
+  L: 'Leu',
+  K: 'Lys',
+  M: 'Met',
+  F: 'Phe',
+  P: 'Pro',
+  S: 'Ser',
+  T: 'Thr',
+  W: 'Trp',
+  Y: 'Tyr',
+  V: 'Val',
 };
 
 export default class Variation {
@@ -343,7 +343,7 @@ export default class Variation {
       const evidences: Evidence[] = [];
 
       if ('undefined' !== typeof rawFeature.evidences) {
-        rawFeature.evidences.forEach(ev => {
+        rawFeature.evidences.forEach((ev) => {
           // TODO: ev.source is 'undefined' in some cases.
           if ('undefined' === typeof ev.source) {
             return;
@@ -382,12 +382,4 @@ export default class Variation {
     const hgvsg: string = `${geneId}:g.${this.genomicVariationStart}${allele}`;
     this._hgvsg = hgvsg;
   }
-
-  // public toJSON() : any {
-  //   return {
-  //     allele: this.allele,
-  //     baseAndAllele: this.baseAndAllele,
-
-  //   }
-  // }
 }
