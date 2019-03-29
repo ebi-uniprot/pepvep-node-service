@@ -5,26 +5,6 @@ import {
 import Helpers from '../../src/data-fetch/Helpers';
 
 describe('Helpers', () => {
-  describe('#stringOrArrayToCommaSeparated', () => {
-    it('should return one element when string is passed', () => {
-      const input: string = "one";
-      const output: string = Helpers.stringOrArrayToCommaSeparated(input);
-      const expectedValue: string = "one";
-
-      expect(output)
-        .to.equal(expectedValue); 
-    });
-
-    it('should return all elements when array is passed', () => {
-      const input: string[] = ["one", "two", "three"];
-      const output: string = Helpers.stringOrArrayToCommaSeparated(input);
-      const expectedValue: string = "one,two,three";
-
-      expect(output)
-        .to.equal(expectedValue);
-    });
-  });
-
   describe('#parseProteinChangeInput', () => {
     it('should parse single line input correctly', () => {
       const input = "P05067 F234G";

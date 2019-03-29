@@ -13,10 +13,10 @@ describe("UniProtKB", () => {
 
   describe("#proteinDetailsByAccession()", () => {
     it("should retrieve details for a given accession", () => {
-      return UniProtKbFetch.proteinsDetailByAccession([accession]).then(
+      return UniProtKbFetch.getProteinDetailByAccession([accession]).then(
         ({ data }) => {
           expect(data).not.to.be.undefined;
-          expect(data).not.to.be.null;
+          expect(data).not.to.be.null; 
           expect(data).not.to.be.empty;
           expect(data).not.to.be.a("function");
         }
