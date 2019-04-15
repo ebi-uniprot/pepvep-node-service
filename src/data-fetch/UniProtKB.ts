@@ -1,6 +1,7 @@
 import axios from 'axios';
-import Helpers from './Helpers';
 import * as tunnel from 'tunnel';
+
+import Helpers from './Helpers';
 
 let customAxios: any = axios;
 

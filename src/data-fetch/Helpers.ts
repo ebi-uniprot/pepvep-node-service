@@ -60,4 +60,14 @@ export default class Helpers {
 
     return output;
   }
+
+  public static chunkArray(source: any[], chunkSize: number) : any[] {
+    const results = [];
+
+    for (let i = 0; i < source.length; i += chunkSize) {
+      results.push(source.slice(i, i + chunkSize));
+    }
+
+    return results;
+  }
 }

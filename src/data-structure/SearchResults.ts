@@ -178,6 +178,69 @@ export default class SearchResults {
     return map;
   }
 
+  public getProteinAcccessionsAndPositionHits() {
+    let json = {};
+
+    Object.keys(this._inputs)
+      .forEach((groupId) => {
+        this._inputs[groupId]
+          .getGenes()
+          .forEach((gene) => {
+            gene.getProteins()
+              .forEach((protein) => {
+                protein.getVariations()
+                  .forEach((variation) => {
+                    const { accession } = protein;
+                    const {
+                      proteinStart,
+                      proteinEnd,
+                    } = variation;
+
+                    if (!json[accession]) {
+                      json[accession] = {
+                        accession,
+                        'positions': [],
+                      };
+                    }
+
+                    if (proteinStart !== null && typeof proteinStart !== 'undefined') {
+                      let range;
+
+                      if (proteinStart === proteinEnd) {
+                        range = [proteinStart];
+                      } else {
+                        range = Array(proteinEnd - proteinStart)
+                          .fill(0)
+                          .map((_, i) => proteinStart + i);
+                      }
+
+                      range.forEach((pos) => {
+                        // if not already in the 
+                        if (json[accession].positions.indexOf(pos) === -1) {
+                          json[accession].positions.push(pos);
+                        }
+                      });
+
+                      json[accession].positions.concat(range);
+                    }
+                  });
+              });
+          });
+      });
+
+    json = values(json)
+      .filter(el => el.positions.length > 0)
+      .map(el => {
+        el.positions = el.positions
+          .sort((a, b) => a - b)
+          .map(p => p.toString());
+
+        return el;
+      });
+
+    return json;
+  }
+
   public generateResultTableData() {
     const json = {};
 

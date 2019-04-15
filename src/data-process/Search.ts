@@ -2,6 +2,7 @@ import * as crypto from 'crypto';
 
 import UniProtKB from '../data-fetch/UniProtKB';
 import VEP from '../data-fetch/VEP';
+import PDBe from '../data-fetch/PDBe';
 import Significance from './Significance';
 import SearchResults from '../data-structure/SearchResults';
 import Input from '../data-structure/Input';
@@ -222,66 +223,59 @@ export default class Search {
           });
         });
 
-        return UniProtKB.getProteinDetailByAccession(results.getAccessionsAsArray());
+        const structuralQueryInput = results.getProteinAcccessionsAndPositionHits();
+        return PDBe.getProteinStructureSummary(structuralQueryInput)
       })
       .then((response) => {
-        // Structural Significances
-        response.data.forEach((proteinDetails) => {
-          const structuralSignificance: StructuralSignificance[] = [];
+        const allPDBeResults = response
+          .reduce((all, current) => all.concat(current.data), []);
 
-          if (
-            typeof proteinDetails.dbReferences === 'undefined' ||
-            proteinDetails.dbReferences.length <= 0
-          ) {
-            return;
-          }
+        allPDBeResults
+          .forEach((pdbeResult) => {
+            const accession = Object.keys(pdbeResult)[0];
+            const pdbeDetails = pdbeResult[accession];
 
-          proteinDetails.dbReferences.forEach((dbRef) => {
-            const { id, type, properties } = dbRef;
+            results.getProteinsByAccession(accession)
+              .forEach((protein) => {
+                protein.getVariations()
+                  .forEach((v) => {
+                    const structrualSignificance : StructuralSignificance
+                      = new StructuralSignificance();
 
-            if ('undefined' === typeof properties) {
-              return;
-            }
+                    structrualSignificance.addAllStructures(pdbeDetails.all_structures);
 
-            const { method, chains } = properties;
+                    pdbeDetails.annotations.positions
+                      .forEach((annotation) => {
+                        if (v.isInRange(annotation.position, annotation.position)) {
+                          structrualSignificance.addAnnotation(annotation);
+                        }
+                      });
 
-            if ('PDB' !== type) {
-              return;
-            }
+                    pdbeDetails.ligands.positions
+                      .forEach((ligand) => {
+                        if (v.isInRange(ligand.position, ligand.position)) {
+                          structrualSignificance.addLigand(ligand);
+                        }
+                      });
 
-            if (!['X-ray', 'NMR', 'Model'].includes(method)) {
-              return;
-            }
+                    pdbeDetails.interactions.positions
+                      .forEach((interaction) => {
+                        if (v.isInRange(interaction.position, interaction.position)) {
+                          structrualSignificance.addInteraction(interaction);
+                        }
+                      });
 
-            const rangeRegExp = /([0-9]*)-([0-9]*)/g;
+                    pdbeDetails.structures.positions
+                      .forEach((structure) => {
+                        if (v.isInRange(structure.position, structure.position)) {
+                          structrualSignificance.addStructure(structure);
+                        }
+                      });
 
-            let range;
-            while (null !== (range = rangeRegExp.exec(chains))) {
-              const rangeStart = parseInt(range[1], 10);
-              const rangeEnd = parseInt(range[2], 10);
-
-              const structuralSignificance: StructuralSignificance =
-                new StructuralSignificance(id, method, [rangeStart, rangeEnd]);
-
-              const variations: Variation[] = results
-                .getProteinVariationsInRange(proteinDetails.accession, rangeStart, rangeEnd);
-
-              variations
-                .forEach((v) => {
-                  if (v.isInRange(rangeStart, rangeEnd)) {
-                    v.addStructuralSignificance(structuralSignificance);
-                  }
-                });
-            }
+                    v.addStructuralSignificance(structrualSignificance);
+                  });
+              });
           });
-        });
-
-        // Positional Significances/Features
-        response.data.forEach((proteinDetails) => {
-
-        });
-
-// console.log(">>> RESULTS. >>> ", JSON.stringify(results));
 
         if (download === true) {
           return results.generateDownloadableData();
