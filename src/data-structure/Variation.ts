@@ -89,7 +89,7 @@ export default class Variation {
   private _transcriptSignificance: TranscriptSignificance[] = [];
   private _positionalSignificance: PositionalSignificance;
   private _clinicalSignificance: ClinicalSignificance;
-  private _structuralSignificances: StructuralSignificance[] = [];
+  private _structuralSignificances: StructuralSignificance;
   private _colocatedVariants: ColocatedVariant[] = [];
 
   constructor(allele: string) {
@@ -282,12 +282,12 @@ export default class Variation {
   }
 
   // Structural Significances
-  public getStructuralSignificances() : StructuralSignificance[] {
+  public getStructuralSignificances() : StructuralSignificance {
     return this._structuralSignificances;
   }
 
   public addStructuralSignificance(structuralSignificance: StructuralSignificance) {
-    this._structuralSignificances.push(structuralSignificance);
+    this._structuralSignificances = structuralSignificance;
   }
 
   // Colocated Variants

@@ -312,11 +312,10 @@ export default class SearchResults {
                             : undefined;
 
                           const structuralSignificances = variation
-                            .getStructuralSignificances()
-                            .map(ss => ss.toJSON());
+                            .getStructuralSignificances();
 
-                          row.significances['structural'] = (0 < structuralSignificances.length)
-                            ? structuralSignificances
+                          row.significances['structural'] = (structuralSignificances)
+                            ? structuralSignificances.toJSON()
                             : undefined;
                         });
 
