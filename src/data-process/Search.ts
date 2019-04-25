@@ -229,7 +229,7 @@ export default class Search {
       .then((response) => {
         const allPDBeResults = response
           .reduce((all, current) => all.concat(current.data), []);
-
+console.log("PDBe results:", JSON.stringify(allPDBeResults));
         allPDBeResults
           .forEach((pdbeResult) => {
             const accession = Object.keys(pdbeResult)[0];
