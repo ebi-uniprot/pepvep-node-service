@@ -361,6 +361,7 @@ export default class Variation {
         rawFeature.begin,
         rawFeature.end,
         evidences,
+        rawFeature.ftId,
       );
 
       this.getPositionalSignificance()
