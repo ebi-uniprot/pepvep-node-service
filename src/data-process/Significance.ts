@@ -8,6 +8,7 @@ export default class Significance {
   public static async addPositionalSignificance (proteins: Protein[], featuresResults: any) {
     proteins
       .filter(p => (p.accession === featuresResults.accession))
+      .filter(p => p.hasVariationWithProteinPosition())
       .forEach((p) => {
         const features = featuresResults.features
         .map((feature) => {

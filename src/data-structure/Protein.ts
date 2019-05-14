@@ -1,7 +1,27 @@
 import Variation from './Variation';
 
+export enum ProteinType {
+  SwissProt = 'Swiss-Prot',
+  Trembl = 'TrEMBL',
+  SwissProtUpdate = 'Swiss-Prot update',
+  Immunoglobulin = 'Immunoglobulin',
+  Patent = 'Patent',
+  Pseudogene = 'Pseudogene',
+  SmallFragment = 'Small fragment',
+  SyntheticProtein = 'Synthetic protein',
+  NotRealProtein = 'Not real protein',
+  OverRepresentedSequence = 'Over-represented sequence',
+  TruncatedProtein = 'Truncated protein',
+  SPRedundant = 'SP redundant',
+  Celera = 'Celera',
+  SwissProtIsoform = 'Swiss-Prot isoform',
+  PartialWGSOnHold = 'partial WGS on hold',
+  OnHold = 'On hold',
+};
+
 export default class Protein {
   readonly accession: string;
+  private _type: ProteinType;
   private _ensp: string;
   private _enst: string;
   private _taxonomy: number;
@@ -15,6 +35,9 @@ export default class Protein {
   constructor(accession: string) {
     this.accession = accession;
   }
+
+  public get type() : ProteinType { return this._type; }
+  public set type(type: ProteinType) { throw 'Use Protein.setType() method instead.' }
 
   public get ensp() : string { return this._ensp; }
   public set ensp(ensp: string) { this._ensp = ensp; }
@@ -61,5 +84,24 @@ export default class Protein {
           v.proteinStart !== null && v.proteinStart !== NaN
         ),
       );
+  }
+
+  public setType(type: string) {
+    switch (type) {
+      case 'Swiss-Prot':
+        this._type = ProteinType.SwissProt;
+        break;
+
+      case 'TrEMBL':
+        this._type = ProteinType.Trembl;
+        break;
+
+      case 'Swiss-Prot isoform':
+        this._type = ProteinType.SwissProtIsoform;
+        break;
+
+      default:
+        break;
+    }
   }
 }

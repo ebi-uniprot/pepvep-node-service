@@ -126,13 +126,12 @@ export default class Search {
 
         });
 
-        const shouldExcludeNonPositional: boolean = true;
+        const shouldExcludeNonPositional: boolean = false;
         return UniProtKB
           .getProteinDetailByAccession(results.getAccessionsAsArray(shouldExcludeNonPositional));
       })
       .then((response) => {
         response.data.forEach((proteinFeaturesResult) => {
-// console.log("      >>> Protein Features:", JSON.stringify(proteinFeaturesResult));
           const proteins: Protein[] =
             results.getProteinsByAccession(proteinFeaturesResult.accession);
 
@@ -144,7 +143,7 @@ export default class Search {
 
           results
             .getProteinsByAccession(proteinFeaturesResult.accession)
-            .forEach((p) => {
+            .map((p) => {
               if ('undefined' !== typeof p) {
                 p.name = {
                   full: proteinFeaturesResult.protein &&
@@ -159,6 +158,14 @@ export default class Search {
 
                 p.taxonomy = proteinFeaturesResult.organism.taxonomy;
                 p.length = proteinFeaturesResult.sequence.length;
+                p.setType(proteinFeaturesResult.info.type);
+              }
+
+              return p;
+            })
+            .forEach((p) => {
+              if (!p.hasVariationWithProteinPosition()) {
+                p.length = null;
               }
             });
         });
@@ -229,7 +236,7 @@ export default class Search {
       .then((response) => {
         const allPDBeResults = response
           .reduce((all, current) => all.concat(current.data), []);
-console.log("PDBe results:", JSON.stringify(allPDBeResults));
+// console.log("PDBe results:", JSON.stringify(allPDBeResults));
         allPDBeResults
           .forEach((pdbeResult) => {
             const accession = Object.keys(pdbeResult)[0];

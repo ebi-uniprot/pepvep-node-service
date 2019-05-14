@@ -2,7 +2,7 @@ import * as crypto from 'crypto';
 import * as values from 'object.values';
 
 import Input from './Input';
-import Protein from './Protein';
+import Protein, { ProteinType } from './Protein';
 import Gene from './Gene';
 import Variation from './Variation';
 import ClinicalSignificance from './significance/ClinicalSignificance';
@@ -286,6 +286,7 @@ export default class SearchResults {
                           row.protein.length = protein.length;
                           // row.variation = variation
                           row.protein.canonical = variation.canonical;
+                          row.protein.type = protein.type;
 
                           const positinalSignificances: any = {
                             features: variation.getPositionalSignificance().getFeatures(),
