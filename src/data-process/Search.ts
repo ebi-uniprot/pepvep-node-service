@@ -235,9 +235,22 @@ export default class Search {
       })
       .then((response) => {
         const allPDBeResults = response
-          .reduce((all, current) => all.concat(current.data), []);
-// console.log("------- PDBe results:", JSON.stringify(allPDBeResults));
-        allPDBeResults
+          .reduce((all, current) => {
+            current.data
+              .forEach((i) => {
+                const accession = Object.keys(i)[0];
+                const item = i[accession];
+
+                if (Object.keys(item.all_structures).length > 0) {
+
+                  const x = {};
+                  x[accession] = item;
+                  all.push(x);
+                }
+              });
+
+            return all;
+          }, [])
           .forEach((pdbeResult) => {
             const accession = Object.keys(pdbeResult)[0];
             const pdbeDetails = pdbeResult[accession];
