@@ -2,7 +2,7 @@ import TranscriptSignificance from './significance/TranscriptSignificance';
 import PositionalSignificance from './significance/PositionalSignificance';
 import StructuralSignificance from './significance/StructuralSignificance';
 import ClinicalSignificance from './significance/ClinicalSignificance';
-import ColocatedVariant from './significance/ColocatedVariant';
+import GenomicColocatedVariant from './significance/GenomicColocatedVariant';
 import Feature from './significance/Feature';
 import Evidence from './significance/Evidence';
 
@@ -90,7 +90,7 @@ export default class Variation {
   private _positionalSignificance: PositionalSignificance;
   private _clinicalSignificance: ClinicalSignificance;
   private _structuralSignificances: StructuralSignificance;
-  private _colocatedVariants: ColocatedVariant[] = [];
+  private _genomicColocatedVariants: GenomicColocatedVariant[] = [];
 
   constructor(allele: string) {
     this.allele = allele;
@@ -290,13 +290,17 @@ export default class Variation {
     this._structuralSignificances = structuralSignificance;
   }
 
-  // Colocated Variants
-  public getColocatedVariants() : ColocatedVariant[] {
-    return this._colocatedVariants;
+  // Genomic Colocated Variants
+  public getGenomicColocatedVariants() : GenomicColocatedVariant[] {
+    return this._genomicColocatedVariants;
   }
 
-  public addColocatedVariant(colocatedVariant: ColocatedVariant) {
-    this._colocatedVariants.push(colocatedVariant);
+  public addGenomicColocatedVariant(colocatedVariant: GenomicColocatedVariant) {
+    this._genomicColocatedVariants.push(colocatedVariant);
+  }
+
+  public hasGenomicColocatedVariant() : boolean {
+    return (this._genomicColocatedVariants.length > 0);
   }
 
   // Check if this variation overlaps with the suplied range.

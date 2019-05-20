@@ -260,6 +260,7 @@ export default class SearchResults {
                         gene: {},
                         protein: {},
                         significances: {},
+                        variation: {},
                       };
 
                       row.gene['ensgId'] = gene.ensg;
@@ -273,7 +274,6 @@ export default class SearchResults {
                           row.gene.allele = variation.allele;
                           row.gene.start = variation.genomicVariationStart;
                           row.gene.end = variation.genomicVariationEnd;
-                          // row.gene.mostSevereConsequence = variation.mostSevereConsequence;
                           row.gene.hgvsg = variation.hgvsg;
                           row.gene.hgvsp = variation.hgvsp;
                           row.gene.codons = variation.codons;
@@ -284,9 +284,15 @@ export default class SearchResults {
                           row.protein.end = variation.proteinEnd;
                           row.protein.name = protein.name;
                           row.protein.length = protein.length;
-                          // row.variation = variation
                           row.protein.canonical = variation.canonical;
                           row.protein.type = protein.type;
+                          row.variation.novel = true;
+
+                          if (variation.hasGenomicColocatedVariant()
+                            || protein.hasProteinColocatedVariant()
+                          ) {
+                            row.variation.novel = false;
+                          }
 
                           const positinalSignificances: any = {
                             features: variation.getPositionalSignificance().getFeatures(),

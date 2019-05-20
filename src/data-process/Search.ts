@@ -13,6 +13,8 @@ import TranscriptSignificance from '../data-structure/significance/TranscriptSig
 import ClinicalSignificance from '../data-structure/significance/ClinicalSignificance';
 import StructuralSignificance from '../data-structure/significance/StructuralSignificance';
 import PositionalSignificance from '../data-structure/significance/PositionalSignificance';
+import GenomicColocatedVariant from '../data-structure/significance/GenomicColocatedVariant';
+import ProteinColocatedVariant from '../data-structure/significance/ProteinColocatedVariant';
 
 export default class Search {
   public async vepInputSearch(organism: string, input: string, download: boolean = false) {
@@ -27,11 +29,15 @@ export default class Search {
      */
     return await VEP.variantConsequencesAllInputs(organism, input)
       .then(({ data }) => {
-
         data.forEach((vepOutput) => {
           // --> INPUT
           const input: Input = results.addInput(vepOutput.input);
 // console.log('        ---> VEP output:', JSON.stringify(vepOutput));
+          let gene: Gene;
+          let protein: Protein;
+          let variation: Variation;
+          let transcriptSignificance: TranscriptSignificance;
+
           /* Looping through Transcript Consequences to collect some useful information. */
           if ('undefined' !== typeof vepOutput.transcript_consequences) {
             vepOutput.transcript_consequences
@@ -45,7 +51,7 @@ export default class Search {
                 }
 
                 // --> GENE
-                const gene: Gene = results.addGene(tc.gene_id, vepOutput.seq_region_name);
+                gene = results.addGene(tc.gene_id, vepOutput.seq_region_name);
                 gene.symbol = tc.gene_symbol;
                 gene.symbolSource = tc.gene_symbol_source;
                 gene.assemblyName = vepOutput.assembly_name;
@@ -54,7 +60,7 @@ export default class Search {
                 input.addGene(gene);
 
                 // --> PROTEIN
-                const protein: Protein =
+                protein =
                   results.addProtein(
                     tc.protein_id,
                     tc.transcript_id,
@@ -65,7 +71,7 @@ export default class Search {
                 gene.addProtein(protein);
 
                 // --> VARIATION
-                const variation: Variation =
+                variation =
                   results.addVariation(vepOutput.allele_string, vepOutput.input);
 
                 variation.proteinStart = (tc.protein_start)
@@ -90,8 +96,7 @@ export default class Search {
                 variation.cdsEnd = tc.cds_end;
                 variation.exon = tc.exon;
 
-                const transcriptSignificance: TranscriptSignificance =
-                  new TranscriptSignificance();
+                transcriptSignificance = new TranscriptSignificance();
                 transcriptSignificance.biotype = tc.biotype;
                 transcriptSignificance.impact = tc.impact;
                 transcriptSignificance.polyphenPrediction = tc.polyphen_prediction;
@@ -122,8 +127,22 @@ export default class Search {
                 variation.addTranscriptSignificance(transcriptSignificance);
                 protein.addVariation(variation);
               });
-          }
 
+            /* Looping through genomic colocated variants to either define a novel variant or
+              collect useful information */
+            vepOutput.colocated_variants
+              .forEach((cv) => {
+                const genomicColocatedVariant : GenomicColocatedVariant =
+                  new GenomicColocatedVariant(cv.id);
+
+                if (typeof cv.pubmed !== 'undefined') {
+                  cv.pubmed
+                    .forEach(pm => genomicColocatedVariant.addPubMedID(pm));
+                }
+
+                variation.addGenomicColocatedVariant(genomicColocatedVariant);
+              });
+          }
         });
 
         const shouldExcludeNonPositional: boolean = false;
@@ -175,7 +194,7 @@ export default class Search {
       .then((response) => {
         response.data.forEach((proteinVariationResult) => {
           const clinicalSignificances: ClinicalSignificance[] = [];
-
+// console.log("----> protein variants:", JSON.stringify(proteinVariationResult));
           proteinVariationResult.features.forEach((feature) => {
             const { accession } = proteinVariationResult;
 
@@ -227,6 +246,11 @@ export default class Search {
               new ClinicalSignificance(clinicalSignificances, diseaseAssociation);
 
             variation.addClinicalSignificance(cs);
+
+            if (typeof feature.ftId !== 'undefined') {
+              const proteinColocatedVariant : ProteinColocatedVariant =
+                new ProteinColocatedVariant(feature.ftId);
+            }
           });
         });
 

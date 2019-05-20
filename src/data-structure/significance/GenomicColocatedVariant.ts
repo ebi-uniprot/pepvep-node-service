@@ -1,8 +1,8 @@
 /**
  * To define an object that holds relevant details regarding
- * colocated variants of a variation.
+ * genomic colocated variants of a variation.
  */
-export default class ColocatedVariant {
+export default class GenomicColocatedVariant {
   readonly id: string;
   private _pubMedIDs: string[] = [];
 
@@ -13,6 +13,8 @@ export default class ColocatedVariant {
   get pubMedIDs() : string[] { return this._pubMedIDs; }
 
   public addPubMedID(id: string) : void {
-    this._pubMedIDs.push(id);
+    if (!this._pubMedIDs.includes(id)) {
+      this._pubMedIDs.push(id);
+    }
   }
 }
