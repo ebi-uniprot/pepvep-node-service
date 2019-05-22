@@ -1,16 +1,26 @@
 export default class StructuralSignificance {
 
+  private _proteinLenght: number;
   private _allStructures: string[];
   private _annotaionts: any[] = [];
   private _ligands: any[] = [];
   private _interactions: any[] = [];
   private _structures: any[] = [];
 
+  public get proteinLength() : number {
+    return this._proteinLenght;
+  }
+
+  public set proteinLength(length: number) {
+    this._proteinLenght = length;
+  }
+
   public addAllStructures(structures: string[]) : void {
     this._allStructures = structures;
   }
 
   public getAllStructures() : string[] {
+// console.log(" ----- get all structures:", this._allStructures);
     return this._allStructures;
   }
 
@@ -48,6 +58,7 @@ export default class StructuralSignificance {
 
   public toJSON() {
     return {
+      proteinLength: this.proteinLength,
       allStructures: this.getAllStructures(),
       annotations: this.getAnnotations(),
       ligands: this.getLigands(),

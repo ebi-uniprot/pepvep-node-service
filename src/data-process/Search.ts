@@ -278,13 +278,15 @@ export default class Search {
           .forEach((pdbeResult) => {
             const accession = Object.keys(pdbeResult)[0];
             const pdbeDetails = pdbeResult[accession];
-
+// console.log("----> PDBe results:", JSON.stringify(pdbeResult));
             results.getProteinsByAccession(accession)
               .forEach((protein) => {
                 protein.getVariations()
                   .forEach((v) => {
                     const structrualSignificance : StructuralSignificance
                       = new StructuralSignificance();
+
+                    structrualSignificance.proteinLength = parseInt(pdbeDetails.length, 10);
 
                     structrualSignificance.addAllStructures(pdbeDetails.all_structures);
 
