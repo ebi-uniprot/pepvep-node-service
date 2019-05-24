@@ -286,13 +286,26 @@ export default class SearchResults {
                           row.protein.length = protein.length;
                           row.protein.canonical = variation.canonical;
                           row.protein.type = protein.type;
-                          row.variation.novel = true;
+                          row.variation.novel = false;
 
-                          if (variation.hasGenomicColocatedVariant()
-                            || protein.hasProteinColocatedVariant()
+                          if (!variation.hasGenomicColocatedVariant()
+                            && !variation.hasProteinColocatedVariant()
                           ) {
-                            row.variation.novel = false;
+                            row.variation.novel = true;
                           }
+// console.log(">>>> Protein Variants:", variation.getProteinColocatedVariants());
+
+                          row.variation.proteinColocatedVariants =
+                            variation.getProteinColocatedVariants();
+
+                          row.variation.genomicColocatedVariants =
+                            variation.getGenomicColocatedVariants();
+
+                          row.variation.proteinColocatedVariantsCount =
+                            variation.countUniqueProteinColocatedVariants();
+
+                          row.variation.diseasAssociatedProteinColocatedVariantsCount =
+                            variation.countDiseasAssociatedProteinColocatedVariants();
 
                           const positinalSignificances: any = {
                             features: variation.getPositionalSignificance().getFeatures(),

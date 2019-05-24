@@ -195,6 +195,57 @@ export default class Search {
         response.data.forEach((proteinVariationResult) => {
           const clinicalSignificances: ClinicalSignificance[] = [];
 // console.log("----> protein variants:", JSON.stringify(proteinVariationResult));
+          // Protein Colocated Variants
+          proteinVariationResult.features.forEach((feature) => {
+            const { accession } = proteinVariationResult;
+
+            const {
+              ftId,
+              type,
+              begin,
+              end,
+              wildType,
+              alternativeSequence,
+              genomicLocation,
+              association,
+              clinicalSignificances,
+              sourceType,
+              xrefs,
+              polyphenScore,
+              siftScore,
+            } = feature;
+
+            if ('VARIANT' !== type) {
+              return;
+            }
+
+            const key: string =
+              `${accession}-${begin}:${end}-${wildType}/${alternativeSequence}`;
+
+            const accessionToVariationMap = results.getAccessionToVariationMap();
+            const variation: Variation = accessionToVariationMap[key];
+
+            if ('undefined' === typeof variation) {
+              return;
+            }
+
+            const proteinColocatedVariant : ProteinColocatedVariant =
+              new ProteinColocatedVariant(
+                ftId,
+                wildType,
+                alternativeSequence,
+                clinicalSignificances,
+                sourceType,
+                association,
+                xrefs,
+                polyphenScore,
+                siftScore,
+              );
+
+            variation.addProteinColocatedVariant(proteinColocatedVariant);
+          });
+
+          // Clinical Significances
           proteinVariationResult.features.forEach((feature) => {
             const { accession } = proteinVariationResult;
 
@@ -247,10 +298,10 @@ export default class Search {
 
             variation.addClinicalSignificance(cs);
 
-            if (typeof feature.ftId !== 'undefined') {
-              const proteinColocatedVariant : ProteinColocatedVariant =
-                new ProteinColocatedVariant(feature.ftId);
-            }
+            // if (typeof feature.ftId !== 'undefined') {
+            //   const proteinColocatedVariant : ProteinColocatedVariant =
+            //     new ProteinColocatedVariant(feature.ftId);
+            // }
           });
         });
 

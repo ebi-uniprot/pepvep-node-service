@@ -1,5 +1,4 @@
 import Variation from './Variation';
-import ProteinColocatedVariant from './significance/ProteinColocatedVariant';
 
 export enum ProteinType {
   SwissProt = 'Swiss-Prot',
@@ -32,7 +31,6 @@ export default class Protein {
   private _tremblAccessions: string[] = [];
   private _uniparcAccessions: string[] = [];
   private _variations: Variation[] = [];
-  private _proteinColocatedVariants: ProteinColocatedVariant[] = [];
 
   constructor(accession: string) {
     this.accession = accession;
@@ -67,18 +65,6 @@ export default class Protein {
 
   public addVariation(variation: Variation) { this._variations.push(variation); }
   public getVariations() : Variation[] { return this._variations; }
-
-  public addProteinColocatedVariant(variant: ProteinColocatedVariant) {
-    this._proteinColocatedVariants.push(variant);
-  }
-
-  public getProteinColocatedVariants() : ProteinColocatedVariant[] {
-    return this._proteinColocatedVariants;
-  }
-
-  public hasProteinColocatedVariant() : boolean {
-    return (this._proteinColocatedVariants.length > 0);
-  }
 
   public getVariationsInRange(start: number, end: number) : Variation[] {
     return this._variations

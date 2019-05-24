@@ -1,8 +1,11 @@
+import * as values from 'object.values';
+
 import TranscriptSignificance from './significance/TranscriptSignificance';
 import PositionalSignificance from './significance/PositionalSignificance';
 import StructuralSignificance from './significance/StructuralSignificance';
 import ClinicalSignificance from './significance/ClinicalSignificance';
 import GenomicColocatedVariant from './significance/GenomicColocatedVariant';
+import ProteinColocatedVariant from './significance/ProteinColocatedVariant';
 import Feature from './significance/Feature';
 import Evidence from './significance/Evidence';
 
@@ -71,6 +74,8 @@ export default class Variation {
   private _baseAndAllele: string;
   private _variantAllele: string;
   private _aminoAcids: string;
+  private _aminoAcidBase: string;
+  private _aminoAcidChange: string;
   private _threeLetterCodes: string;
   private _codons: string;
   private _proteinStart: number;
@@ -91,6 +96,7 @@ export default class Variation {
   private _clinicalSignificance: ClinicalSignificance;
   private _structuralSignificances: StructuralSignificance;
   private _genomicColocatedVariants: GenomicColocatedVariant[] = [];
+  private _proteinColocatedVariants: ProteinColocatedVariant[] = [];
 
   constructor(allele: string) {
     this.allele = allele;
@@ -126,8 +132,13 @@ export default class Variation {
     this._aminoAcids = aminoAcids;
 
     const oneLetterCodes = aminoAcids.split('/');
-    const left: string = threeLetterCode[oneLetterCodes[0]];
-    const right: string = threeLetterCode[oneLetterCodes[1]];
+
+    this._aminoAcidBase = oneLetterCodes[0];
+    this._aminoAcidChange = oneLetterCodes[1];
+
+    const left: string = threeLetterCode[this._aminoAcidBase];
+    const right: string = threeLetterCode[this._aminoAcidChange];
+
     this._threeLetterCodes = `${left}/${right}`;
   }
 
@@ -301,6 +312,64 @@ export default class Variation {
 
   public hasGenomicColocatedVariant() : boolean {
     return (this._genomicColocatedVariants.length > 0);
+  }
+
+  // Protein Colocated Variants
+  public getProteinColocatedVariants() : ProteinColocatedVariant[] {
+    return this._proteinColocatedVariants;
+  }
+
+  public addProteinColocatedVariant(colocatedVariant: ProteinColocatedVariant) {
+    this._proteinColocatedVariants.push(colocatedVariant);
+  }
+
+  public hasProteinColocatedVariant() : boolean {
+    return (this._proteinColocatedVariants.length > 0);
+  }
+
+  public countUniqueProteinColocatedVariants() : number {
+    const counts = {};
+
+    this._proteinColocatedVariants
+      .forEach((cv) => {
+        const alt = cv.alternativeSequence;
+
+        if (typeof counts[alt] === 'undefined') {
+          counts[alt] = 0;
+        }
+
+        counts[alt] = counts[alt] + 1;
+      });
+
+    return Object.keys(counts)
+      .length;
+  }
+
+  public countDiseasAssociatedProteinColocatedVariants() : number {
+    const counts = {};
+
+    this._proteinColocatedVariants
+      .forEach((cv) => {
+        const alt = cv.alternativeSequence;
+
+        if (typeof counts[alt] === 'undefined') {
+          counts[alt] = 0;
+        }
+
+        if (cv.disease) {
+          counts[alt] = counts[alt] + 1;
+        }
+      });
+
+    Object.keys(counts)
+      .forEach((key) => {
+        if (counts[key] === 0) {
+          delete counts[key];
+        }
+      });
+
+    return Object.keys(counts)
+      .length;
   }
 
   // Check if this variation overlaps with the suplied range.
