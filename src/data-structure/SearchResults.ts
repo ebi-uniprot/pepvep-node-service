@@ -286,6 +286,7 @@ export default class SearchResults {
                           row.protein.length = protein.length;
                           row.protein.canonical = variation.canonical;
                           row.protein.type = protein.type;
+                          row.protein.isoform = protein.isoform;
                           row.variation.novel = false;
 
                           if (!variation.hasGenomicColocatedVariant()

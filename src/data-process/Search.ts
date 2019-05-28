@@ -180,6 +180,24 @@ export default class Search {
                 p.setType(proteinFeaturesResult.info.type);
               }
 
+              // Adding 'isoform' value
+              proteinFeaturesResult.dbReferences
+                .forEach((ref) => {
+                  if (ref.type !== 'Ensembl') {
+                    return;
+                  }
+
+                  if (ref.id !== p.enst) {
+                    return;
+                  }
+
+                  if (typeof ref.isoform === 'undefined') {
+                    return;
+                  }
+
+                  p.isoform = ref.isoform;
+                });
+
               return p;
             })
             .forEach((p) => {
