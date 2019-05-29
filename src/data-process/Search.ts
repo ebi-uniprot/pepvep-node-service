@@ -262,15 +262,8 @@ export default class Search {
               return;
             }
 
-            const key: string =
-              `${accession}-${begin}:${end}-${wildType}/${alternativeSequence}`;
-
-            const accessionToVariationMap = results.getAccessionToVariationMap();
-            const variation: Variation = accessionToVariationMap[key];
-
-            if ('undefined' === typeof variation) {
-              return;
-            }
+            const variationsInRange : Variation[] = results
+              .getProteinVariationsInRange(accession, begin, end);
 
             const proteinColocatedVariant : ProteinColocatedVariant =
               new ProteinColocatedVariant(
@@ -285,7 +278,8 @@ export default class Search {
                 siftScore,
               );
 
-            variation.addProteinColocatedVariant(proteinColocatedVariant);
+            variationsInRange
+              .forEach(v => v.addProteinColocatedVariant(proteinColocatedVariant));
           });
 
           // Clinical Significances
