@@ -22,6 +22,8 @@ export enum ProteinType {
 export default class Protein {
   readonly accession: string;
   private _isoform: string;
+  private _canonical: boolean = false;
+  private _canonicalAccession: string;
   private _type: ProteinType;
   private _ensp: string;
   private _enst: string;
@@ -39,6 +41,12 @@ export default class Protein {
 
   public get isoform() : string { return this._isoform; }
   public set isoform(isoform: string) { this._isoform = isoform; }
+
+  public get canonical() : boolean { return this._canonical; }
+  public set canonical(canonical: boolean) { this._canonical = canonical; }
+
+  public get canonicalAccession() : string { return this._canonicalAccession; }
+  public set canonicalAccession(accession: string) { this._canonicalAccession = accession; }
 
   public get type() : ProteinType { return this._type; }
   public set type(type: ProteinType) { throw 'Use Protein.setType() method instead.' }

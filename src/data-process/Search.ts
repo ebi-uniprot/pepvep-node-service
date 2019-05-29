@@ -180,6 +180,26 @@ export default class Search {
                 p.setType(proteinFeaturesResult.info.type);
               }
 
+              // Picking up the canonical isoform(s) per each protein
+              let canonicalIsoforms : string[] = [];
+              let canonicalAccession: string;
+
+              if (proteinFeaturesResult.comments) {
+                const altProducts = proteinFeaturesResult.comments
+                  .find(c => c.type === 'ALTERNATIVE_PRODUCTS');
+
+                if (altProducts && altProducts.isoforms) {
+                  canonicalIsoforms = altProducts.isoforms
+                    .find(i => i.sequenceStatus === 'displayed')
+                    .ids;
+                }
+              }
+
+              if (canonicalIsoforms.length > 0) {
+                canonicalAccession = canonicalIsoforms[0]
+                  .split('-')[0];
+              }
+
               // Adding 'isoform' value
               proteinFeaturesResult.dbReferences
                 .forEach((ref) => {
@@ -196,6 +216,11 @@ export default class Search {
                   }
 
                   p.isoform = ref.isoform;
+
+                  if (canonicalIsoforms.length > 0 && p.isoform === canonicalIsoforms[0]) {
+                    p.canonical = true;
+                    p.canonicalAccession = canonicalAccession;
+                  }
                 });
 
               return p;
