@@ -51,7 +51,7 @@ export default class Search {
                 }
 
                 // --> GENE
-                gene = results.addGene(tc.gene_id, vepOutput.seq_region_name);
+                gene = results.addGene(vepOutput.input, tc.gene_id, vepOutput.seq_region_name);
                 gene.symbol = tc.gene_symbol;
                 gene.symbolSource = tc.gene_symbol_source;
                 gene.assemblyName = vepOutput.assembly_name;
@@ -62,6 +62,7 @@ export default class Search {
                 // --> PROTEIN
                 protein =
                   results.addProtein(
+                    vepOutput.input,
                     tc.protein_id,
                     tc.transcript_id,
                     tc.swissprot,

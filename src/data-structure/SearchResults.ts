@@ -36,9 +36,9 @@ export default class SearchResults {
     return this._inputs[id];
   }
 
-  public addGene(ensg: string, chromosome: string) : Gene {
+  public addGene(input: string, ensg: string, chromosome: string) : Gene {
     const gene: Gene = new Gene(ensg, chromosome);
-    const id: string = this.idGenerator(`${ensg}-${chromosome}`);
+    const id: string = this.idGenerator(`${input}-${ensg}-${chromosome}`);
     if (typeof this._genes[id] === 'undefined') {
       this._genes[id] = gene;
     }
@@ -47,6 +47,7 @@ export default class SearchResults {
   }
 
   public addProtein(
+    input: string,
     ensp: string,
     enst: string,
     swissprotAccessions: string[],
@@ -71,7 +72,7 @@ export default class SearchResults {
     protein.tremblAccessions = tremblAccessions;
     protein.uniparcAccessions = uniparcAccessions;
 
-    const id: string = this.idGenerator(`${ensp}-${enst}-${accession}`);
+    const id: string = this.idGenerator(`${input}-${ensp}-${enst}-${accession}`);
 
     if (typeof this._proteins[id] === 'undefined') {
       this._proteins[id] = protein;
