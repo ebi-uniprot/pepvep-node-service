@@ -152,15 +152,6 @@ export default class Search {
       })
       .then((response) => {
         response.data.forEach((proteinFeaturesResult) => {
-          const proteins: Protein[] =
-            results.getProteinsByAccession(proteinFeaturesResult.accession);
-
-          if ('undefined' === typeof proteinFeaturesResult.features) {
-            proteinFeaturesResult.features = [];
-          }
-
-          Significance.addPositionalSignificance(proteins, proteinFeaturesResult);
-
           results
             .getProteinsByAccession(proteinFeaturesResult.accession)
             .map((p) => {
@@ -231,6 +222,16 @@ export default class Search {
                 p.length = null;
               }
             });
+
+          const proteins: Protein[] =
+            results.getProteinsByAccession(proteinFeaturesResult.accession)
+              .filter(p => p.canonical);
+
+          if ('undefined' === typeof proteinFeaturesResult.features) {
+            proteinFeaturesResult.features = [];
+          }
+
+          Significance.addPositionalSignificance(proteins, proteinFeaturesResult);
         });
 
         return UniProtKB.getProteinVariants(results.getAccessionsAsArray());
