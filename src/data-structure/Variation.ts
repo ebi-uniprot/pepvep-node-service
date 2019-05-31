@@ -147,6 +147,12 @@ export default class Variation {
     return this._threeLetterCodes;
   }
 
+  // Wild Type
+  public get wildType() : string { return this._aminoAcidBase; }
+
+  // Alternative Sequence
+  public get alternativeSequence() : string { return this._aminoAcidChange; }
+
   // Codons
   public get codons() : string {
     return this._codons;

@@ -314,32 +314,28 @@ export default class Search {
               return;
             }
 
-            const key: string =
-              `${accession}-${begin}:${end}-${wildType}/${alternativeSequence}`;
+            results.getProteinsByAccession(accession)
+              .filter(p => p.canonical)
+              .forEach((protein) => {
+                protein
+                  .getVariations()
+                  .map(v => (v.isInRange(begin, end)) ? v : null)
+                  .filter(v => v !== null)
+                  .filter(v => v.wildType === wildType && v.alternativeSequence === alternativeSequence)
+                  .forEach((variation) => {
+                    const diseaseAssociation: any[] = association
+                      .filter(a => a.disease);
 
-            const accessionToVariationMap = results.getAccessionToVariationMap();
-            const variation: Variation = accessionToVariationMap[key];
+                    if (0 >= diseaseAssociation.length) {
+                      return;
+                    }
 
-            if ('undefined' === typeof variation) {
-              return;
-            }
+                    const cs: ClinicalSignificance =
+                      new ClinicalSignificance(clinicalSignificances, diseaseAssociation);
 
-            const diseaseAssociation: any[] = association
-              .filter(a => a.disease);
-
-            if (0 >= diseaseAssociation.length) {
-              return;
-            }
-
-            const cs: ClinicalSignificance =
-              new ClinicalSignificance(clinicalSignificances, diseaseAssociation);
-
-            variation.addClinicalSignificance(cs);
-
-            // if (typeof feature.ftId !== 'undefined') {
-            //   const proteinColocatedVariant : ProteinColocatedVariant =
-            //     new ProteinColocatedVariant(feature.ftId);
-            // }
+                    variation.addClinicalSignificance(cs);
+                  });
+              });
           });
         });
 
