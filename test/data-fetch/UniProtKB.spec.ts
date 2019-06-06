@@ -35,18 +35,4 @@ describe("UniProtKB", () => {
       });
     });
   });
-
-  // describe('#getProteinVariants()', () => {
-  //   it('should retrieve variants for a given accession', () => {
-  //     return UniProtKbFetch.getProteinVariants(accession)
-  //       .then(({
-  //         data
-  //       }) => {
-  //         expect(data).not.to.be.undefined;
-  //         expect(data).not.to.be.null;
-  //         expect(data).not.to.be.empty;
-  //         expect(data).not.to.be.a('function');
-  //       });
-  //   });
-  // });
 });
