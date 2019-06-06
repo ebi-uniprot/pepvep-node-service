@@ -80,9 +80,9 @@ export default class ProteinColocatedVariant {
 
   private isUncertain() : boolean {
     return (
-      typeof this.clinicalSignificances === 'undefined'
-      && typeof this.polyphenScore === 'undefined'
-      && typeof this.siftScore === 'undefined'
+      this.clinicalSignificances === undefined
+      && this.polyphenScore === undefined
+      && this.siftScore === undefined
     ) || (
       this.consequencesRegEx
         .uncertain

@@ -17,7 +17,7 @@ export enum ProteinType {
   SwissProtIsoform = 'Swiss-Prot isoform',
   PartialWGSOnHold = 'partial WGS on hold',
   OnHold = 'On hold',
-};
+}
 
 export default class Protein {
   readonly accession: string;
@@ -87,7 +87,7 @@ export default class Protein {
     return this._variations
       .some(
         v => (
-          typeof v.proteinStart !== 'undefined' &&
+          v.proteinStart !== undefined &&
           v.proteinStart !== null && v.proteinStart !== NaN
         ),
       );

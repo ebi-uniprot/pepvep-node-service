@@ -13,6 +13,14 @@ import Search from './data-process/Search';
 const app = express();
 const port = 3687;
 
+// This is to fix this TSLint issue:
+// https://github.com/Microsoft/tslint-microsoft-contrib/issues/39
+import { response } from 'express';
+
+response.setContentType = function (type: string) {
+  this.set('Content-Type', type);
+};
+
 // Enable CORS
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
@@ -32,14 +40,6 @@ app.use(bodyParser.json());
 
 // Is Alive?
 app.get('/is-alive', (req, res) => res.send('Node service is alive.'));
-
-// Protein API
-app.get('/protein/:accessions', (req, res) => {
-  const accessions: string[] = req.params.accessions.split(',');
-
-  // UniProtKB.impactSearchByProteinAccessions(accessions)
-  //   .then(results => res.send(results));
-});
 
 // Data process
 const process = (input: string, download: boolean = false) => {
@@ -65,18 +65,11 @@ app.post('/download', (req, res) => {
   const downloadResults: boolean = true;
 
   res.setHeader('Content-disposition', 'attachment; filename=pepvep-data.csv');
-  res.set('Content-Type', 'text/csv');
+  res.setContentType('text/csv');
 
   process(input, downloadResults)
     .then(results => res.send(results));
 });
-
-// app.post('/protein-variants', (req, res) => {
-//   const proteinVariants: string = req.body.input;
-//   const queryItems = Helpers.parseProteinChangeInput(proteinVariants);
-//   UniProtKB.proteinsDetailByAccession(queryItems.map(d => d['accession']))
-//     .then(results => res.send(results));
-// });
 
 // To serve front-end from 'www' folder
 app.get('*', (req, res) => res.sendFile(path.join(`${__dirname}/../../www/index.html`)));

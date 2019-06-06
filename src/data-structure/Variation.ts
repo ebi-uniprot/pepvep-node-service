@@ -125,7 +125,7 @@ export default class Variation {
   }
   public set aminoAcids(aminoAcids: string) {
 
-    if (typeof aminoAcids === 'undefined' || aminoAcids === null) {
+    if (aminoAcids === undefined || aminoAcids === null) {
       return;
     }
 
@@ -340,7 +340,7 @@ export default class Variation {
       .forEach((cv) => {
         const alt = cv.alternativeSequence;
 
-        if (typeof counts[alt] === 'undefined') {
+        if (counts[alt] === undefined) {
           counts[alt] = 0;
         }
 
@@ -358,7 +358,7 @@ export default class Variation {
       .forEach((cv) => {
         const alt = cv.alternativeSequence;
 
-        if (typeof counts[alt] === 'undefined') {
+        if (counts[alt] === undefined) {
           counts[alt] = 0;
         }
 
@@ -398,24 +398,17 @@ export default class Variation {
       }
 
       // feature type.
-      if (typeof featureTypes[rawFeature.type] === 'undefined') {
+      if (featureTypes[rawFeature.type] === undefined) {
         // not a type that we are interested in.
         return;
-      }
-
-      // TODO: Where should the following data be collected? How is it represented?
-      // special types.
-      if (specialFeatureTypes.includes(rawFeature.type)) {
-        // collect this somewhere...
       }
 
       // evidence.
       const evidences: Evidence[] = [];
 
-      if (typeof rawFeature.evidences !== 'undefined') {
+      if (rawFeature.evidences !== undefined) {
         rawFeature.evidences.forEach((ev) => {
-          // TODO: ev.source is 'undefined' in some cases.
-          if (typeof ev.source === 'undefined') {
+          if (ev.source === undefined) {
             return;
           }
 

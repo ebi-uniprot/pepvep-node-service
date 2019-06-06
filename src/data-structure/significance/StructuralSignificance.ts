@@ -20,7 +20,6 @@ export default class StructuralSignificance {
   }
 
   public getAllStructures() : string[] {
-// console.log(" ----- get all structures:", this._allStructures);
     return this._allStructures;
   }
 
