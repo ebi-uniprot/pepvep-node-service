@@ -206,42 +206,41 @@ export default class Search {
   }
 
   private async processPDBeOutput(data: any, downloadResults: boolean) {
-    const allPDBeResults = data
-      .reduce((all, current) => {
-        current.data
-          .forEach((i) => {
-            const accession = Object.keys(i)[0];
-            const item = i[accession];
+    data.reduce((all, current) => {
+      current.data
+        .forEach((i) => {
+          const accession = Object.keys(i)[0];
+          const item = i[accession];
 
-            if (Object.keys(item.all_structures).length > 0) {
+          if (Object.keys(item.all_structures).length > 0) {
 
-              const x = {};
-              x[accession] = item;
-              all.push(x);
-            }
-          });
+            const x = {};
+            x[accession] = item;
+            all.push(x);
+          }
+        });
 
-        return all;
-      }, [])
-      .forEach((pdbeResult) => {
-        const accession = Object.keys(pdbeResult)[0];
-        const pdbeDetails = pdbeResult[accession];
+      return all;
+    }, [])
+    .forEach((pdbeResult) => {
+      const accession = Object.keys(pdbeResult)[0];
+      const pdbeDetails = pdbeResult[accession];
 
-        this.results.getProteinsByAccession(accession)
-          .forEach((protein) => {
-            protein.getVariations()
-              .forEach((variation) => {
-                const structrualSignificance : StructuralSignificance
-                  = new StructuralSignificance();
+      this.results.getProteinsByAccession(accession)
+        .forEach((protein) => {
+          protein.getVariations()
+            .forEach((variation) => {
+              const structrualSignificance : StructuralSignificance
+                = new StructuralSignificance();
 
-                this.collectStructuralSignificancesData(
-                  structrualSignificance,
-                  variation,
-                  pdbeDetails,
-                );
-              });
-          });
-      });
+              this.collectStructuralSignificancesData(
+                structrualSignificance,
+                variation,
+                pdbeDetails,
+              );
+            });
+        });
+    });
 
     if (downloadResults) {
       return this.results.generateDownloadableData();
