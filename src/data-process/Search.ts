@@ -21,9 +21,9 @@ export default class Search {
 
   public async vepInputSearch(organism: string, input: string, download: boolean = false) {
 
-    const vepOuput = await VEP
+    const vepOutput = await VEP
       .variantConsequencesAllInputs(organism, input);
-    await this.processVEPOutou(vepOuput.data);
+    await this.processVEPOutput(vepOutput.data);
 
     const proteinDetailsData = await UniProtKB
       .getProteinDetailByAccession(this.results.getAccessionsAsArray(false));
@@ -45,7 +45,7 @@ export default class Search {
     return this.results.generateResultTableData();
   }
 
-  private async processVEPOutou(data: any) {
+  private async processVEPOutput(data: any) {
     data.forEach((vepOutput) => {
       // --> INPUT
       const input: Input = this.results.addInput(vepOutput.input);
