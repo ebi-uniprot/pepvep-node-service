@@ -20,24 +20,29 @@ export default class Search {
   private results: SearchResults = new SearchResults();
 
   public async vepInputSearch(organism: string, input: string, download: boolean = false) {
-    /**
-     * Assuming the input is one of the default VEP inputs, we would
-     * just pass the input to VEP end-point and consume the result.
-     * Note: this has to change later as we would need to handle both
-     * Genomic (VEP) and Protein (UniProt) input variants.
-     */
-    return await VEP.variantConsequencesAllInputs(organism, input)
-      .then(({ data }) => this.processVEPOutou(data))
-      .then((response) => this.processProteinDetails(response))
-      .then(({ data }) => this.processProteinVariantData(data))
-      .then((response) => this.processPDBeOutput(response, download))
-      .catch((error) => {
-        if (error.response !== undefined) {
-          console.log('===> EXCEPTION:', error.response);
-        } else {
-          console.log('===> EXCEPTION:', error);
-        }
-      });
+
+    const vepOuput = await VEP
+      .variantConsequencesAllInputs(organism, input);
+    await this.processVEPOutou(vepOuput.data);
+
+    const proteinDetailsData = await UniProtKB
+      .getProteinDetailByAccession(this.results.getAccessionsAsArray(false));
+    await this.processProteinDetails(proteinDetailsData);
+
+    const protainVariantsData = await UniProtKB
+      .getProteinVariants(this.results.getAccessionsAsArray());
+    await this.processProteinVariantData(protainVariantsData.data);
+
+    const structuralQueryInput = this.results.getProteinAcccessionsAndPositionHits();
+    const proteinStructuralData = await PDBe
+      .getProteinStructureSummary(structuralQueryInput);
+    await this.processPDBeOutput(proteinStructuralData);
+
+    if (download) {
+      return this.results.generateDownloadableData();
+    }
+
+    return this.results.generateResultTableData();
   }
 
   private async processVEPOutou(data: any) {
@@ -111,10 +116,6 @@ export default class Search {
           });
       }
     });
-
-    const shouldExcludeNonPositional: boolean = false;
-    return UniProtKB
-      .getProteinDetailByAccession(this.results.getAccessionsAsArray(shouldExcludeNonPositional));
   }
 
   private async processProteinDetails(data: any) {
@@ -147,8 +148,6 @@ export default class Search {
 
       SignificancesHelper.addPositionalSignificance(proteins, proteinFeaturesResult);
     });
-
-    return UniProtKB.getProteinVariants(this.results.getAccessionsAsArray());
   }
 
   private async processProteinVariantData(data: any) {
@@ -200,12 +199,10 @@ export default class Search {
       const { accession, features } = proteinVariationResult;
       this.collectClinicalSignificancesData(accession, features);
     });
-
-    const structuralQueryInput = this.results.getProteinAcccessionsAndPositionHits();
-    return PDBe.getProteinStructureSummary(structuralQueryInput)
   }
 
-  private async processPDBeOutput(data: any, downloadResults: boolean) {
+  // private async processPDBeOutput(data: any, downloadResults: boolean) {
+  private async processPDBeOutput(data: any) {
     data.reduce((all, current) => {
       current.data
         .forEach((i) => {
@@ -241,12 +238,6 @@ export default class Search {
             });
         });
     });
-
-    if (downloadResults) {
-      return this.results.generateDownloadableData();
-    }
-
-    return this.results.generateResultTableData();
   }
 
   private collectClinicalSignificancesData(accession: string, features: any[]) {
