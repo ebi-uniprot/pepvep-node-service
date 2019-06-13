@@ -18,9 +18,9 @@ export default class Helpers {
 
   public static toHummanReadable(
     input: string,
-    capitalise: boolean = false,
-    capitaliseAllWords: boolean = false,
-    lowercaseRest: boolean = false,
+    capitalise: boolean = true,
+    capitaliseAllWords: boolean = true,
+    lowercaseRest: boolean = true,
     ignore: string[] = [],
   ) : string {
     if (typeof input !== 'string') {

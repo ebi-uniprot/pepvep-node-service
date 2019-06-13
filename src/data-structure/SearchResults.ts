@@ -181,7 +181,7 @@ export default class SearchResults {
   }
 
   public getProteinAcccessionsAndPositionHits() {
-    let json = {};
+    let hits = {};
 
     Object.keys(this._inputs)
       .forEach((groupId) => {
@@ -198,8 +198,8 @@ export default class SearchResults {
                       proteinEnd,
                     } = variation;
 
-                    if (!json[accession]) {
-                      json[accession] = {
+                    if (!hits[accession]) {
+                      hits[accession] = {
                         accession,
                         'positions': [],
                       };
@@ -218,19 +218,19 @@ export default class SearchResults {
 
                       range.forEach((pos) => {
                         // if not already in the 
-                        if (json[accession].positions.indexOf(pos) === -1) {
-                          json[accession].positions.push(pos);
+                        if (hits[accession].positions.indexOf(pos) === -1) {
+                          hits[accession].positions.push(pos);
                         }
                       });
 
-                      json[accession].positions.concat(range);
+                      hits[accession].positions.concat(range);
                     }
                   });
               });
           });
       });
 
-    json = values(json)
+    hits = values(hits)
       .filter(el => el.positions.length > 0)
       .map(el => {
         el.positions = el.positions
@@ -240,7 +240,7 @@ export default class SearchResults {
         return el;
       });
 
-    return json;
+    return hits;
   }
 
   private createEmptyResultsTableRow() {
@@ -385,58 +385,58 @@ export default class SearchResults {
   private createEmptyDownloadableResultsRow(groupId: string, gene: Gene, protein: Protein) {
     return {
       input: this._inputs[groupId].raw,
-      most_sever_consequence: null,
+      most_sever_consequence: undefined,
       assembly: gene.assemblyName,
       chromosome: gene.chromosome,
-      genomic_start: null,
-      genomic_end: null,
-      allele_string: null,
-      variant_allele: null,
+      genomic_start: undefined,
+      genomic_end: undefined,
+      allele_string: undefined,
+      variant_allele: undefined,
       gene_symbol: gene.symbol,
       gene_symbol_source: gene.symbolSource,
       hgnc_id: gene.hgncId,
       gene_id: gene.ensg,
       transcript_id: protein.enst,
       translation_id: protein.ensp,
-      biotype: null,
-      impact: null,
-      consequence_terms: null,
+      biotype: undefined,
+      impact: undefined,
+      consequence_terms: undefined,
       swissprot_accessions: (protein.swissprotAccessions || []).join(';'),
       trembl_accessions: (protein.tremblAccessions || []).join(';'),
-      protein_start: null,
-      protein_end: null,
-      amino_acid_change: null,
-      associated_to_disease: null,
-      disease_categories: null,
-      polyphen_prediction: null,
-      polyphen_score: null,
-      mutation_taster_prediction: null,
-      mutation_taster_score: null,
-      lrt_prediction: null,
-      lrt_score: null,
-      fathmm_prediction: null,
-      fathmm_score: null,
-      provean_prediction: null,
-      provean_score: null,
-      cadd_raw: null,
-      cadd_phred: null,
-      sift_prediction: null,
-      sift_score: null,
-      mutpred_score: null,
-      blosum62: null,
-      appris: null,
-      tsl: null,
+      protein_start: undefined,
+      protein_end: undefined,
+      amino_acid_change: undefined,
+      associated_to_disease: undefined,
+      disease_categories: undefined,
+      polyphen_prediction: undefined,
+      polyphen_score: undefined,
+      mutation_taster_prediction: undefined,
+      mutation_taster_score: undefined,
+      lrt_prediction: undefined,
+      lrt_score: undefined,
+      fathmm_prediction: undefined,
+      fathmm_score: undefined,
+      provean_prediction: undefined,
+      provean_score: undefined,
+      cadd_raw: undefined,
+      cadd_phred: undefined,
+      sift_prediction: undefined,
+      sift_score: undefined,
+      mutpred_score: undefined,
+      blosum62: undefined,
+      appris: undefined,
+      tsl: undefined,
       strand: gene.strand,
-      codons: null,
-      cdna_start: null,
-      cdna_end: null,
-      cds_start: null,
-      cds_end: null,
-      exon: null,
+      codons: undefined,
+      cdna_start: undefined,
+      cdna_end: undefined,
+      cds_start: undefined,
+      cds_end: undefined,
+      exon: undefined,
       uniparc_accessions: (protein.uniparcAccessions || []).join(';'),
-      hgvs_c: null,
-      hgvs_p: null,
-      hgvs_g: null,
+      hgvs_c: undefined,
+      hgvs_p: undefined,
+      hgvs_g: undefined,
       disease_associations: [],
       protein_annotations: [],
     };
@@ -458,24 +458,21 @@ export default class SearchResults {
         ? transcriptConsequence.mostSevereConsequence : undefined;
 
       row.impact = (!row.impact) 
-        ? Helpers.toHummanReadable(
-          transcriptConsequence.impact, true, true, true,
-        ) : undefined;
+        ? Helpers.toHummanReadable(transcriptConsequence.impact) : undefined;
 
       if (!row.consequence_terms) {
         row.consequence_terms = transcriptConsequence
           .consequenceTerms
-          .map(term => Helpers.toHummanReadable(term, true, true, true))
+          .map(term => Helpers.toHummanReadable(term))
           .join('; ');
       }
 
       row.polyphen_prediction = (!row.polyphen_prediction)
-        ? Helpers.toHummanReadable(
-        transcriptConsequence.polyphenPrediction, true, true, true,
-      ) : undefined;
+        ? Helpers.toHummanReadable(transcriptConsequence.polyphenPrediction) : undefined;
 
-      row.polyphen_score = (!row.polyphen_score)
-        ? transcriptConsequence.polyphenScore : undefined;
+      row.polyphen_score = (typeof row.polyphen_score !== 'number')
+        ? transcriptConsequence.polyphenScore
+        : undefined;
 
       row.mutation_taster_prediction = (!row.mutation_taster_prediction)
         ? transcriptConsequence.mutationTasterPrediction : undefined;
@@ -486,7 +483,9 @@ export default class SearchResults {
       row.lrt_prediction = (!row.lrt_prediction)
         ? transcriptConsequence.lrtPrediction : undefined;
 
-      row.lrt_score = (!row.lrt_score) ? transcriptConsequence.lrtScore : undefined;
+      row.lrt_score = (typeof row.lrt_score !== 'number')
+        ? transcriptConsequence.lrtScore
+        : undefined;
 
       row.fathmm_prediction = (!row.fathmm_prediction)
         ? transcriptConsequence.fathmmPrediction : undefined;
@@ -501,26 +500,36 @@ export default class SearchResults {
         ? transcriptConsequence.proveanScore : undefined;
 
       row.biotype = (!row.biotype)
-        ? Helpers.toHummanReadable(
-        transcriptConsequence.biotype, true, true, true,
-      ) : undefined;
+        ? Helpers.toHummanReadable(transcriptConsequence.biotype) : undefined;
 
-      row.cadd_phred = (!row.cadd_phred) ? transcriptConsequence.caddPhred : undefined;
-      row.cadd_raw = (!row.cadd_raw) ? transcriptConsequence.caddRaw : undefined;
+      row.cadd_phred = (typeof row.cadd_phred !== 'number')
+        ? transcriptConsequence.caddPhred
+        : undefined;
+
+      row.cadd_raw = (typeof !row.cadd_raw !== 'number')
+        ? transcriptConsequence.caddRaw
+        : undefined;
+
       row.appris = (!row.appris) ? transcriptConsequence.appris : undefined;
 
       row.sift_prediction = (!row.sift_prediction)
-        ? Helpers.toHummanReadable(
-        transcriptConsequence.siftPrediction, true, true, true,
-      ) : undefined;
+        ? Helpers.toHummanReadable(transcriptConsequence.siftPrediction) : undefined;
 
-      row.sift_score = (!row.sift_score) ? transcriptConsequence.siftScore : undefined;
+      row.sift_score = (typeof row.sift_score !== 'number')
+        ? transcriptConsequence.siftScore
+        : undefined;
 
-      row.mutpred_score = (!row.mutpred_score)
-        ? transcriptConsequence.mutPredScore : undefined;
+      row.mutpred_score = (typeof row.mutpred_score !== 'number')
+        ? transcriptConsequence.mutPredScore
+        : undefined;
 
-      row.blosum62 = (!row.blosum62) ? transcriptConsequence.blosum62 : undefined;
-      row.tsl = (!row.tsl) ? transcriptConsequence.tsl : undefined;
+      row.blosum62 = (typeof row.blosum62 !== 'number')
+        ? transcriptConsequence.blosum62
+        : undefined;
+
+      row.tsl = (typeof row.tsl !== 'number')
+        ? transcriptConsequence.tsl
+        : undefined;
     }
   }
 
@@ -529,10 +538,10 @@ export default class SearchResults {
       .getFeatures()
       .forEach((feature) => {
         let featureDetails = `type=${
-          Helpers.toHummanReadable(feature.type, true, true, true)
+          Helpers.toHummanReadable(feature.type)
         }`;
         featureDetails += `,category=${
-          Helpers.toHummanReadable(feature.category, true, true, true)
+          Helpers.toHummanReadable(feature.category)
         }`;
         featureDetails += (feature.description)
           ? `,description=${feature.description.replace(/,/ig, '')}`
@@ -581,7 +590,7 @@ export default class SearchResults {
                 );
               });
 
-            if (diseaseEvidences.length > 0) {
+            if (diseaseEvidences.length) {
               diseaseDetails += `,evidences=${diseaseEvidences.join(';')}`;
             }
 
@@ -590,25 +599,25 @@ export default class SearchResults {
       }
       row.disease_categories = clinicalSignificances
         .value
-        .map(category => Helpers.toHummanReadable(category, true, true, true))
+        .map(category => Helpers.toHummanReadable(category))
         .join(', ');
     }
   }
 
   private addVariationDataToDownloadableResultsRow(row: any, variation: Variation) {
-    if (!row.genomic_start && variation.genomicVariationStart) {
+    if (typeof row.genomic_start !== 'number' && variation.genomicVariationStart) {
       row.genomic_start = variation.genomicVariationStart;
     }
 
-    if (!row.genomic_end && variation.genomicVariationEnd) {
+    if (typeof row.genomic_end !== 'number' && variation.genomicVariationEnd) {
       row.genomic_end = variation.genomicVariationEnd;
     }
 
-    if (!row.protein_start && variation.proteinStart) {
+    if (typeof row.protein_start !== 'number' && variation.proteinStart) {
       row.protein_start = variation.proteinStart;
     }
 
-    if (!row.protein_end && variation.proteinEnd) {
+    if (typeof row.protein_end !== 'number' && variation.proteinEnd) {
       row.protein_end = variation.proteinEnd;
     }
 
