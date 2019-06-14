@@ -1,6 +1,10 @@
 {
-  "extends": "tslint-config-airbnb",
+  "rulesDirectory": ["node_modules/tslint-microsoft-contrib"],
+  "extends": ["tslint-microsoft-contrib/latest"],
   "rules": {
-    "variable-name": [true, "allow-leading-underscore"]
+    "variable-name": [true, "allow-leading-underscore"],
+    "no-relative-imports": false,
+    "prefer-array-literal": [true, {"allow-size-argument": true}],
+    "function-name": false
   }
 }

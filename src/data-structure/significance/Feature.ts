@@ -8,6 +8,7 @@ class Feature {
   readonly begin: number;
   readonly end: number;
   readonly evidences: Evidence[];
+  readonly featureId: string;
 
   constructor(
     type: string,
@@ -17,6 +18,7 @@ class Feature {
     begin: number,
     end: number,
     evidences: Evidence[],
+    featureId: string,
   ) {
     this.type = type;
     this.typeDescription = typeDescription;
@@ -25,6 +27,7 @@ class Feature {
     this.begin = begin;
     this.end = end;
     this.evidences = evidences;
+    this.featureId = featureId || null;
   }
 }
 

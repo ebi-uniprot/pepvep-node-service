@@ -1,22 +1,5 @@
 export default class Helpers {
 
-  public static parseProteinChangeInput(input: string): any[] {
-    const rows = input.split('\n');
-    return rows.map((row) => {
-      const regExp = /^(\S+)(\s{1})([a-zA-Z])(\d+)([a-zA-Z])$/;
-      const matches = row.match(regExp);
-      if (!matches) {
-        throw new Error('No matches found');
-      }
-      return {
-        accession: matches[1],
-        WT: matches[3],
-        position: matches[4],
-        variant: matches[5],
-      };
-    });
-  }
-
   public static toCapitalise(
     input: string,
     lowercaseRest: boolean = false,
@@ -35,9 +18,9 @@ export default class Helpers {
 
   public static toHummanReadable(
     input: string,
-    capitalise: boolean = false,
-    capitaliseAllWords: boolean = false,
-    lowercaseRest: boolean = false,
+    capitalise: boolean = true,
+    capitaliseAllWords: boolean = true,
+    lowercaseRest: boolean = true,
     ignore: string[] = [],
   ) : string {
     if (typeof input !== 'string') {
@@ -59,5 +42,15 @@ export default class Helpers {
     }
 
     return output;
+  }
+
+  public static chunkArray(source: any[], chunkSize: number) : any[] {
+    const results = [];
+
+    for (let i = 0; i < source.length; i += chunkSize) {
+      results.push(source.slice(i, i + chunkSize));
+    }
+
+    return results;
   }
 }

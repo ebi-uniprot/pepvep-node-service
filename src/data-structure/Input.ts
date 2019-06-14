@@ -16,7 +16,7 @@ export default class Input {
   public addGene(gene: Gene) : void {
     const { ensg } = gene;
 
-    if (typeof this._genes[ensg] === 'undefined') {
+    if (this._genes[ensg] === undefined) {
       this._genes[ensg] = gene;
     }
   }

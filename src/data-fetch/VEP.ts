@@ -55,12 +55,6 @@ export default class VEP {
     });
   }
 
-  public static async variantConsequences(organism: string, region: string, allele: string) {
-    // tslint:disable-next-line:max-line-length
-    const url: string = `https://rest.ensembl.org/vep/${organism}/region/${region}/${allele}?content-type=application/json`;
-    return await customAxios.get(url);
-  }
-
   public static async variantConsequencesBatch(organism: string, variants: string[]) {
     // tslint:disable:max-line-length
     const url: string = `https://rest.ensembl.org/vep/${organism}/region?content-type=application/json`;

@@ -2,15 +2,16 @@ import * as crypto from 'crypto';
 import * as values from 'object.values';
 
 import Input from './Input';
-import Protein from './Protein';
+import Protein, { ProteinType } from './Protein';
 import Gene from './Gene';
 import Variation from './Variation';
 import ClinicalSignificance from './significance/ClinicalSignificance';
 import PositionalSignificance from './significance/PositionalSignificance';
 import StructuralSignificance from './significance/StructuralSignificance';
 import TranscriptSignificance from './significance/TranscriptSignificance';
-import Helpers from '../data-fetch/Helpers';
+import Helpers from './../data-fetch/Helpers';
 
+// A generic type for dictionary-like objects
 interface TypedMap<T> {
   [id: string] : T;
 }
@@ -29,17 +30,17 @@ export default class SearchResults {
     const input: Input = new Input(rawInput);
     const id: string = this.idGenerator(input.raw);
 
-    if (typeof this._inputs[id] === 'undefined') {
+    if (this._inputs[id] === undefined) {
       this._inputs[id] = input;
     }
 
     return this._inputs[id];
   }
 
-  public addGene(ensg: string, chromosome: string) : Gene {
+  public addGene(input: string, ensg: string, chromosome: string) : Gene {
     const gene: Gene = new Gene(ensg, chromosome);
-    const id: string = this.idGenerator(`${ensg}-${chromosome}`);
-    if (typeof this._genes[id] === 'undefined') {
+    const id: string = this.idGenerator(`${input}-${ensg}-${chromosome}`);
+    if (this._genes[id] === undefined) {
       this._genes[id] = gene;
     }
 
@@ -47,6 +48,7 @@ export default class SearchResults {
   }
 
   public addProtein(
+    input: string,
     ensp: string,
     enst: string,
     swissprotAccessions: string[],
@@ -56,9 +58,9 @@ export default class SearchResults {
     // choosing what accession should be used for this protein
     let accession: string;
 
-    if (typeof swissprotAccessions !== 'undefined' && swissprotAccessions.length > 0) {
+    if (swissprotAccessions !== undefined && swissprotAccessions.length > 0) {
       accession = swissprotAccessions[0];
-    } else if (typeof tremblAccessions !== 'undefined' && tremblAccessions.length > 0) {
+    } else if (tremblAccessions !== undefined && tremblAccessions.length > 0) {
       accession = tremblAccessions[0];
     } else {
       return null;
@@ -71,9 +73,9 @@ export default class SearchResults {
     protein.tremblAccessions = tremblAccessions;
     protein.uniparcAccessions = uniparcAccessions;
 
-    const id: string = this.idGenerator(`${ensp}-${enst}-${accession}`);
+    const id: string = this.idGenerator(`${input}-${ensp}-${enst}-${accession}`);
 
-    if (typeof this._proteins[id] === 'undefined') {
+    if (this._proteins[id] === undefined) {
       this._proteins[id] = protein;
     }
 
@@ -109,9 +111,9 @@ export default class SearchResults {
     const variation: Variation = new Variation(allele);
     // We are going to use the original raw `input` value to generate a unique key
     // for this variation instance.
-    const id: string = this.idGenerator(input + Math.random().toString());
+    const id: string = this.idGenerator(input + crypto.randomBytes(20).toString('hex'));
 
-    if (typeof this._variations[id] === 'undefined') {
+    if (this._variations[id] === undefined) {
       this._variations[id] = variation;
     }
 
@@ -178,12 +180,171 @@ export default class SearchResults {
     return map;
   }
 
+  public getProteinAcccessionsAndPositionHits() {
+    let hits = {};
+
+    Object.keys(this._inputs)
+      .forEach((groupId) => {
+        this._inputs[groupId]
+          .getGenes()
+          .forEach((gene) => {
+            gene.getProteins()
+              .forEach((protein) => {
+                protein.getVariations()
+                  .forEach((variation) => {
+                    const { accession } = protein;
+                    const {
+                      proteinStart,
+                      proteinEnd,
+                    } = variation;
+
+                    if (!hits[accession]) {
+                      hits[accession] = {
+                        accession,
+                        'positions': [],
+                      };
+                    }
+
+                    if (proteinStart !== null && proteinStart !== undefined) {
+                      let range;
+
+                      if (proteinStart === proteinEnd) {
+                        range = [proteinStart];
+                      } else {
+                        range = new Array(proteinEnd - proteinStart)
+                          .fill(0)
+                          .map((_, i) => proteinStart + i);
+                      }
+
+                      range.forEach((pos) => {
+                        // if not already in the 
+                        if (hits[accession].positions.indexOf(pos) === -1) {
+                          hits[accession].positions.push(pos);
+                        }
+                      });
+
+                      hits[accession].positions.concat(range);
+                    }
+                  });
+              });
+          });
+      });
+
+    hits = values(hits)
+      .filter(el => el.positions.length > 0)
+      .map(el => {
+        el.positions = el.positions
+          .sort((a, b) => a - b)
+          .map(p => p.toString());
+
+        return el;
+      });
+
+    return hits;
+  }
+
+  private createEmptyResultsTableRow() {
+    return {
+      gene: {},
+      protein: {},
+      significances: {},
+      variation: {},
+    }
+  }
+
+  private addGeneDataToSearchResultsRow(row: any, gene: Gene) {
+    row.gene['ensgId'] = gene.ensg;
+    row.gene['chromosome'] = gene.chromosome;
+    row.gene['symbol'] = gene.symbol;
+    row.gene['source'] = gene.symbolSource;
+  }
+
+  private addProteinDataToSearchResultsRow(row: any, protein: Protein) {
+    row.gene['enstId'] = protein.enst;
+  }
+
+  private addVariationDataToSearchresultsRow(row: any, variation: Variation) {
+    row.gene.allele = variation.allele;
+    row.gene.start = variation.genomicVariationStart;
+    row.gene.end = variation.genomicVariationEnd;
+    row.gene.hgvsg = variation.hgvsg;
+    row.gene.hgvsp = variation.hgvsp;
+    row.gene.codons = variation.codons;
+    row.protein.variant = variation.aminoAcids;
+    row.protein.threeLetterCodes = variation.threeLetterCodes;
+    row.protein.start = variation.proteinStart;
+    row.protein.end = variation.proteinEnd;
+    row.protein.canonical = variation.canonical;
+  }
+
+  private addVariationProteinDataToSearchResultsRow(row: any, protein: Protein) {
+    row.protein.accession = protein.accession;
+    row.protein.name = protein.name;
+    row.protein.length = protein.length;
+    row.protein.type = protein.type;
+    row.protein.isoform = protein.isoform;
+    row.protein.canonical = protein.canonical;
+    row.protein.canonicalAccession = protein.canonicalAccession;
+  }
+
+  private addNovelFlagToSearchResultsTableRow(row: any, variation: Variation) {
+    row.variation.novel = (!variation.hasGenomicColocatedVariant()
+      && !variation.hasProteinColocatedVariant());
+  }
+
+  private addColocatedVariantsToSearchResultsRow(row: any, variation: Variation) {
+    row.variation.proteinColocatedVariants =
+      variation.getProteinColocatedVariants();
+
+    row.variation.genomicColocatedVariants =
+      variation.getGenomicColocatedVariants();
+
+    row.variation.proteinColocatedVariantsCount =
+      variation.countUniqueProteinColocatedVariants();
+
+    row.variation.diseasAssociatedProteinColocatedVariantsCount =
+      variation.countDiseasAssociatedProteinColocatedVariants();
+  }
+
+  private addSignificancesToSearchResultsRow(row: any, variation: Variation) {
+    const positinalSignificances: any = {
+      features: variation.getPositionalSignificance().getFeatures(),
+    };
+
+    row.significances['positional'] =
+      (0 < positinalSignificances.features.length)
+        ? positinalSignificances
+        : undefined;
+
+    const transcriptSignificances = variation
+      .getTranscriptSignificance()
+      .map(ts => ts.toJSON());
+
+    row.significances['transcript'] = (0 < transcriptSignificances.length)
+      ? transcriptSignificances
+      : undefined;
+
+    const clinicalSignificances: ClinicalSignificance = variation
+      .getClinicalSignificances();
+
+    row.significances['clinical'] = (clinicalSignificances)
+      ? clinicalSignificances.toJSON()
+      : undefined;
+
+    const structuralSignificances = variation
+      .getStructuralSignificances();
+
+    row.significances['structural'] = (structuralSignificances)
+      ? structuralSignificances.toJSON()
+      : undefined;
+  }
+
   public generateResultTableData() {
     const json = {};
 
     Object.keys(this._inputs)
       .forEach((groupId) => {
-        if (typeof json[groupId] === 'undefined') {
+        if (json[groupId] === undefined) {
           json[groupId] = {
             key: groupId,
             input: this._inputs[groupId].raw,
@@ -193,68 +354,18 @@ export default class SearchResults {
                 (accu, gene) => {
                   gene.getProteins()
                     .forEach((protein) => {
-                      const row: any = {
-                        gene: {},
-                        protein: {},
-                        significances: {},
-                      };
+                      const row: any = this.createEmptyResultsTableRow();
 
-                      row.gene['ensgId'] = gene.ensg;
-                      row.gene['chromosome'] = gene.chromosome;
-                      row.gene['enstId'] = protein.enst;
-                      row.gene['symbol'] = gene.symbol;
-                      row.gene['source'] = gene.symbolSource;
+                      this.addGeneDataToSearchResultsRow(row, gene);
+                      this.addProteinDataToSearchResultsRow(row, protein);
 
                       protein.getVariations()
                         .forEach((variation) => {
-                          row.gene.allele = variation.allele;
-                          row.gene.start = variation.genomicVariationStart;
-                          row.gene.end = variation.genomicVariationEnd;
-                          // row.gene.mostSevereConsequence = variation.mostSevereConsequence;
-                          row.gene.hgvsg = variation.hgvsg;
-                          row.gene.hgvsp = variation.hgvsp;
-                          row.gene.codons = variation.codons;
-                          row.protein.accession = protein.accession;
-                          row.protein.variant = variation.aminoAcids;
-                          row.protein.threeLetterCodes = variation.threeLetterCodes;
-                          row.protein.start = variation.proteinStart;
-                          row.protein.end = variation.proteinEnd;
-                          row.protein.name = protein.name;
-                          row.protein.length = protein.length;
-                          // row.variation = variation
-                          row.protein.canonical = variation.canonical;
-
-                          const positinalSignificances: any = {
-                            features: variation.getPositionalSignificance().getFeatures(),
-                          };
-
-                          row.significances['positional'] =
-                            (0 < positinalSignificances.features.length)
-                              ? positinalSignificances
-                              : undefined;
-
-                          const transcriptSignificances = variation
-                            .getTranscriptSignificance()
-                            .map(ts => ts.toJSON());
-
-                          row.significances['transcript'] = (0 < transcriptSignificances.length)
-                            ? transcriptSignificances
-                            : undefined;
-
-                          const clinicalSignificances: ClinicalSignificance = variation
-                            .getClinicalSignificances();
-
-                          row.significances['clinical'] = (clinicalSignificances)
-                            ? clinicalSignificances.toJSON()
-                            : undefined;
-
-                          const structuralSignificances = variation
-                            .getStructuralSignificances()
-                            .map(ss => ss.toJSON());
-
-                          row.significances['structural'] = (0 < structuralSignificances.length)
-                            ? structuralSignificances
-                            : undefined;
+                          this.addVariationDataToSearchresultsRow(row, variation);
+                          this.addVariationProteinDataToSearchResultsRow(row, protein);
+                          this.addNovelFlagToSearchResultsTableRow(row, variation);
+                          this.addColocatedVariantsToSearchResultsRow(row, variation);
+                          this.addSignificancesToSearchResultsRow(row, variation);
                         });
 
                       accu.push(row);
@@ -271,6 +382,294 @@ export default class SearchResults {
     return json;
   }
 
+  private createEmptyDownloadableResultsRow(groupId: string, gene: Gene, protein: Protein) {
+    return {
+      input: this._inputs[groupId].raw,
+      most_sever_consequence: undefined,
+      assembly: gene.assemblyName,
+      chromosome: gene.chromosome,
+      genomic_start: undefined,
+      genomic_end: undefined,
+      allele_string: undefined,
+      variant_allele: undefined,
+      gene_symbol: gene.symbol,
+      gene_symbol_source: gene.symbolSource,
+      hgnc_id: gene.hgncId,
+      gene_id: gene.ensg,
+      transcript_id: protein.enst,
+      translation_id: protein.ensp,
+      biotype: undefined,
+      impact: undefined,
+      consequence_terms: undefined,
+      swissprot_accessions: (protein.swissprotAccessions || []).join(';'),
+      trembl_accessions: (protein.tremblAccessions || []).join(';'),
+      protein_start: undefined,
+      protein_end: undefined,
+      amino_acid_change: undefined,
+      associated_to_disease: undefined,
+      disease_categories: undefined,
+      polyphen_prediction: undefined,
+      polyphen_score: undefined,
+      mutation_taster_prediction: undefined,
+      mutation_taster_score: undefined,
+      lrt_prediction: undefined,
+      lrt_score: undefined,
+      fathmm_prediction: undefined,
+      fathmm_score: undefined,
+      provean_prediction: undefined,
+      provean_score: undefined,
+      cadd_raw: undefined,
+      cadd_phred: undefined,
+      sift_prediction: undefined,
+      sift_score: undefined,
+      mutpred_score: undefined,
+      blosum62: undefined,
+      appris: undefined,
+      tsl: undefined,
+      strand: gene.strand,
+      codons: undefined,
+      cdna_start: undefined,
+      cdna_end: undefined,
+      cds_start: undefined,
+      cds_end: undefined,
+      exon: undefined,
+      uniparc_accessions: (protein.uniparcAccessions || []).join(';'),
+      hgvs_c: undefined,
+      hgvs_p: undefined,
+      hgvs_g: undefined,
+      disease_associations: [],
+      protein_annotations: [],
+    };
+  }
+
+  private addTranscriptDataToDownloadableResultsRow(
+    row: any,
+    variation: Variation,
+  ) {
+    if (variation.getTranscriptSignificance().length > 0) {
+      const transcriptConsequence = variation
+        .getTranscriptSignificance()[0];
+
+      if (!transcriptConsequence) {
+        return;
+      }
+
+      row.most_sever_consequence = (!row.most_sever_consequence)
+        ? transcriptConsequence.mostSevereConsequence : undefined;
+
+      row.impact = (!row.impact) 
+        ? Helpers.toHummanReadable(transcriptConsequence.impact) : undefined;
+
+      if (!row.consequence_terms) {
+        row.consequence_terms = transcriptConsequence
+          .consequenceTerms
+          .map(term => Helpers.toHummanReadable(term))
+          .join('; ');
+      }
+
+      row.polyphen_prediction = (!row.polyphen_prediction)
+        ? Helpers.toHummanReadable(transcriptConsequence.polyphenPrediction) : undefined;
+
+      row.polyphen_score = (typeof row.polyphen_score !== 'number')
+        ? transcriptConsequence.polyphenScore
+        : undefined;
+
+      row.mutation_taster_prediction = (!row.mutation_taster_prediction)
+        ? transcriptConsequence.mutationTasterPrediction : undefined;
+
+      row.mutation_taster_score = (!row.mutation_taster_score)
+        ? transcriptConsequence.mutationTasterScore : undefined;
+
+      row.lrt_prediction = (!row.lrt_prediction)
+        ? transcriptConsequence.lrtPrediction : undefined;
+
+      row.lrt_score = (typeof row.lrt_score !== 'number')
+        ? transcriptConsequence.lrtScore
+        : undefined;
+
+      row.fathmm_prediction = (!row.fathmm_prediction)
+        ? transcriptConsequence.fathmmPrediction : undefined;
+
+      row.fathmm_score = (!row.fathmm_score)
+        ? transcriptConsequence.fathmmScore : undefined;
+
+      row.provean_prediction = (!row.provean_prediction)
+        ? transcriptConsequence.proveanPrediction : undefined;
+
+      row.provean_score = (!row.provean_score)
+        ? transcriptConsequence.proveanScore : undefined;
+
+      row.biotype = (!row.biotype)
+        ? Helpers.toHummanReadable(transcriptConsequence.biotype) : undefined;
+
+      row.cadd_phred = (typeof row.cadd_phred !== 'number')
+        ? transcriptConsequence.caddPhred
+        : undefined;
+
+      row.cadd_raw = (typeof !row.cadd_raw !== 'number')
+        ? transcriptConsequence.caddRaw
+        : undefined;
+
+      row.appris = (!row.appris) ? transcriptConsequence.appris : undefined;
+
+      row.sift_prediction = (!row.sift_prediction)
+        ? Helpers.toHummanReadable(transcriptConsequence.siftPrediction) : undefined;
+
+      row.sift_score = (typeof row.sift_score !== 'number')
+        ? transcriptConsequence.siftScore
+        : undefined;
+
+      row.mutpred_score = (typeof row.mutpred_score !== 'number')
+        ? transcriptConsequence.mutPredScore
+        : undefined;
+
+      row.blosum62 = (typeof row.blosum62 !== 'number')
+        ? transcriptConsequence.blosum62
+        : undefined;
+
+      row.tsl = (typeof row.tsl !== 'number')
+        ? transcriptConsequence.tsl
+        : undefined;
+    }
+  }
+
+  private addPositionalDataToDownloadableResultsRow(row: any, variation: Variation) {
+    variation.getPositionalSignificance()
+      .getFeatures()
+      .forEach((feature) => {
+        let featureDetails = `type=${
+          Helpers.toHummanReadable(feature.type)
+        }`;
+        featureDetails += `,category=${
+          Helpers.toHummanReadable(feature.category)
+        }`;
+        featureDetails += (feature.description)
+          ? `,description=${feature.description.replace(/,/ig, '')}`
+          : '';
+        featureDetails += `,start=${feature.begin}`;
+        featureDetails += `,end=${feature.end}`;
+
+        const featureEvidences = [];
+        feature.evidences
+          .forEach((featureEvidence) => {
+            featureEvidences.push(
+              `${featureEvidence.sourceName}:${featureEvidence.sourceId}`,
+            );
+          });
+
+        if (featureEvidences.length > 0) {
+          featureDetails += `,evidences=${featureEvidences.join(';')}`;
+        }
+
+        row.protein_annotations.push(featureDetails);
+      });
+  }
+
+  private addClinicalDataToDownloadableResultsRow(row: any, variation: Variation) {
+    const clinicalSignificances = variation.getClinicalSignificances();
+
+    if (clinicalSignificances) {
+      if (clinicalSignificances.association.length > 0) {
+        row.associated_to_disease = 'Yes';
+
+        clinicalSignificances.association
+          .forEach((disease) => {
+            let diseaseDetails = `disease=${disease.disease}`;
+            diseaseDetails += (disease.name)
+              ? `,name=${disease.name.replace(/,/ig, '')}`
+              : '';
+            diseaseDetails += (disease.description)
+              ? `,description=${disease.description.replace(/,/ig, '')}`
+              : '';
+
+            const diseaseEvidences = [];
+            disease.evidences
+              .forEach((diseaseEvidence) => {
+                diseaseEvidences.push(
+                  `${diseaseEvidence.source.name}:${diseaseEvidence.source.id}`,
+                );
+              });
+
+            if (diseaseEvidences.length) {
+              diseaseDetails += `,evidences=${diseaseEvidences.join(';')}`;
+            }
+
+            row.disease_associations.push(diseaseDetails);
+          });
+      }
+      row.disease_categories = clinicalSignificances
+        .value
+        .map(category => Helpers.toHummanReadable(category))
+        .join(', ');
+    }
+  }
+
+  private addVariationDataToDownloadableResultsRow(row: any, variation: Variation) {
+    if (typeof row.genomic_start !== 'number' && variation.genomicVariationStart) {
+      row.genomic_start = variation.genomicVariationStart;
+    }
+
+    if (typeof row.genomic_end !== 'number' && variation.genomicVariationEnd) {
+      row.genomic_end = variation.genomicVariationEnd;
+    }
+
+    if (typeof row.protein_start !== 'number' && variation.proteinStart) {
+      row.protein_start = variation.proteinStart;
+    }
+
+    if (typeof row.protein_end !== 'number' && variation.proteinEnd) {
+      row.protein_end = variation.proteinEnd;
+    }
+
+    if (!row.allele_string && variation.baseAndAllele) {
+      row.allele_string = variation.baseAndAllele;
+    }
+
+    if (!row.amino_acid_change && variation.aminoAcids) {
+      row.amino_acid_change = variation.aminoAcids;
+    }
+
+    if (!row.variant_allele && variation.variantAllele) {
+      row.variant_allele = variation.variantAllele;
+    }
+
+    if (!row.hgvs_c && variation.hgvsc) {
+      row.hgvs_c = variation.hgvsc;
+    }
+
+    if (!row.hgvs_p && variation.hgvsp) {
+      row.hgvs_p = variation.hgvsp;
+    }
+
+    if (!row.hgvs_g && variation.hgvsg) {
+      row.hgvs_g = variation.hgvsg;
+    }
+
+    if (!row.codons) {
+      row.codons = variation.codons;
+    }
+
+    if (!row.cdna_start) {
+      row.cdna_start = variation.cdnaStart;
+    }
+
+    if (!row.cdna_end) {
+      row.cdna_end = variation.cdnaEnd;
+    }
+
+    if (!row.cds_start) {
+      row.cds_start = variation.cdsStart;
+    }
+
+    if (!row.cds_end) {
+      row.cds_end = variation.cdsEnd;
+    }
+
+    if (!row.exon) {
+      row.exon = variation.exon;
+    }
+  }
+
   public generateDownloadableData() {
     const data: any[] = [];
 
@@ -281,313 +680,14 @@ export default class SearchResults {
           .forEach((gene) => {
             gene.getProteins()
               .forEach((protein) => {
-                const row = {
-                  input: this._inputs[groupId].raw,
-                  most_sever_consequence: null,
-                  assembly: gene.assemblyName,
-                  chromosome: gene.chromosome,
-                  genomic_start: null,
-                  genomic_end: null,
-                  allele_string: null,
-                  variant_allele: null,
-                  gene_symbol: gene.symbol,
-                  gene_symbol_source: gene.symbolSource,
-                  hgnc_id: gene.hgncId,
-                  gene_id: gene.ensg,
-                  transcript_id: protein.enst,
-                  translation_id: protein.ensp,
-                  biotype: null,
-                  impact: null,
-                  consequence_terms: null,
-                  swissprot_accessions: (protein.swissprotAccessions || []).join(';'),
-                  trembl_accessions: (protein.tremblAccessions || []).join(';'),
-                  protein_start: null,
-                  protein_end: null,
-                  amino_acid_change: null,
-                  associated_to_disease: null,
-                  disease_categories: null,
-                  polyphen_prediction: null,
-                  polyphen_score: null,
-                  mutation_taster_prediction: null,
-                  mutation_taster_score: null,
-                  lrt_prediction: null,
-                  lrt_score: null,
-                  fathmm_prediction: null,
-                  fathmm_score: null,
-                  provean_prediction: null,
-                  provean_score: null,
-                  cadd_raw: null,
-                  cadd_phred: null,
-                  sift_prediction: null,
-                  sift_score: null,
-                  mutpred_score: null,
-                  blosum62: null,
-                  appris: null,
-                  tsl: null,
-                  strand: gene.strand,
-                  codons: null,
-                  cdna_start: null,
-                  cdna_end: null,
-                  cds_start: null,
-                  cds_end: null,
-                  exon: null,
-                  uniparc_accessions: (protein.uniparcAccessions || []).join(';'),
-                  hgvs_c: null,
-                  hgvs_p: null,
-                  hgvs_g: null,
-                  disease_associations: [],
-                  protein_annotations: [],
-                };
+                const row = this.createEmptyDownloadableResultsRow(groupId, gene, protein);
 
                 protein.getVariations()
                   .forEach((variation) => {
-                    if (!row.genomic_start && variation.genomicVariationStart) {
-                      row.genomic_start = variation.genomicVariationStart;
-                    }
-
-                    if (!row.genomic_end && variation.genomicVariationEnd) {
-                      row.genomic_end = variation.genomicVariationEnd;
-                    }
-
-                    if (!row.protein_start && variation.proteinStart) {
-                      row.protein_start = variation.proteinStart;
-                    }
-
-                    if (!row.protein_end && variation.proteinEnd) {
-                      row.protein_end = variation.proteinEnd;
-                    }
-
-                    if (variation.getTranscriptSignificance().length > 0) {
-                      const transcriptConsequence = variation
-                          .getTranscriptSignificance()[0];
-
-                      if (transcriptConsequence) {
-                        if (!row.most_sever_consequence) {
-                          row.most_sever_consequence = transcriptConsequence
-                            .mostSevereConsequence;
-                        }
-
-                        if (!row.impact) {
-                          row.impact = Helpers.toHummanReadable(
-                            transcriptConsequence.impact, true, true, true,
-                          );
-                        }
-
-                        if (!row.consequence_terms) {
-                          row.consequence_terms = transcriptConsequence
-                            .consequenceTerms
-                            .map(term => Helpers.toHummanReadable(term, true, true, true))
-                            .join('; ');
-                        }
-
-                        if (!row.polyphen_prediction) {
-                          row.polyphen_prediction = Helpers.toHummanReadable(
-                            transcriptConsequence.polyphenPrediction, true, true, true,
-                          );
-                        }
-
-                        if (!row.polyphen_score) {
-                          row.polyphen_score = transcriptConsequence
-                            .polyphenScore;
-                        }
-
-                        if (!row.mutation_taster_prediction) {
-                          row.mutation_taster_prediction = transcriptConsequence
-                            .mutationTasterPrediction;
-                        }
-
-                        if (!row.mutation_taster_score) {
-                          row.mutation_taster_score = transcriptConsequence
-                            .mutationTasterScore;
-                        }
-
-                        if (!row.lrt_prediction) {
-                          row.lrt_prediction = transcriptConsequence
-                            .lrtPrediction;
-                        }
-
-                        if (!row.lrt_score) {
-                          row.lrt_score = transcriptConsequence
-                            .lrtScore;
-                        }
-
-                        if (!row.fathmm_prediction) {
-                          row.fathmm_prediction = transcriptConsequence
-                            .fathmmPrediction;
-                        }
-
-                        if (!row.fathmm_score) {
-                          row.fathmm_score = transcriptConsequence
-                            .fathmmScore;
-                        }
-
-                        if (!row.provean_prediction) {
-                          row.provean_prediction = transcriptConsequence
-                            .proveanPrediction;
-                        }
-
-                        if (!row.provean_score) {
-                          row.provean_score = transcriptConsequence
-                            .proveanScore;
-                        }
-
-                        if (!row.biotype) {
-                          row.biotype = Helpers.toHummanReadable(
-                            transcriptConsequence.biotype, true, true, true,
-                          );
-                        }
-
-                        if (!row.cadd_phred) {
-                          row.cadd_phred = transcriptConsequence.caddPhred;
-                        }
-
-                        if (!row.cadd_raw) {
-                          row.cadd_raw = transcriptConsequence.caddRaw;
-                        }
-
-                        if (!row.appris) {
-                          row.appris = transcriptConsequence.appris;
-                        }
-
-                        if (!row.sift_prediction) {
-                          row.sift_prediction = Helpers.toHummanReadable(
-                            transcriptConsequence.siftPrediction, true, true, true,
-                          );
-                        }
-
-                        if (!row.sift_score) {
-                          row.sift_score = transcriptConsequence.siftScore;
-                        }
-
-                        if (!row.mutpred_score) {
-                          row.mutpred_score = transcriptConsequence
-                            .mutPredScore;
-                        }
-
-                        if (!row.blosum62) {
-                          row.blosum62 = transcriptConsequence.blosum62;
-                        }
-
-                        if (!row.tsl) {
-                          row.tsl = transcriptConsequence.tsl;
-                        }
-                      }
-                    }
-
-                    if (!row.allele_string && variation.baseAndAllele) {
-                      row.allele_string = variation.baseAndAllele;
-                    }
-
-                    if (!row.amino_acid_change && variation.aminoAcids) {
-                      row.amino_acid_change = variation.aminoAcids;
-                    }
-
-                    if (!row.variant_allele && variation.variantAllele) {
-                      row.variant_allele = variation.variantAllele;
-                    }
-
-                    if (!row.hgvs_c && variation.hgvsc) {
-                      row.hgvs_c = variation.hgvsc;
-                    }
-
-                    if (!row.hgvs_p && variation.hgvsp) {
-                      row.hgvs_p = variation.hgvsp;
-                    }
-
-                    if (!row.hgvs_g && variation.hgvsg) {
-                      row.hgvs_g = variation.hgvsg;
-                    }
-
-                    if (!row.codons) {
-                      row.codons = variation.codons;
-                    }
-
-                    if (!row.cdna_start) {
-                      row.cdna_start = variation.cdnaStart;
-                    }
-
-                    if (!row.cdna_end) {
-                      row.cdna_end = variation.cdnaEnd;
-                    }
-
-                    if (!row.cds_start) {
-                      row.cds_start = variation.cdsStart;
-                    }
-
-                    if (!row.cds_end) {
-                      row.cds_end = variation.cdsEnd;
-                    }
-
-                    if (!row.exon) {
-                      row.exon = variation.exon;
-                    }
-
-                    variation.getPositionalSignificance()
-                      .getFeatures()
-                      .forEach((feature) => {
-                        let featureDetails = `type=${
-                          Helpers.toHummanReadable(feature.type, true, true, true)
-                        }`;
-                        featureDetails += `,category=${
-                          Helpers.toHummanReadable(feature.category, true, true, true)
-                        }`;
-                        featureDetails += (feature.description)
-                          ? `,description=${feature.description.replace(/,/ig, '')}`
-                          : '';
-                        featureDetails += `,start=${feature.begin}`;
-                        featureDetails += `,end=${feature.end}`;
-
-                        const featureEvidences = [];
-                        feature.evidences
-                          .forEach((featureEvidence) => {
-                            featureEvidences.push(
-                              `${featureEvidence.sourceName}:${featureEvidence.sourceId}`,
-                            );
-                          });
-
-                        if (featureEvidences.length > 0) {
-                          featureDetails += `,evidences=${featureEvidences.join(';')}`;
-                        }
-
-                        row.protein_annotations.push(featureDetails);
-                      });
-
-                    const clinicalSignificances = variation.getClinicalSignificances();
-
-                    if (clinicalSignificances) {
-                      if (clinicalSignificances.association.length > 0) {
-                        row.associated_to_disease = 'Yes';
-
-                        clinicalSignificances.association
-                          .forEach((disease) => {
-                            let diseaseDetails = `disease=${disease.disease}`;
-                            diseaseDetails += (disease.name)
-                              ? `,name=${disease.name.replace(/,/ig, '')}`
-                              : '';
-                            diseaseDetails += (disease.description)
-                              ? `,description=${disease.description.replace(/,/ig, '')}`
-                              : '';
-
-                            const diseaseEvidences = [];
-                            disease.evidences
-                              .forEach((diseaseEvidence) => {
-                                diseaseEvidences.push(
-                                  `${diseaseEvidence.source.name}:${diseaseEvidence.source.id}`,
-                                );
-                              });
-
-                            if (diseaseEvidences.length > 0) {
-                              diseaseDetails += `,evidences=${diseaseEvidences.join(';')}`;
-                            }
-
-                            row.disease_associations.push(diseaseDetails);
-                          });
-                      }
-                      row.disease_categories = clinicalSignificances
-                        .value
-                        .map(category => Helpers.toHummanReadable(category, true, true, true))
-                        .join(', ');
-                    }
+                    this.addTranscriptDataToDownloadableResultsRow(row, variation);
+                    this.addPositionalDataToDownloadableResultsRow(row, variation);
+                    this.addClinicalDataToDownloadableResultsRow(row, variation);
+                    this.addVariationDataToDownloadableResultsRow(row, variation);
                   });
 
                 // Add the row to the results

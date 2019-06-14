@@ -1,8 +1,11 @@
+import * as values from 'object.values';
+
 import TranscriptSignificance from './significance/TranscriptSignificance';
 import PositionalSignificance from './significance/PositionalSignificance';
 import StructuralSignificance from './significance/StructuralSignificance';
 import ClinicalSignificance from './significance/ClinicalSignificance';
-import ColocatedVariant from './significance/ColocatedVariant';
+import GenomicColocatedVariant from './significance/GenomicColocatedVariant';
+import ProteinColocatedVariant from './significance/ProteinColocatedVariant';
 import Feature from './significance/Feature';
 import Evidence from './significance/Evidence';
 
@@ -71,6 +74,8 @@ export default class Variation {
   private _baseAndAllele: string;
   private _variantAllele: string;
   private _aminoAcids: string;
+  private _aminoAcidBase: string;
+  private _aminoAcidChange: string;
   private _threeLetterCodes: string;
   private _codons: string;
   private _proteinStart: number;
@@ -89,8 +94,9 @@ export default class Variation {
   private _transcriptSignificance: TranscriptSignificance[] = [];
   private _positionalSignificance: PositionalSignificance;
   private _clinicalSignificance: ClinicalSignificance;
-  private _structuralSignificances: StructuralSignificance[] = [];
-  private _colocatedVariants: ColocatedVariant[] = [];
+  private _structuralSignificances: StructuralSignificance;
+  private _genomicColocatedVariants: GenomicColocatedVariant[] = [];
+  private _proteinColocatedVariants: ProteinColocatedVariant[] = [];
 
   constructor(allele: string) {
     this.allele = allele;
@@ -119,15 +125,20 @@ export default class Variation {
   }
   public set aminoAcids(aminoAcids: string) {
 
-    if (typeof aminoAcids === 'undefined' || aminoAcids === null) {
+    if (aminoAcids === undefined || aminoAcids === null) {
       return;
     }
 
     this._aminoAcids = aminoAcids;
 
     const oneLetterCodes = aminoAcids.split('/');
-    const left: string = threeLetterCode[oneLetterCodes[0]];
-    const right: string = threeLetterCode[oneLetterCodes[1]];
+
+    this._aminoAcidBase = oneLetterCodes[0];
+    this._aminoAcidChange = oneLetterCodes[1];
+
+    const left: string = threeLetterCode[this._aminoAcidBase];
+    const right: string = threeLetterCode[this._aminoAcidChange];
+
     this._threeLetterCodes = `${left}/${right}`;
   }
 
@@ -135,6 +146,12 @@ export default class Variation {
   public get threeLetterCodes() : string {
     return this._threeLetterCodes;
   }
+
+  // Wild Type
+  public get wildType() : string { return this._aminoAcidBase; }
+
+  // Alternative Sequence
+  public get alternativeSequence() : string { return this._aminoAcidChange; }
 
   // Codons
   public get codons() : string {
@@ -282,21 +299,83 @@ export default class Variation {
   }
 
   // Structural Significances
-  public getStructuralSignificances() : StructuralSignificance[] {
+  public getStructuralSignificances() : StructuralSignificance {
     return this._structuralSignificances;
   }
 
   public addStructuralSignificance(structuralSignificance: StructuralSignificance) {
-    this._structuralSignificances.push(structuralSignificance);
+    this._structuralSignificances = structuralSignificance;
   }
 
-  // Colocated Variants
-  public getColocatedVariants() : ColocatedVariant[] {
-    return this._colocatedVariants;
+  // Genomic Colocated Variants
+  public getGenomicColocatedVariants() : GenomicColocatedVariant[] {
+    return this._genomicColocatedVariants;
   }
 
-  public addColocatedVariant(colocatedVariant: ColocatedVariant) {
-    this._colocatedVariants.push(colocatedVariant);
+  public addGenomicColocatedVariant(colocatedVariant: GenomicColocatedVariant) {
+    this._genomicColocatedVariants.push(colocatedVariant);
+  }
+
+  public hasGenomicColocatedVariant() : boolean {
+    return (this._genomicColocatedVariants.length > 0);
+  }
+
+  // Protein Colocated Variants
+  public getProteinColocatedVariants() : ProteinColocatedVariant[] {
+    return this._proteinColocatedVariants;
+  }
+
+  public addProteinColocatedVariant(colocatedVariant: ProteinColocatedVariant) {
+    this._proteinColocatedVariants.push(colocatedVariant);
+  }
+
+  public hasProteinColocatedVariant() : boolean {
+    return (this._proteinColocatedVariants.length > 0);
+  }
+
+  public countUniqueProteinColocatedVariants() : number {
+    const counts = {};
+
+    this._proteinColocatedVariants
+      .forEach((cv) => {
+        const alt = cv.alternativeSequence;
+
+        if (counts[alt] === undefined) {
+          counts[alt] = 0;
+        }
+
+        counts[alt] = counts[alt] + 1;
+      });
+
+    return Object.keys(counts)
+      .length;
+  }
+
+  public countDiseasAssociatedProteinColocatedVariants() : number {
+    const counts = {};
+
+    this._proteinColocatedVariants
+      .forEach((cv) => {
+        const alt = cv.alternativeSequence;
+
+        if (counts[alt] === undefined) {
+          counts[alt] = 0;
+        }
+
+        if (cv.disease) {
+          counts[alt] = counts[alt] + 1;
+        }
+      });
+
+    Object.keys(counts)
+      .forEach((key) => {
+        if (counts[key] === 0) {
+          delete counts[key];
+        }
+      });
+
+    return Object.keys(counts)
+      .length;
   }
 
   // Check if this variation overlaps with the suplied range.
@@ -319,24 +398,17 @@ export default class Variation {
       }
 
       // feature type.
-      if (typeof featureTypes[rawFeature.type] === 'undefined') {
+      if (featureTypes[rawFeature.type] === undefined) {
         // not a type that we are interested in.
         return;
-      }
-
-      // TODO: Where should the following data be collected? How is it represented?
-      // special types.
-      if (specialFeatureTypes.includes(rawFeature.type)) {
-        // collect this somewhere...
       }
 
       // evidence.
       const evidences: Evidence[] = [];
 
-      if (typeof rawFeature.evidences !== 'undefined') {
+      if (rawFeature.evidences !== undefined) {
         rawFeature.evidences.forEach((ev) => {
-          // TODO: ev.source is 'undefined' in some cases.
-          if (typeof ev.source === 'undefined') {
+          if (ev.source === undefined) {
             return;
           }
 
@@ -361,6 +433,7 @@ export default class Variation {
         rawFeature.begin,
         rawFeature.end,
         evidences,
+        rawFeature.ftId,
       );
 
       this.getPositionalSignificance()

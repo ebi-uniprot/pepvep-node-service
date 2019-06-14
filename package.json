@@ -26,7 +26,7 @@
   "homepage": "https://github.com/ebi-uniprot/pepvep-node-service#readme",
   "dependencies": {
     "@types/node": "^10.9.4",
-    "axios": "^0.18.0",
+    "axios": "0.18.1",
     "body-parser": "^1.18.2",
     "cookie-parser": "^1.4.3",
     "express": "^4.16.3",
@@ -43,7 +43,7 @@
     "pm2": "^3.2.2",
     "ts-node": "^7.0.1",
     "tslint": "^5.11.0",
-    "tslint-config-airbnb": "^5.11.1",
+    "tslint-microsoft-contrib": "^6.2.0",
     "typescript": "^3.1.1"
   }
 }
