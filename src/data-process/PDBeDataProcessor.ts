@@ -10,10 +10,8 @@ export default abstract class PDBeDataProcessor {
           const accession = Object.keys(i)[0];
           const item = i[accession];
 
-          if (Object.keys(item.all_structures).length > 0) {
-            const x = {};
-            x[accession] = item;
-            all.push(x);
+          if (Object.keys(item.all_structures).length) {
+            all.push({ [accession]: item });
           }
         });
 
