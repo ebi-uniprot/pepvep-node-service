@@ -21,6 +21,7 @@ export default class SearchResults {
   private _proteins: TypedMap<Protein> = {};
   private _genes: TypedMap<Gene> = {};
   private _variations: TypedMap<Variation> = {};
+  public errors: any[] = [];
 
   public idGenerator(value: string) : string {
     return crypto.createHash('md5').update(value).digest('hex');
@@ -340,12 +341,15 @@ export default class SearchResults {
   }
 
   public generateResultTableData() {
-    const json = {};
+    const output = {
+      errors: this.errors,
+      results: {},
+    };
 
     Object.keys(this._inputs)
       .forEach((groupId) => {
-        if (json[groupId] === undefined) {
-          json[groupId] = {
+        if (output.results[groupId] === undefined) {
+          output.results[groupId] = {
             key: groupId,
             input: this._inputs[groupId].raw,
             rows: this._inputs[groupId]
@@ -379,7 +383,7 @@ export default class SearchResults {
         }
       });
 
-    return json;
+    return output;
   }
 
   private createEmptyDownloadableResultsRow(groupId: string, gene: Gene, protein: Protein) {
