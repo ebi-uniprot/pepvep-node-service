@@ -3,6 +3,7 @@ import * as bodyParser from 'body-parser';
 import * as cookieParser from 'cookie-parser';
 import axios from 'axios';
 import * as path from 'path';
+import to from 'await-to-js';
 
 import Helpers from './data-fetch/Helpers';
 import UniProtKB from './data-fetch/UniProtKB';
@@ -42,21 +43,27 @@ app.use(bodyParser.json());
 app.get('/is-alive', (req, res) => res.send('Node service is alive.'));
 
 // Data process
-const process = (input: string, download: boolean = false) => {
+const process = async (input: string, download: boolean = false) => {
   const organism: string = 'homo_sapiens';
 
   const search = new Search();
-  return search.vepInputSearch(organism, input, download);
+  const results = await to(search.vepInputSearch(organism, input, download));
+
+  return Promise.resolve(results);
 };
 
 // Default VEP Input
-app.post('/parser', (req, res) => {
-  // console.log("input:", req.body.input);
+app.post('/parser', async (req, res) => {
   const input: string = req.body.input;
   const downloadResults: boolean = false;
 
-  process(input, downloadResults)
-    .then(results => res.send(results));
+  const [error, results] = await process(input, downloadResults);
+
+  if (error) {
+    res.status(500).send('Back-end failed.')
+  }
+
+  res.send(results);
 });
 
 // Download
