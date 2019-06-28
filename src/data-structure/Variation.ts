@@ -77,6 +77,8 @@ export default class Variation {
   private _aminoAcidBase: string;
   private _aminoAcidChange: string;
   private _threeLetterCodes: string;
+  private _threeLetterAminoAcidBase: string;
+  private _threeLetterAminoAcidChange: string;
   private _codons: string;
   private _proteinStart: number;
   private _proteinEnd: number;
@@ -136,16 +138,22 @@ export default class Variation {
     this._aminoAcidBase = oneLetterCodes[0];
     this._aminoAcidChange = oneLetterCodes[1];
 
-    const left: string = threeLetterCode[this._aminoAcidBase];
-    const right: string = threeLetterCode[this._aminoAcidChange];
+    this._threeLetterAminoAcidBase = threeLetterCode[this._aminoAcidBase];
+    this._threeLetterAminoAcidChange = threeLetterCode[this._aminoAcidChange];
 
-    this._threeLetterCodes = `${left}/${right}`;
+    this._threeLetterCodes = `${this._threeLetterAminoAcidBase}/${this._threeLetterAminoAcidChange}`;
   }
 
   // Three Letter Codes
   public get threeLetterCodes() : string {
     return this._threeLetterCodes;
   }
+
+  // Three Letter Amino Acid Base Code
+  public get threeLetterAminoAcidBase() : string { return this._threeLetterAminoAcidBase; }
+
+  // Three Letter Amino Acid Change Code
+  public get threeLetterAminoAcidChange() : string { return this._threeLetterAminoAcidChange; }
 
   // Wild Type
   public get wildType() : string { return this._aminoAcidBase; }

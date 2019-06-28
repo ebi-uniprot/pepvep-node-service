@@ -67,15 +67,20 @@ app.post('/parser', async (req, res) => {
 });
 
 // Download
-app.post('/download', (req, res) => {
+app.post('/download', async (req, res) => {
   const input: string = req.body.input;
   const downloadResults: boolean = true;
 
   res.setHeader('Content-disposition', 'attachment; filename=pepvep-data.csv');
   res.setContentType('text/csv');
 
-  process(input, downloadResults)
-    .then(results => res.send(results));
+  const [error, results] = await process(input, downloadResults);
+
+  if (error) {
+    res.status(500).send('Back-end failed.')
+  }
+
+  res.send(results);
 });
 
 // To serve front-end from 'www' folder
