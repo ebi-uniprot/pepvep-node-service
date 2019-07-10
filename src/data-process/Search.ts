@@ -21,21 +21,21 @@ export default class Search {
     uniprot: {
       proteins: {
         title: 'API Error',
-        message: 'Call to UniProtKB API failed. Some data from the results will be missing.',
+        message: 'Call to UniProt/Proteins API has failed. Some data from the results will be missing.',
       },
       features: {
         title: 'API Error',
-        message: 'Call to UniProtKB API failed. Some data from the results will be missing.',
+        message: 'Call to UniProt/Features API has failed. Some data from the results will be missing.',
       },
       variation: {
         title: 'API Error',
-        message: 'Call to UniProtKB API failed. Some data from the results will be missing.',
+        message: 'Call to UniProt/Variation API has failed. Some data from the results will be missing.',
       },
     },
     pdbe: {
       summary_stats: {
         title: 'API Error',
-        message: 'Call to PDBe API failed. Some data from the results will be missing.',
+        message: 'Call to PDBe API has failed. Some data from the results will be missing.',
      },
    },
   };

@@ -409,6 +409,9 @@ export default class SearchResults {
       trembl_accessions: (protein.tremblAccessions || []).join(';'),
       protein_start: undefined,
       protein_end: undefined,
+      structures: undefined,
+      ligands: undefined,
+      structural_interaction_partners: undefined,
       amino_acid_change: undefined,
       associated_to_disease: undefined,
       disease_categories: undefined,
@@ -608,6 +611,69 @@ export default class SearchResults {
     }
   }
 
+  private addStructuralDataToDownloadableResultsRow(
+    row: any,
+    variation: Variation,
+    protein: Protein,
+  ) {
+    const structuralSignificances = variation.getStructuralSignificances();
+
+    if (!structuralSignificances) {
+      return;
+    }
+
+    row.structures = structuralSignificances.getStructures()
+      .reduce((output, structure) => {
+        let result = output;
+
+        if (variation.threeLetterAminoAcidBase.toUpperCase() !== structure.position_code) {
+          return output;
+        }
+
+        result += structure.best_structures
+          .join(',');
+
+        return result;
+      }, '');
+
+    row.ligands = structuralSignificances.getLigands()
+      .reduce((output, ligandObject) => {
+        let result = [];
+
+        if (variation.threeLetterAminoAcidBase.toUpperCase() !== ligandObject.position_code) {
+          return output;
+        }
+
+        ligandObject.ligands
+          .forEach((ligand) => {
+            const ligandSerilised = [
+              `id:${ligand.ligand_id}`,
+              `formula:${ligand.formula}`,
+              `InChi:${ligand.InChi}`,
+              `ligand_name:${ligand.ligand_name}`,
+            ].join(',');
+
+            result.push(ligandSerilised);
+          });
+
+          return output + result.join('|');
+      }, '');
+
+    row.structural_interaction_partners = structuralSignificances.getInteractions()
+      .reduce((output, interaction) => {
+        let result = output;
+
+        if (variation.threeLetterAminoAcidBase.toUpperCase() !== interaction.position_code) {
+          return output;
+        }
+
+        result += interaction.partners
+          .join(',');
+
+        return result;
+      }, '');
+  }
+
   private addVariationDataToDownloadableResultsRow(row: any, variation: Variation) {
     if (typeof row.genomic_start !== 'number' && variation.genomicVariationStart) {
       row.genomic_start = variation.genomicVariationStart;
@@ -691,6 +757,7 @@ export default class SearchResults {
                     this.addTranscriptDataToDownloadableResultsRow(row, variation);
                     this.addPositionalDataToDownloadableResultsRow(row, variation);
                     this.addClinicalDataToDownloadableResultsRow(row, variation);
+                    this.addStructuralDataToDownloadableResultsRow(row, variation, protein);
                     this.addVariationDataToDownloadableResultsRow(row, variation);
                   });
 
