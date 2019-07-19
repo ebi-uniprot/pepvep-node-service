@@ -3,6 +3,7 @@ import * as values from 'object.values';
 import TranscriptSignificance from './significance/TranscriptSignificance';
 import PositionalSignificance from './significance/PositionalSignificance';
 import StructuralSignificance from './significance/StructuralSignificance';
+import GenomicSignificance from './significance/GenomicSignificance';
 import ClinicalSignificance from './significance/ClinicalSignificance';
 import GenomicColocatedVariant from './significance/GenomicColocatedVariant';
 import ProteinColocatedVariant from './significance/ProteinColocatedVariant';
@@ -42,6 +43,7 @@ export const featureTypes: any = {
   HELIX: 'Alpha-helix',
   STRAND: 'Beta-strand',
   PEPTIDE: 'Peptide',
+  REGION: 'Region',
 };
 
 const threeLetterCode: any = {
@@ -93,12 +95,20 @@ export default class Variation {
   private _cdsStart: number;
   private _cdsEnd: number;
   private _exon: string;
+  private _hasENSP: boolean;
+  private _hasENST: boolean;
+  private _cosmicId: string;
+  private _dbSNIPId: string;
+  private _clinVarId: string;
+  private _uniprotVariantId: string;
   private _transcriptSignificance: TranscriptSignificance[] = [];
   private _positionalSignificance: PositionalSignificance;
   private _clinicalSignificance: ClinicalSignificance;
   private _structuralSignificances: StructuralSignificance;
+  private _genomicSignificance: GenomicSignificance;
   private _genomicColocatedVariants: GenomicColocatedVariant[] = [];
   private _proteinColocatedVariants: ProteinColocatedVariant[] = [];
+  private _populationFrequency: any = {};
 
   constructor(allele: string) {
     this.allele = allele;
@@ -275,6 +285,54 @@ export default class Variation {
     this._exon = exon;
   }
 
+  // Has ENSP?
+  public get hasENSP() : boolean {
+    return this._hasENSP;
+  }
+  public set hasENSP(hasENSP: boolean) {
+    this._hasENSP = hasENSP;
+  }
+
+  // Has ENST?
+  public get hasENST() : boolean {
+    return this._hasENST;
+  }
+  public set hasENST(hasENST: boolean) {
+    this._hasENST = hasENST;
+  }
+
+  // Cosmic ID
+  public get cosmicId() : string {
+    return this._cosmicId;
+  }
+  public set cosmicId(cosmicId: string) {
+    this._cosmicId = cosmicId;
+  }
+
+  // dbSNIP ID
+  public get dbSNIPId() : string {
+    return this._dbSNIPId;
+  }
+  public set dbSNIPId(dbSNIPId: string) {
+    this._dbSNIPId = dbSNIPId;
+  }
+
+  // ClinVar ID
+  public get clinVarId() : string {
+    return this._clinVarId;
+  }
+  public set clinVarId(clinVarId: string) {
+    this._clinVarId = clinVarId;
+  }
+
+  // UniProt Variation ID
+  public get uniProtVariationId() : string {
+    return this._uniprotVariantId;
+  }
+  public set uniProtVariationId(uniProtVariationId: string) {
+    this._uniprotVariantId = uniProtVariationId;
+  }
+
   // Transcript Significances
   public getTranscriptSignificance() : TranscriptSignificance[] {
     return this._transcriptSignificance;
@@ -315,6 +373,15 @@ export default class Variation {
     this._structuralSignificances = structuralSignificance;
   }
 
+  // Genomic Significances
+  public getGenomicSignificance() : GenomicSignificance {
+    return this._genomicSignificance;
+  }
+
+  public addGenomicSignificance(genomicSignificance: GenomicSignificance) {
+    this._genomicSignificance = genomicSignificance;
+  }
+
   // Genomic Colocated Variants
   public getGenomicColocatedVariants() : GenomicColocatedVariant[] {
     return this._genomicColocatedVariants;
@@ -326,6 +393,32 @@ export default class Variation {
 
   public hasGenomicColocatedVariant() : boolean {
     return (this._genomicColocatedVariants.length > 0);
+  }
+
+  // Add Genomic Colocated Variant IDs
+  public addGenomicColocatedVariantIDs(ids: any) {
+    const {
+      cosmicId,
+      dbSNIPId,
+      clinVarId,
+      uniProtVariationId,
+    } = ids;
+
+    if (cosmicId) {
+      this.cosmicId = cosmicId;
+    }
+
+    if (dbSNIPId) {
+      this.dbSNIPId = dbSNIPId;
+    }
+
+    if (clinVarId) {
+      this.clinVarId = clinVarId;
+    }
+
+    if (uniProtVariationId) {
+      this.uniProtVariationId = uniProtVariationId;
+    }
   }
 
   // Protein Colocated Variants
@@ -340,6 +433,20 @@ export default class Variation {
   public hasProteinColocatedVariant() : boolean {
     return (this._proteinColocatedVariants.length > 0);
   }
+
+  // Population Frequency
+  public getPopulationFrequency() : any {
+    return this._populationFrequency;
+  }
+
+  public addPopulationFrequency(frequency: any) {
+    // const transformed = this.processPopulationFrequency(frequency);
+    // this._populationFrequency = transformed;
+  }
+
+  // private processPopulationFrequency(frequncy: any) : any {
+
+  // }
 
   public countUniqueProteinColocatedVariants() : number {
     const counts = {};

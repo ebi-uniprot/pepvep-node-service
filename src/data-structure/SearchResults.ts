@@ -9,6 +9,7 @@ import ClinicalSignificance from './significance/ClinicalSignificance';
 import PositionalSignificance from './significance/PositionalSignificance';
 import StructuralSignificance from './significance/StructuralSignificance';
 import TranscriptSignificance from './significance/TranscriptSignificance';
+import GenomicSignificance from './significance/GenomicSignificance';
 import Helpers from './../data-fetch/Helpers';
 
 // A generic type for dictionary-like objects
@@ -171,7 +172,6 @@ export default class SearchResults {
 
                     // tslint:disable:max-line-length
                     const key: string = `${accession}-${proteinStart}:${proteinEnd}-${aminoAcids}`;
-
                     map[key] = variation;
                   });
               });
@@ -271,6 +271,8 @@ export default class SearchResults {
     row.gene.hgvsg = variation.hgvsg;
     row.gene.hgvsp = variation.hgvsp;
     row.gene.codons = variation.codons;
+    row.gene.hasENSP = variation.hasENSP;
+    row.gene.hasENST = variation.hasENST;
     row.protein.variant = variation.aminoAcids;
     row.protein.threeLetterCodes = variation.threeLetterCodes;
     row.protein.start = variation.proteinStart;
@@ -294,11 +296,18 @@ export default class SearchResults {
   }
 
   private addColocatedVariantsToSearchResultsRow(row: any, variation: Variation) {
+    row.variation.cosmicId = variation.cosmicId;
+    row.variation.dbSNIPId = variation.dbSNIPId;
+    row.variation.clinVarId = variation.clinVarId;
+    row.variation.uniProtVariationId = variation.uniProtVariationId;
+
     row.variation.proteinColocatedVariants =
       variation.getProteinColocatedVariants();
 
     row.variation.genomicColocatedVariants =
-      variation.getGenomicColocatedVariants();
+      variation
+        .getGenomicColocatedVariants()
+        .map(cv => cv.toJSON());
 
     row.variation.proteinColocatedVariantsCount =
       variation.countUniqueProteinColocatedVariants();
@@ -310,9 +319,20 @@ export default class SearchResults {
   private addSignificancesToSearchResultsRow(row: any, variation: Variation) {
     const positinalSignificances: any = {
       features: variation.getPositionalSignificance().getFeatures(),
+      colocatedVariants: variation.getProteinColocatedVariants(),
+      variationDetails: {
+        begin: variation.proteinStart,
+        end: variation.proteinEnd,
+        ids: {
+          rsId: variation.dbSNIPId,
+          clinVarId: variation.clinVarId,
+          uniprotVariantId: variation.uniProtVariationId,
+          cosmicId: variation.cosmicId,
+        }
+      }
     };
 
-    row.significances['positional'] =
+    row.significances['functional'] =
       (0 < positinalSignificances.features.length)
         ? positinalSignificances
         : undefined;
@@ -337,6 +357,13 @@ export default class SearchResults {
 
     row.significances['structural'] = (structuralSignificances)
       ? structuralSignificances.toJSON()
+      : undefined;
+
+    const genomicSignificance: GenomicSignificance = variation
+      .getGenomicSignificance();
+
+    row.significances['genomic'] = (genomicSignificance)
+      ? genomicSignificance.toJSON()
       : undefined;
   }
 

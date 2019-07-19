@@ -59,8 +59,8 @@ app.post('/parser', async (req, res) => {
 
   const [error, results] = await process(input, downloadResults);
 
-  if (error) {
-    res.status(500).send('Back-end failed.')
+  if (error && JSON.stringify(error) !== '{}') {
+    res.status(500).send({ error });
   }
 
   res.send(results);
@@ -77,7 +77,7 @@ app.post('/download', async (req, res) => {
   const [error, results] = await process(input, downloadResults);
 
   if (error) {
-    res.status(500).send('Back-end failed.')
+    res.status(500).send('Back-end failed.');
   }
 
   res.send(results);

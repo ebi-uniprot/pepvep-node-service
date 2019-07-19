@@ -4,7 +4,9 @@ import Gene from '../data-structure/Gene';
 import Protein from '../data-structure/Protein';
 import Variation from '../data-structure/Variation';
 import TranscriptSignificance from '../data-structure/significance/TranscriptSignificance';
+import GenomicSignificance from '../data-structure/significance/GenomicSignificance';
 import GenomicColocatedVariant from '../data-structure/significance/GenomicColocatedVariant';
+import Helpers from '../data-fetch/Helpers';
 
 export default abstract class VEPDataProcessor {
   public static async process(results: SearchResults, data: any) {
@@ -60,24 +62,188 @@ export default abstract class VEPDataProcessor {
 
             variation.addTranscriptSignificance(transcriptSignificance);
             protein.addVariation(variation);
-          });
 
-        /* Looping through genomic colocated variants to either define a novel variant or
-          collect useful information */
-        vepOutput.colocated_variants
-          .forEach((cv) => {
-            const genomicColocatedVariant : GenomicColocatedVariant =
-              new GenomicColocatedVariant(cv.id);
+            let genomicVariantIDs = {};
 
-            if (cv.pubmed) {
-              cv.pubmed
-                .forEach(pm => genomicColocatedVariant.addPubMedID(pm));
-            }
+            const genomicSignificance: GenomicSignificance =
+              new GenomicSignificance();
 
-            variation.addGenomicColocatedVariant(genomicColocatedVariant);
+            VEPDataProcessor.collectConsequencePredictionData(
+              genomicSignificance,
+              tc,
+            );
+
+            /* Looping through genomic colocated variants to either define a novel variant or
+              collect useful information */
+            vepOutput.colocated_variants && vepOutput.colocated_variants
+              .forEach((cv) => {
+                const genomicColocatedVariant : GenomicColocatedVariant =
+                  new GenomicColocatedVariant(cv.id);
+
+                if (cv.pubmed) {
+                  cv.pubmed
+                    .forEach(pm => genomicColocatedVariant.addPubMedID(pm));
+                }
+
+                variation.addGenomicColocatedVariant(genomicColocatedVariant);
+
+                const variantIDs = VEPDataProcessor
+                  .extractGenomicVariantIDs(genomicColocatedVariant);
+
+                Object.keys(variantIDs)
+                  .forEach((id) => {
+                    if (!genomicVariantIDs[id] && variantIDs[id]) {
+                      genomicVariantIDs[id] = variantIDs[id];
+                    }
+                  });
+
+                if (cv.clin_sig) {
+                  transcriptSignificance.pathogenicity = cv
+                    .clin_sig
+                    .map(cs => Helpers.toHummanReadable(cs));
+                }
+
+                if (cv.frequencies && cv.frequencies[variation.variantAllele]) {
+                  const rawFrequencies = cv.frequencies[variation.variantAllele];
+                  const gnomAD = {
+                    all: {
+                      label: 'All',
+                      value: undefined,
+                    },
+                    afr: {
+                      label: 'African',
+                      value: undefined,
+                    },
+                    amr: {
+                      label: 'Latino',
+                      value: undefined,
+                    },
+                    asj: {
+                      label: 'Ashkenazi Jewish',
+                      value: undefined,
+                    },
+                    eas: {
+                      label: 'East Asian',
+                      value: undefined,
+                    },
+                    fin: {
+                      label: 'Finnish',
+                      value: undefined,
+                    },
+                    nfe: {
+                      label: 'non-Finish European',
+                      value: undefined,
+                    },
+                    oth: {
+                      label: 'Other',
+                      value: undefined,
+                    },
+                    sas: {
+                      label: 'South Asian',
+                      value: undefined
+                    },
+                  };
+
+                  const oneK = {
+                    afr: {
+                      label: 'African',
+                      value: undefined,
+                    },
+                    amr: {
+                      label: 'American',
+                      value: undefined,
+                    },
+                    eas: {
+                      label: 'East Asian',
+                      value: undefined,
+                    },
+                    eur: {
+                      label: 'European',
+                      value: undefined,
+                    },
+                    sas: {
+                      label: 'South Asian',
+                      value: undefined
+                    },
+                  };
+
+                  const frequencies = {
+                    gnomAD,
+                    '1kg': oneK,
+                  };
+
+                  if (rawFrequencies.gnomad > 0) {
+                    gnomAD.all.value = rawFrequencies.gnomad;
+                  }
+
+                  Object.keys(gnomAD)
+                    .forEach((key) => {
+                      if (rawFrequencies[`gnomad_${key}`] > 0) {
+                        gnomAD[key].value = rawFrequencies[`gnomad_${key}`];
+                      }
+                    });
+
+                  Object.keys(oneK)
+                    .forEach((key) => {
+                      if (rawFrequencies[key] > 0) {
+                        oneK[key].value = rawFrequencies[key];
+                      }
+                    });
+
+                  genomicColocatedVariant.populationFrequencies = frequencies;
+                    // cv.frequencies[variation.variantAllele];
+
+                  genomicSignificance.populationFrequencies = frequencies;
+                    // cv.frequencies[variation.variantAllele];
+                }
+              });
+
+            gene.addGenomicColocatedVariantIDs(genomicVariantIDs);
+
+            genomicSignificance.cosmicId = genomicVariantIDs['cosmicId'];
+            genomicSignificance.dbSNIPId = genomicVariantIDs['dbSNIPId'];
+            genomicSignificance.clinVarId = genomicVariantIDs['clinVarId'];
+            genomicSignificance.uniProtVariationId = genomicVariantIDs['uniProtVariationId'];
+
+            variation.addGenomicSignificance(genomicSignificance);
           });
       }
     });
+  }
+
+  private static extractGenomicVariantIDs(colocatedVariant: GenomicColocatedVariant) {
+    const cosmicPattern: RegExp = /^COSM.*/ig;
+    const dbSNIPPattern: RegExp = /^rs.*/ig;
+    const clinVarPattern: RegExp = /^RCV.*/ig;
+    const uniprotVariantId: RegExp = /^VAR_.*/ig;
+
+    let cosmicId;
+    let dbSNIPId;
+    let clinVarId;
+    let uniProtVariationId;
+
+    if (cosmicPattern.test(colocatedVariant.id)) {
+      cosmicId = colocatedVariant.id;
+    }
+
+    if (dbSNIPPattern.test(colocatedVariant.id)) {
+      dbSNIPId = colocatedVariant.id;
+    }
+
+    if (clinVarPattern.test(colocatedVariant.id)) {
+      clinVarId = colocatedVariant.id;
+    }
+
+    if (uniprotVariantId.test(colocatedVariant.id)) {
+      uniProtVariationId = colocatedVariant.id;
+    }
+
+    return {
+      cosmicId,
+      dbSNIPId,
+      clinVarId,
+      uniProtVariationId,
+    };
   }
 
   private static collectVariationData(
@@ -107,6 +273,8 @@ export default abstract class VEPDataProcessor {
     variation.cdsStart = transcriptData.cds_start;
     variation.cdsEnd = transcriptData.cds_end;
     variation.exon = transcriptData.exon;
+    variation.hasENSP = (transcriptData.protein_id !== undefined);
+    variation.hasENST = (transcriptData.transcript_id !== undefined);
   }
 
   private static collectTranscriptSignificancesData(
@@ -114,7 +282,7 @@ export default abstract class VEPDataProcessor {
     transcriptData: any,
     other: any
   ) {
-    transcriptSignificance.biotype = transcriptData.biotype;
+    transcriptSignificance.biotype = Helpers.toHummanReadable(transcriptData.biotype);
     transcriptSignificance.impact = transcriptData.impact;
     transcriptSignificance.polyphenPrediction = transcriptData.polyphen_prediction;
     transcriptSignificance.polyphenScore = transcriptData.polyphen_score;
@@ -136,9 +304,21 @@ export default abstract class VEPDataProcessor {
     transcriptSignificance.blosum62 = transcriptData.blosum62;
     transcriptSignificance.tsl = transcriptData.tsl;
 
-    if (transcriptData.consequence_terms !== undefined) {
+    if (transcriptData.consequence_terms) {
       transcriptData.consequence_terms
         .forEach(term => transcriptSignificance.addConsequenceTerm(term));
     }
+  }
+
+  private static collectConsequencePredictionData(
+    genomicSignificance: GenomicSignificance,
+    transcriptData: any,
+  ) {
+    genomicSignificance.polyphenPrediction = transcriptData.polyphen_prediction;
+    genomicSignificance.polyphenScore = transcriptData.polyphen_score;
+    genomicSignificance.siftPrediction = transcriptData.sift_prediction;
+    genomicSignificance.siftScore = transcriptData.sift_score;
+    genomicSignificance.caddPhred = transcriptData.cadd_phred;
+    genomicSignificance.caddRaw = transcriptData.cadd_raw;
   }
 }

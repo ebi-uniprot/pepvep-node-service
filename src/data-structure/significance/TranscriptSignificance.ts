@@ -28,6 +28,7 @@ export default class TranscriptSignificance {
   private _mutPredScore: number;
   private _blosum62: number;
   private _tsl: number;
+  private _pathogenicity: string[];
 
   // Biotype
   get biotype() : string { return this._biotype; }
@@ -131,6 +132,10 @@ export default class TranscriptSignificance {
   public get tsl() : number { return this._tsl; }
   public set tsl(value: number) { this._tsl = value; }
 
+  // Pathogenicity
+  public get pathogenicity() : string[] { return this._pathogenicity; }
+  public set pathogenicity(pathogenicity: string[]) { this._pathogenicity = pathogenicity; }
+
   public toJSON() {
     return {
       biotype: this.biotype,
@@ -155,6 +160,7 @@ export default class TranscriptSignificance {
       mutPredScore: this.mutPredScore,
       blosum62: this.blosum62,
       tsl: this.tsl,
+      pathogenicity: this.pathogenicity,
     };
   }
 }

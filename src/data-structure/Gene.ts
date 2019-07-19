@@ -9,6 +9,10 @@ export default class Gene {
   private _assemblyName: string;
   private _strand: number;
   private _hgncId: string;
+  private _cosmicId: string;
+  private _dbSNIPId: string;
+  private _clinVarId: string;
+  private _uniprotVariantId: string;
   private _proteins: any = {};
 
   constructor(ensg: string, chromosome: string) {
@@ -31,6 +35,38 @@ export default class Gene {
   public get hgncId() : string { return this._hgncId; }
   public set hgncId(id: string) { this._hgncId = id; }
 
+  // Cosmic ID
+  public get cosmicId() : string {
+    return this._cosmicId;
+  }
+  public set cosmicId(cosmicId: string) {
+    this._cosmicId = cosmicId;
+  }
+
+  // dbSNIP ID
+  public get dbSNIPId() : string {
+    return this._dbSNIPId;
+  }
+  public set dbSNIPId(dbSNIPId: string) {
+    this._dbSNIPId = dbSNIPId;
+  }
+
+  // ClinVar ID
+  public get clinVarId() : string {
+    return this._clinVarId;
+  }
+  public set clinVarId(clinVarId: string) {
+    this._clinVarId = clinVarId;
+  }
+
+  // UniProt Variation ID
+  public get uniProtVariationId() : string {
+    return this._uniprotVariantId;
+  }
+  public set uniProtVariationId(uniProtVariationId: string) {
+    this._uniprotVariantId = uniProtVariationId;
+  }
+
   public getProteins() : Protein[] {
     return values(this._proteins);
   }
@@ -42,5 +78,43 @@ export default class Gene {
     if (this._proteins[key] === undefined) {
       this._proteins[key] = protein;
     }
+  }
+
+  public addGenomicColocatedVariantIDs(ids: any) {
+    const {
+      cosmicId,
+      dbSNIPId,
+      clinVarId,
+      uniProtVariationId,
+    } = ids;
+
+    if (cosmicId) {
+      this.cosmicId = cosmicId;
+    }
+
+    if (dbSNIPId) {
+      this.dbSNIPId = dbSNIPId;
+    }
+
+    if (clinVarId) {
+      this.clinVarId = clinVarId;
+    }
+
+    if (uniProtVariationId) {
+      this.uniProtVariationId = uniProtVariationId;
+    }
+
+    this.getProteins()
+      .map((protein) => {
+        protein.getVariations()
+          .forEach((variation) => {
+            variation.addGenomicColocatedVariantIDs({
+              cosmicId: this.cosmicId,
+              dbSNIPId: this.dbSNIPId,
+              clinVarId: this.clinVarId,
+              uniProtVariationId: this.uniProtVariationId,
+            });
+          });
+      });
   }
 }
