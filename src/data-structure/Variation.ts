@@ -99,7 +99,7 @@ export default class Variation {
   private _hasENST: boolean;
   private _cosmicId: string;
   private _dbSNIPId: string;
-  private _clinVarId: string;
+  private _clinVarRecords: any[] = [];
   private _uniprotVariantId: string;
   private _transcriptSignificance: TranscriptSignificance[] = [];
   private _positionalSignificance: PositionalSignificance;
@@ -317,12 +317,45 @@ export default class Variation {
     this._dbSNIPId = dbSNIPId;
   }
 
-  // ClinVar ID
-  public get clinVarId() : string {
-    return this._clinVarId;
+  // ClinVar
+  public addClinVarRecord(record: any) : void {
+    const {
+      external_id,
+      mim,
+      pubmed_id,
+      risk_allele,
+      datelastevaluated,
+      associated_gene,
+      clinvar_clin_sig,
+      id,
+      phenotype,
+    } = record;
+
+    const formatted: any = {
+      id: external_id,
+      pubMedIDs: (pubmed_id && pubmed_id.split)
+        ? pubmed_id.split(',')
+        : pubmed_id,
+      allele: risk_allele,
+      date: datelastevaluated,
+      gene: associated_gene,
+      clinicalSignificances: clinvar_clin_sig,
+      dbSNIPId: id,
+      mim,
+      phenotype,
+    };
+
+    this._clinVarRecords
+      .push(formatted);
   }
-  public set clinVarId(clinVarId: string) {
-    this._clinVarId = clinVarId;
+
+  public getClinVarRecords() : any[] {
+    return this._clinVarRecords;
+  }
+
+  public getClinVarIDs() : string[] {
+    return this._clinVarRecords
+      .map(cv => cv.id);
   }
 
   // UniProt Variation ID
@@ -400,7 +433,6 @@ export default class Variation {
     const {
       cosmicId,
       dbSNIPId,
-      clinVarId,
       uniProtVariationId,
     } = ids;
 
@@ -410,10 +442,6 @@ export default class Variation {
 
     if (dbSNIPId) {
       this.dbSNIPId = dbSNIPId;
-    }
-
-    if (clinVarId) {
-      this.clinVarId = clinVarId;
     }
 
     if (uniProtVariationId) {
@@ -438,15 +466,6 @@ export default class Variation {
   public getPopulationFrequency() : any {
     return this._populationFrequency;
   }
-
-  public addPopulationFrequency(frequency: any) {
-    // const transformed = this.processPopulationFrequency(frequency);
-    // this._populationFrequency = transformed;
-  }
-
-  // private processPopulationFrequency(frequncy: any) : any {
-
-  // }
 
   public countUniqueProteinColocatedVariants() : number {
     const counts = {};

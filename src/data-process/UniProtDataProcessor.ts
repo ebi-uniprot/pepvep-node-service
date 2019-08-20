@@ -144,6 +144,11 @@ export default abstract class UniProtDataProcessor {
         }
 
         if (ref.isoform === undefined) {
+          if (canonicalIsoforms.length === 0 && protein.type === 'Swiss-Prot') {
+            protein.canonical = true;
+            protein.canonicalAccession = protein.swissprotAccessions[0];
+          }
+
           return;
         }
 

@@ -1,5 +1,4 @@
 export default class StructuralSignificance {
-
   private _proteinLenght: number;
   private _allStructures: string[];
   private _annotaionts: any[] = [];

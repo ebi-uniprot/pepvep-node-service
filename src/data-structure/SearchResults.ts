@@ -298,7 +298,7 @@ export default class SearchResults {
   private addColocatedVariantsToSearchResultsRow(row: any, variation: Variation) {
     row.variation.cosmicId = variation.cosmicId;
     row.variation.dbSNIPId = variation.dbSNIPId;
-    row.variation.clinVarId = variation.clinVarId;
+    row.variation.clinVarIDs = variation.getClinVarIDs();
     row.variation.uniProtVariationId = variation.uniProtVariationId;
 
     row.variation.proteinColocatedVariants =
@@ -325,12 +325,54 @@ export default class SearchResults {
         end: variation.proteinEnd,
         ids: {
           rsId: variation.dbSNIPId,
-          clinVarId: variation.clinVarId,
+          dbSNIPId: variation.dbSNIPId,
+          clinVarIDs: variation.getClinVarIDs(),
           uniprotVariantId: variation.uniProtVariationId,
           cosmicId: variation.cosmicId,
         }
       }
     };
+
+    let clinicalSignificances: any = variation
+      .getClinicalSignificances();
+
+    if (clinicalSignificances) {
+      clinicalSignificances = clinicalSignificances.toJSON();
+
+      clinicalSignificances.colocatedVariants =
+        variation.getProteinColocatedVariants();
+
+      clinicalSignificances.variationDetails = {
+        begin: variation.proteinStart,
+        end: variation.proteinEnd,
+        ids: {
+          rsId: variation.dbSNIPId,
+          dbSNIPId: variation.dbSNIPId,
+          clinVarIDs: variation.getClinVarRecords(),
+          uniprotVariantId: variation.uniProtVariationId,
+          cosmicId: variation.cosmicId,
+        }
+      };
+    }
+
+    let genomicSignificance: any = variation
+      .getGenomicSignificance();
+
+    if (genomicSignificance) {
+      genomicSignificance = genomicSignificance.toJSON();
+
+      genomicSignificance.variationDetails = {
+        begin: variation.proteinStart,
+        end: variation.proteinEnd,
+        ids: {
+          rsId: variation.dbSNIPId,
+          dbSNIPId: variation.dbSNIPId,
+          clinVarIDs: variation.getClinVarRecords(),
+          uniprotVariantId: variation.uniProtVariationId,
+          cosmicId: variation.cosmicId,
+        }
+      };
+    }
 
     row.significances['functional'] =
       (0 < positinalSignificances.features.length)
@@ -345,11 +387,8 @@ export default class SearchResults {
       ? transcriptSignificances
       : undefined;
 
-    const clinicalSignificances: ClinicalSignificance = variation
-      .getClinicalSignificances();
-
     row.significances['clinical'] = (clinicalSignificances)
-      ? clinicalSignificances.toJSON()
+      ? clinicalSignificances
       : undefined;
 
     const structuralSignificances = variation
@@ -359,11 +398,8 @@ export default class SearchResults {
       ? structuralSignificances.toJSON()
       : undefined;
 
-    const genomicSignificance: GenomicSignificance = variation
-      .getGenomicSignificance();
-
     row.significances['genomic'] = (genomicSignificance)
-      ? genomicSignificance.toJSON()
+      ? genomicSignificance
       : undefined;
   }
 
@@ -473,6 +509,7 @@ export default class SearchResults {
       hgvs_g: undefined,
       disease_associations: [],
       protein_annotations: [],
+      colocated_variants: [],
     };
   }
 
@@ -765,6 +802,22 @@ export default class SearchResults {
     if (!row.exon) {
       row.exon = variation.exon;
     }
+
+    row.colocated_variants = variation
+      .getProteinColocatedVariants()
+      .map((cv) => {
+        return [
+          `alternative_sequence:${cv.alternativeSequence}`,
+          `clinical_significances:${cv.clinicalSignificances}`,
+          `disease:${(cv.disease) ? 1 : 0}`,
+          `large_scale_study:${cv.largeScaleStudy}`,
+          `polyphen_score:${cv.polyphenScore}`,
+          `sift_score:${cv.siftScore}`,
+          `source_type:${cv.sourceType}`,
+          `uniprot:${cv.uniprot}`,
+          `wildType:${cv.wildType}`,
+        ].join(',');
+      }).join('|');
   }
 
   public generateDownloadableData() {

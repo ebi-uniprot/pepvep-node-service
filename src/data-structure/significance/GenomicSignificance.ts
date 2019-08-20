@@ -1,9 +1,5 @@
 
 export default class GenomicSignificance {
-  private _cosmicId: string;
-  private _dbSNIPId: string;
-  private _clinVarId: string;
-  private _uniprotVariantId: string;
   private _populationFrequencies: any;
   private _polyphenPrediction: string;
   private _polyphenScore: number;
@@ -11,38 +7,6 @@ export default class GenomicSignificance {
   private _siftScore: number;
   private _caddPhred: number;
   private _caddRaw: number;
-
-  // Cosmic ID
-  public get cosmicId() : string {
-    return this._cosmicId;
-  }
-  public set cosmicId(cosmicId: string) {
-    this._cosmicId = cosmicId;
-  }
-
-  // dbSNIP ID
-  public get dbSNIPId() : string {
-    return this._dbSNIPId;
-  }
-  public set dbSNIPId(dbSNIPId: string) {
-    this._dbSNIPId = dbSNIPId;
-  }
-
-  // ClinVar ID
-  public get clinVarId() : string {
-    return this._clinVarId;
-  }
-  public set clinVarId(clinVarId: string) {
-    this._clinVarId = clinVarId;
-  }
-
-  // UniProt Variation ID
-  public get uniProtVariationId() : string {
-    return this._uniprotVariantId;
-  }
-  public set uniProtVariationId(uniProtVariationId: string) {
-    this._uniprotVariantId = uniProtVariationId;
-  }
 
   // Population Frequencies
   public get populationFrequencies() : any {
@@ -78,10 +42,6 @@ export default class GenomicSignificance {
 
   public toJSON() {
     return {
-      cosmicId: this.cosmicId,
-      dbSNIPId: this.dbSNIPId,
-      clinVarId: this.clinVarId,
-      uniProtVariationId: this.uniProtVariationId,
       populationFrequencies: this.populationFrequencies,
       consequencePrediction: {
         polyphenPrediction: this.polyphenPrediction,

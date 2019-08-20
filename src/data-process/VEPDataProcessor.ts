@@ -73,153 +73,190 @@ export default abstract class VEPDataProcessor {
               tc,
             );
 
+            // ClinVar
+            if (tc.phenotypes) {
+              tc.phenotypes
+                .forEach(ph => {
+                  if (ph.source === 'ClinVar') {
+                    variation.addClinVarRecord(ph);
+                  }
+                })
+            }
+
             /* Looping through genomic colocated variants to either define a novel variant or
               collect useful information */
-            vepOutput.colocated_variants && vepOutput.colocated_variants
-              .forEach((cv) => {
-                const genomicColocatedVariant : GenomicColocatedVariant =
-                  new GenomicColocatedVariant(cv.id);
-
-                if (cv.pubmed) {
-                  cv.pubmed
-                    .forEach(pm => genomicColocatedVariant.addPubMedID(pm));
-                }
-
-                variation.addGenomicColocatedVariant(genomicColocatedVariant);
-
-                const variantIDs = VEPDataProcessor
-                  .extractGenomicVariantIDs(genomicColocatedVariant);
-
-                Object.keys(variantIDs)
-                  .forEach((id) => {
-                    if (!genomicVariantIDs[id] && variantIDs[id]) {
-                      genomicVariantIDs[id] = variantIDs[id];
-                    }
-                  });
-
-                if (cv.clin_sig) {
-                  transcriptSignificance.pathogenicity = cv
-                    .clin_sig
-                    .map(cs => Helpers.toHummanReadable(cs));
-                }
-
-                if (cv.frequencies && cv.frequencies[variation.variantAllele]) {
-                  const rawFrequencies = cv.frequencies[variation.variantAllele];
-                  const gnomAD = {
-                    all: {
-                      label: 'All',
-                      value: undefined,
-                    },
-                    afr: {
-                      label: 'African',
-                      value: undefined,
-                    },
-                    amr: {
-                      label: 'Latino',
-                      value: undefined,
-                    },
-                    asj: {
-                      label: 'Ashkenazi Jewish',
-                      value: undefined,
-                    },
-                    eas: {
-                      label: 'East Asian',
-                      value: undefined,
-                    },
-                    fin: {
-                      label: 'Finnish',
-                      value: undefined,
-                    },
-                    nfe: {
-                      label: 'non-Finish European',
-                      value: undefined,
-                    },
-                    oth: {
-                      label: 'Other',
-                      value: undefined,
-                    },
-                    sas: {
-                      label: 'South Asian',
-                      value: undefined
-                    },
-                  };
-
-                  const oneK = {
-                    afr: {
-                      label: 'African',
-                      value: undefined,
-                    },
-                    amr: {
-                      label: 'American',
-                      value: undefined,
-                    },
-                    eas: {
-                      label: 'East Asian',
-                      value: undefined,
-                    },
-                    eur: {
-                      label: 'European',
-                      value: undefined,
-                    },
-                    sas: {
-                      label: 'South Asian',
-                      value: undefined
-                    },
-                  };
-
-                  const frequencies = {
-                    gnomAD,
-                    '1kg': oneK,
-                  };
-
-                  if (rawFrequencies.gnomad > 0) {
-                    gnomAD.all.value = rawFrequencies.gnomad;
-                  }
-
-                  Object.keys(gnomAD)
-                    .forEach((key) => {
-                      if (rawFrequencies[`gnomad_${key}`] > 0) {
-                        gnomAD[key].value = rawFrequencies[`gnomad_${key}`];
-                      }
-                    });
-
-                  Object.keys(oneK)
-                    .forEach((key) => {
-                      if (rawFrequencies[key] > 0) {
-                        oneK[key].value = rawFrequencies[key];
-                      }
-                    });
-
-                  genomicColocatedVariant.populationFrequencies = frequencies;
-                    // cv.frequencies[variation.variantAllele];
-
-                  genomicSignificance.populationFrequencies = frequencies;
-                    // cv.frequencies[variation.variantAllele];
-                }
-              });
-
-            gene.addGenomicColocatedVariantIDs(genomicVariantIDs);
-
-            genomicSignificance.cosmicId = genomicVariantIDs['cosmicId'];
-            genomicSignificance.dbSNIPId = genomicVariantIDs['dbSNIPId'];
-            genomicSignificance.clinVarId = genomicVariantIDs['clinVarId'];
-            genomicSignificance.uniProtVariationId = genomicVariantIDs['uniProtVariationId'];
+            VEPDataProcessor.collectColocatedVariants(
+              vepOutput.colocated_variants,
+              variation,
+              genomicSignificance,
+              transcriptSignificance,
+              genomicVariantIDs,
+            );
 
             variation.addGenomicSignificance(genomicSignificance);
+            variation.addGenomicColocatedVariantIDs(genomicVariantIDs);
           });
       }
     });
   }
 
+  private static collectColocatedVariants(
+    collocatedVariants: any[],
+    variation: Variation,
+    genomicSignificance: GenomicSignificance,
+    transcriptSignificance: TranscriptSignificance,
+    genomicVariantIDs,
+  ) {
+    collocatedVariants && collocatedVariants
+      .forEach((cv) => {
+        const genomicColocatedVariant : GenomicColocatedVariant =
+          new GenomicColocatedVariant(cv.id);
+
+        if (cv.pubmed) {
+          cv.pubmed
+            .forEach(pm => genomicColocatedVariant.addPubMedID(pm));
+        }
+
+        variation.addGenomicColocatedVariant(genomicColocatedVariant);
+
+        const variantIDs = VEPDataProcessor
+          .extractGenomicVariantIDs(genomicColocatedVariant);
+
+        Object.keys(variantIDs)
+          .forEach((id) => {
+            if (!genomicVariantIDs[id] && variantIDs[id]) {
+              genomicVariantIDs[id] = variantIDs[id];
+            }
+          });
+
+        if (cv.allele_string === 'COSMIC_MUTATION') {
+          genomicVariantIDs['cosmicId'] = cv.id;
+        }
+
+        if (cv.clin_sig) {
+          transcriptSignificance.pathogenicity = cv
+            .clin_sig
+            .map(cs => Helpers.toHummanReadable(cs));
+        }
+
+        if (cv.frequencies && cv.frequencies[variation.variantAllele]) {
+          const frequencies = VEPDataProcessor
+            .generatePopulationFrequencies(cv.frequencies, variation.variantAllele);
+
+          genomicColocatedVariant.populationFrequencies = frequencies;
+          genomicSignificance.populationFrequencies = frequencies;
+        }
+      });
+  }
+
+  private static generatePopulationFrequencies(frequencies: any, allele: string) : any {
+    const rawFrequencies = frequencies[allele];
+
+    const { gnomAD, oneK } = VEPDataProcessor
+      .generateDefaultPopulationFrequencyValues();
+
+    const result = {
+      gnomAD,
+      '1kg': oneK,
+    };
+
+    if (rawFrequencies.gnomad > 0) {
+      gnomAD.all.value = rawFrequencies.gnomad;
+    }
+
+    Object.keys(gnomAD)
+      .forEach((key) => {
+        if (rawFrequencies[`gnomad_${key}`] > 0) {
+          gnomAD[key].value = rawFrequencies[`gnomad_${key}`];
+        }
+      });
+
+    Object.keys(oneK)
+      .forEach((key) => {
+        if (rawFrequencies[key] > 0) {
+          oneK[key].value = rawFrequencies[key];
+        }
+      });
+
+    return result;
+  }
+
+  private static generateDefaultPopulationFrequencyValues() : any {
+    const gnomAD = {
+      all: {
+        label: 'All',
+        value: undefined,
+      },
+      afr: {
+        label: 'African',
+        value: undefined,
+      },
+      amr: {
+        label: 'Latino',
+        value: undefined,
+      },
+      asj: {
+        label: 'Ashkenazi Jewish',
+        value: undefined,
+      },
+      eas: {
+        label: 'East Asian',
+        value: undefined,
+      },
+      fin: {
+        label: 'Finnish',
+        value: undefined,
+      },
+      nfe: {
+        label: 'non-Finish European',
+        value: undefined,
+      },
+      oth: {
+        label: 'Other',
+        value: undefined,
+      },
+      sas: {
+        label: 'South Asian',
+        value: undefined
+      },
+    };
+
+    const oneK = {
+      afr: {
+        label: 'African',
+        value: undefined,
+      },
+      amr: {
+        label: 'American',
+        value: undefined,
+      },
+      eas: {
+        label: 'East Asian',
+        value: undefined,
+      },
+      eur: {
+        label: 'European',
+        value: undefined,
+      },
+      sas: {
+        label: 'South Asian',
+        value: undefined
+      },
+    };
+
+    return {
+      gnomAD,
+      oneK,
+    };
+  }
+
   private static extractGenomicVariantIDs(colocatedVariant: GenomicColocatedVariant) {
     const cosmicPattern: RegExp = /^COSM.*/ig;
     const dbSNIPPattern: RegExp = /^rs.*/ig;
-    const clinVarPattern: RegExp = /^RCV.*/ig;
     const uniprotVariantId: RegExp = /^VAR_.*/ig;
 
     let cosmicId;
     let dbSNIPId;
-    let clinVarId;
     let uniProtVariationId;
 
     if (cosmicPattern.test(colocatedVariant.id)) {
@@ -230,10 +267,6 @@ export default abstract class VEPDataProcessor {
       dbSNIPId = colocatedVariant.id;
     }
 
-    if (clinVarPattern.test(colocatedVariant.id)) {
-      clinVarId = colocatedVariant.id;
-    }
-
     if (uniprotVariantId.test(colocatedVariant.id)) {
       uniProtVariationId = colocatedVariant.id;
     }
@@ -241,7 +274,6 @@ export default abstract class VEPDataProcessor {
     return {
       cosmicId,
       dbSNIPId,
-      clinVarId,
       uniProtVariationId,
     };
   }

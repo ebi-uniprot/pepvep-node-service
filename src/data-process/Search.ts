@@ -47,7 +47,7 @@ export default class Search {
   ) {
     let [vepAPIError, vepOutput] = await to(VEP
       .variantConsequencesAllInputs(organism, input));
-// console.log("--- VEP Data:", JSON.stringify(vepOutput.data));
+
     if (vepAPIError) {
       this.results.errors.push(this.errorMessages.vep.region);
       return Promise.reject([vepAPIError, null]);

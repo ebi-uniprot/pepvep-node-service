@@ -52,6 +52,7 @@ export default class VEP {
       tsl: true,
       numbers: true,
       miRNA: true,
+      Phenotypes: 1,
     });
   }
 
