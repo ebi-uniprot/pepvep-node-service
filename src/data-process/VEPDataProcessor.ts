@@ -78,6 +78,10 @@ export default abstract class VEPDataProcessor {
               tc.phenotypes
                 .forEach(ph => {
                   if (ph.source === 'ClinVar') {
+                    if (!ph.url) {
+                      ph.url = `https://www.ncbi.nlm.nih.gov/clinvar?term=${ph.id}`;
+                    }
+
                     variation.addClinVarRecord(ph);
                   }
                 })

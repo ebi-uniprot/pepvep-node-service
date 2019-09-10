@@ -329,6 +329,7 @@ export default class Variation {
       clinvar_clin_sig,
       id,
       phenotype,
+      url,
     } = record;
 
     const formatted: any = {
@@ -343,6 +344,7 @@ export default class Variation {
       dbSNIPId: id,
       mim,
       phenotype,
+      url,
     };
 
     this._clinVarRecords
@@ -455,6 +457,18 @@ export default class Variation {
   }
 
   public addProteinColocatedVariant(colocatedVariant: ProteinColocatedVariant) {
+    const { xrefs } = colocatedVariant;
+
+    if (xrefs) {
+      xrefs.forEach((v) => {
+        if (v.name === 'ClinVar') {
+          if (!v.url) {
+            v.url = `https://www.ncbi.nlm.nih.gov/clinvar?term=${v.id}`;
+          }
+        }
+      });
+    }
+
     this._proteinColocatedVariants.push(colocatedVariant);
   }
 
