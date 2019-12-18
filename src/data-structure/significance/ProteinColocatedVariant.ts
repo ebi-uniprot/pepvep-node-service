@@ -4,6 +4,7 @@
  */
 export default class ProteinColocatedVariant {
   readonly featureId: string;
+  readonly description: string;
   readonly wildType: string;
   readonly alternativeSequence: string;
   readonly clinicalSignificances: string;
@@ -26,6 +27,7 @@ export default class ProteinColocatedVariant {
 
   constructor(
     featureId: string,
+    description: string,
     wildType: string,
     alternativeSequence: string,
     clinicalSignificances: string,
@@ -36,6 +38,7 @@ export default class ProteinColocatedVariant {
     siftScore: number,
   ) {
     this.featureId = featureId;
+    this.description = description;
     this.wildType = wildType;
     this.alternativeSequence = alternativeSequence;
     this.clinicalSignificances = clinicalSignificances;

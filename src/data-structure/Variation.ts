@@ -109,6 +109,7 @@ export default class Variation {
   private _genomicColocatedVariants: GenomicColocatedVariant[] = [];
   private _proteinColocatedVariants: ProteinColocatedVariant[] = [];
   private _populationFrequency: any = {};
+  private _variationDetails: ProteinColocatedVariant;
 
   constructor(allele: string) {
     this.allele = allele;
@@ -459,6 +460,15 @@ export default class Variation {
   public addProteinColocatedVariant(colocatedVariant: ProteinColocatedVariant) {
     const { xrefs } = colocatedVariant;
 
+    this.updateXrefsClinVarURLs(xrefs);
+    this._proteinColocatedVariants.push(colocatedVariant);
+  }
+
+  public hasProteinColocatedVariant() : boolean {
+    return (this._proteinColocatedVariants.length > 0);
+  }
+
+  private updateXrefsClinVarURLs(xrefs: any[]): void {
     if (xrefs) {
       xrefs.forEach((v) => {
         if (v.name === 'ClinVar') {
@@ -468,12 +478,6 @@ export default class Variation {
         }
       });
     }
-
-    this._proteinColocatedVariants.push(colocatedVariant);
-  }
-
-  public hasProteinColocatedVariant() : boolean {
-    return (this._proteinColocatedVariants.length > 0);
   }
 
   // Population Frequency
@@ -593,5 +597,23 @@ export default class Variation {
     const allele: string = this.allele.replace('/', '>');
     const hgvsg: string = `${geneId}:g.${this.genomicVariationStart}${allele}`;
     this._hgvsg = hgvsg;
+  }
+
+  public addVariationDetails(variant: ProteinColocatedVariant) : void {
+    const { xrefs } = variant;
+
+    this.updateXrefsClinVarURLs(xrefs);
+    this._variationDetails = variant;
+  }
+
+  public getVariationDetails() : ProteinColocatedVariant {
+    return this._variationDetails;
+  }
+
+  public getAllVariantsAtPosition() : ProteinColocatedVariant[] {
+    return [
+      this.getVariationDetails(),
+      ...this.getProteinColocatedVariants(),
+    ];
   }
 }

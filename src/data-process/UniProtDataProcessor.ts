@@ -45,6 +45,7 @@ export default abstract class UniProtDataProcessor {
 
         const {
           ftId,
+          description,
           type,
           begin,
           end,
@@ -69,6 +70,7 @@ export default abstract class UniProtDataProcessor {
         const proteinColocatedVariant : ProteinColocatedVariant =
           new ProteinColocatedVariant(
             ftId,
+            description,
             wildType,
             alternativeSequence,
             clinicalSignificances,
@@ -80,7 +82,14 @@ export default abstract class UniProtDataProcessor {
           );
 
         variationsInRange
-          .forEach(v => v.addProteinColocatedVariant(proteinColocatedVariant));
+          .forEach((variant) => {
+            if (variant.alternativeSequence === alternativeSequence) {
+              variant.addVariationDetails(proteinColocatedVariant);
+              return;
+            }
+
+            variant.addProteinColocatedVariant(proteinColocatedVariant);
+          });
       });
 
       // Clinical Significances

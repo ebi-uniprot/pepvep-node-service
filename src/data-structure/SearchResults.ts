@@ -300,6 +300,9 @@ export default class SearchResults {
     row.variation.dbSNIPId = variation.dbSNIPId;
     row.variation.clinVarIDs = variation.getClinVarRecords();
     row.variation.uniProtVariationId = variation.uniProtVariationId;
+    row.variation.wildType = variation.wildType;
+    row.variation.alternativeSequence = variation.alternativeSequence;
+    row.variation.variationDetails = variation.getVariationDetails();
 
     row.variation.proteinColocatedVariants =
       variation.getProteinColocatedVariants();
@@ -317,20 +320,22 @@ export default class SearchResults {
   }
 
   private addSignificancesToSearchResultsRow(row: any, variation: Variation) {
+    const variationPositionAndIds: any = {
+      begin: variation.proteinStart,
+      end: variation.proteinEnd,
+      ids: {
+        rsId: variation.dbSNIPId,
+        dbSNIPId: variation.dbSNIPId,
+        clinVarIDs: variation.getClinVarRecords(),
+        uniprotVariantId: variation.uniProtVariationId,
+        cosmicId: variation.cosmicId,
+      }
+    };
+
     const positinalSignificances: any = {
       features: variation.getPositionalSignificance().getFeatures(),
       colocatedVariants: variation.getProteinColocatedVariants(),
-      variationDetails: {
-        begin: variation.proteinStart,
-        end: variation.proteinEnd,
-        ids: {
-          rsId: variation.dbSNIPId,
-          dbSNIPId: variation.dbSNIPId,
-          clinVarIDs: variation.getClinVarRecords(),
-          uniprotVariantId: variation.uniProtVariationId,
-          cosmicId: variation.cosmicId,
-        }
-      }
+      variationDetails: variationPositionAndIds,
     };
 
     let clinicalSignificances: any = variation
@@ -342,17 +347,7 @@ export default class SearchResults {
       clinicalSignificances.colocatedVariants =
         variation.getProteinColocatedVariants();
 
-      clinicalSignificances.variationDetails = {
-        begin: variation.proteinStart,
-        end: variation.proteinEnd,
-        ids: {
-          rsId: variation.dbSNIPId,
-          dbSNIPId: variation.dbSNIPId,
-          clinVarIDs: variation.getClinVarRecords(),
-          uniprotVariantId: variation.uniProtVariationId,
-          cosmicId: variation.cosmicId,
-        }
-      };
+      clinicalSignificances.variationDetails = variationPositionAndIds;
     }
 
     let genomicSignificance: any = variation
@@ -360,18 +355,7 @@ export default class SearchResults {
 
     if (genomicSignificance) {
       genomicSignificance = genomicSignificance.toJSON();
-
-      genomicSignificance.variationDetails = {
-        begin: variation.proteinStart,
-        end: variation.proteinEnd,
-        ids: {
-          rsId: variation.dbSNIPId,
-          dbSNIPId: variation.dbSNIPId,
-          clinVarIDs: variation.getClinVarRecords(),
-          uniprotVariantId: variation.uniProtVariationId,
-          cosmicId: variation.cosmicId,
-        }
-      };
+      genomicSignificance.variationDetails = variationPositionAndIds;
     }
 
     row.significances['functional'] =
@@ -381,7 +365,10 @@ export default class SearchResults {
 
     const transcriptSignificances = variation
       .getTranscriptSignificance()
-      .map(ts => ts.toJSON());
+      .map((ts) => ({
+        ...ts.toJSON(),
+        variationDetails: variationPositionAndIds,
+      }));
 
     row.significances['transcript'] = (0 < transcriptSignificances.length)
       ? transcriptSignificances
