@@ -48,6 +48,7 @@ export default abstract class PDBeDataProcessor {
     structuralSignificance.addAllStructures(pdbeDetails.all_structures);
 
     pdbeDetails.annotations.positions
+      .filter(v => variation.threeLetterAminoAcidBase)
       .forEach((annotation) => {
         if (variation.threeLetterAminoAcidBase.toUpperCase() !== annotation.position_code) {
           return;
@@ -59,6 +60,7 @@ export default abstract class PDBeDataProcessor {
       });
 
     pdbeDetails.ligands.positions
+      .filter(v => variation.threeLetterAminoAcidBase)
       .forEach((ligand) => {
         if (variation.threeLetterAminoAcidBase.toUpperCase() !== ligand.position_code) {
           return;
@@ -70,6 +72,7 @@ export default abstract class PDBeDataProcessor {
       });
 
     pdbeDetails.interactions.positions
+      .filter(v => variation.threeLetterAminoAcidBase)
       .forEach((interaction) => {
         if (variation.threeLetterAminoAcidBase.toUpperCase() !== interaction.position_code) {
           return;
@@ -81,6 +84,7 @@ export default abstract class PDBeDataProcessor {
       });
 
     pdbeDetails.structures.positions
+      .filter(v => variation.threeLetterAminoAcidBase)
       .forEach((structure) => {
         if (variation.threeLetterAminoAcidBase.toUpperCase() !== structure.position_code) {
           return;

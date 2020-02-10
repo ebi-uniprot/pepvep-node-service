@@ -59,7 +59,10 @@ app.post('/parser', async (req, res) => {
 
   const [error, results] = await process(input, downloadResults);
 
-  if (error && Object.entries(error).length !== 0 && error.constructor === Object) {
+  if (
+    (error && error instanceof Error)
+    || (error && Object.entries(error).length !== 0 && error.constructor === Object)
+  ) {
     res.status(500).send({ error });
   }
 
