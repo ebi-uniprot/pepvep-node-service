@@ -98,7 +98,7 @@ export default class Variation {
   private _hasENSP: boolean;
   private _hasENST: boolean;
   private _cosmicId: string;
-  private _dbSNIPId: string;
+  private _dbSNPId: string;
   private _clinVarRecords: any[] = [];
   private _uniprotVariantId: string;
   private _transcriptSignificance: TranscriptSignificance[] = [];
@@ -310,12 +310,12 @@ export default class Variation {
     this._cosmicId = cosmicId;
   }
 
-  // dbSNIP ID
-  public get dbSNIPId() : string {
-    return this._dbSNIPId;
+  // dbSNP ID
+  public get dbSNPId() : string {
+    return this._dbSNPId;
   }
-  public set dbSNIPId(dbSNIPId: string) {
-    this._dbSNIPId = dbSNIPId;
+  public set dbSNPId(dbSNPId: string) {
+    this._dbSNPId = dbSNPId;
   }
 
   // ClinVar
@@ -342,7 +342,7 @@ export default class Variation {
       date: datelastevaluated,
       gene: associated_gene,
       clinicalSignificances: clinvar_clin_sig,
-      dbSNIPId: id,
+      dbSNPId: id,
       mim,
       phenotype,
       url,
@@ -435,7 +435,7 @@ export default class Variation {
   public addGenomicColocatedVariantIDs(ids: any) {
     const {
       cosmicId,
-      dbSNIPId,
+      dbSNPId,
       uniProtVariationId,
     } = ids;
 
@@ -443,8 +443,8 @@ export default class Variation {
       this.cosmicId = cosmicId;
     }
 
-    if (dbSNIPId) {
-      this.dbSNIPId = dbSNIPId;
+    if (dbSNPId) {
+      this.dbSNPId = dbSNPId;
     }
 
     if (uniProtVariationId) {

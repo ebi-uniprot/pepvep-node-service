@@ -84,7 +84,7 @@ export default abstract class VEPDataProcessor {
 
                     variation.addClinVarRecord(ph);
                   }
-                })
+                });
             }
 
             /* Looping through genomic colocated variants to either define a novel variant or
@@ -256,19 +256,19 @@ export default abstract class VEPDataProcessor {
 
   private static extractGenomicVariantIDs(colocatedVariant: GenomicColocatedVariant) {
     const cosmicPattern: RegExp = /^COSM.*/ig;
-    const dbSNIPPattern: RegExp = /^rs.*/ig;
+    const dbSNPPattern: RegExp = /^rs.*/ig;
     const uniprotVariantId: RegExp = /^VAR_.*/ig;
 
     let cosmicId;
-    let dbSNIPId;
+    let dbSNPId;
     let uniProtVariationId;
 
     if (cosmicPattern.test(colocatedVariant.id)) {
       cosmicId = colocatedVariant.id;
     }
 
-    if (dbSNIPPattern.test(colocatedVariant.id)) {
-      dbSNIPId = colocatedVariant.id;
+    if (dbSNPPattern.test(colocatedVariant.id)) {
+      dbSNPId = colocatedVariant.id;
     }
 
     if (uniprotVariantId.test(colocatedVariant.id)) {
@@ -277,7 +277,7 @@ export default abstract class VEPDataProcessor {
 
     return {
       cosmicId,
-      dbSNIPId,
+      dbSNPId,
       uniProtVariationId,
     };
   }

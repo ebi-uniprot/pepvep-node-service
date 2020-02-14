@@ -297,7 +297,7 @@ export default class SearchResults {
 
   private addColocatedVariantsToSearchResultsRow(row: any, variation: Variation) {
     row.variation.cosmicId = variation.cosmicId;
-    row.variation.dbSNIPId = variation.dbSNIPId;
+    row.variation.dbSNPId = variation.dbSNPId;
     row.variation.clinVarIDs = variation.getClinVarRecords();
     row.variation.uniProtVariationId = variation.uniProtVariationId;
     row.variation.wildType = variation.wildType;
@@ -324,8 +324,8 @@ export default class SearchResults {
       begin: variation.proteinStart,
       end: variation.proteinEnd,
       ids: {
-        rsId: variation.dbSNIPId,
-        dbSNIPId: variation.dbSNIPId,
+        rsId: variation.dbSNPId,
+        dbSNPId: variation.dbSNPId,
         clinVarIDs: variation.getClinVarRecords(),
         uniprotVariantId: variation.uniProtVariationId,
         cosmicId: variation.cosmicId,
