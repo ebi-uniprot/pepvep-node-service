@@ -6,6 +6,7 @@
     "no-relative-imports": false,
     "prefer-array-literal": [true, {"allow-size-argument": true}],
     "function-name": false,
-    "import-name": false
+    "import-name": false,
+    "max-func-body-length": false
   }
 }
