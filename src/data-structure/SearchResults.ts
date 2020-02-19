@@ -262,6 +262,7 @@ export default class SearchResults {
 
   private addProteinDataToSearchResultsRow(row: any, protein: Protein) {
     row.gene['enstId'] = protein.enst;
+    row.gene['redundantENSTs'] = protein.redundantENSTs;
   }
 
   private addVariationDataToSearchresultsRow(row: any, variation: Variation) {

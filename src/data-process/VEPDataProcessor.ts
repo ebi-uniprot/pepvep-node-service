@@ -13,11 +13,12 @@ export default abstract class VEPDataProcessor {
     data.forEach((vepOutput) => {
       // --> INPUT
       const input: Input = results.addInput(vepOutput.input);
-
       let gene: Gene;
       let protein: Protein;
       let variation: Variation;
       let transcriptSignificance: TranscriptSignificance;
+      let lookupTable = new Map();
+      let redundantRow = false;
 
       // Looping through Transcript Consequences to collect some useful information.
       if (vepOutput.transcript_consequences !== undefined) {
@@ -29,6 +30,31 @@ export default abstract class VEPDataProcessor {
               (!tc.trembl || !tc.trembl.length)
             ) {
               return;
+            }
+
+            // look for redundant transcripts
+            if (tc.swissprot || tc.trembl) {
+              // combine all accession on the fly
+              [...tc.swissprot || [], ...tc.trembl || []]
+                .forEach((accessoin) => {
+                  if (tc.consequence_terms) {
+                    tc.consequence_terms
+                      .forEach(term => {
+                        // Check where the accession already has a record with the same allele
+                        // and consequence term. Then decide if this entry is redundant.
+                        if (this.isReduntantENST(lookupTable, accessoin, tc.transcript_id, term, tc.variant_allele)) {
+                          redundantRow = true;
+                        } else {
+                          redundantRow = false;
+                        }
+                      });
+                  }
+                });
+            }
+
+            if (redundantRow) {
+              redundantRow = false;
+              return false;
             }
 
             // --> GENE
@@ -100,8 +126,64 @@ export default abstract class VEPDataProcessor {
             variation.addGenomicSignificance(genomicSignificance);
             variation.addGenomicColocatedVariantIDs(genomicVariantIDs);
           });
+
+          this.attachRedundantENSTs(results, lookupTable);
       }
     });
+  }
+
+  // Checks whether a row with a certain ENST should be marked
+  // as redundant or not. It also collects some details for co-relating
+  // these redundant ENSTs with their relavent records too.
+  private static isReduntantENST(
+    lookupTable: Map<string, any>,
+    accession: string,
+    enstId: string,
+    consequenceTerm: string,
+    allele: string,
+  ) : Boolean {
+    const lookupKey = [accession, consequenceTerm, allele]
+      .join('-');
+
+    if (lookupTable.has(lookupKey)) {
+      let record = lookupTable.get(lookupKey);
+
+      if (record.mainENST !== enstId) {
+        record.otherENSTs.push(enstId)
+      }
+
+      return true;
+    } else {
+      let newRecord = {
+        accession,
+        mainENST: enstId,
+        otherENSTs: [],
+      };
+
+      lookupTable.set(lookupKey, newRecord);
+
+      return false;
+    }
+  }
+
+  // Looking through the look-up table and try to find a match
+  // with the available proteins. Then add the 'redundant' ENSTs
+  // to the protein object.
+  private static attachRedundantENSTs(
+    results: SearchResults,
+    lookupTable: Map<string, any>,
+  ) {
+    Array.from(lookupTable.keys())
+      .forEach((key) => {
+        const record = lookupTable.get(key);
+
+        results.getProteinsAsArray()
+          .forEach((protein) => {
+            if (protein.accession === record.accession) {
+              protein.addRedundantENSTs(record.otherENSTs);
+            }
+          });
+      });
   }
 
   private static collectColocatedVariants(

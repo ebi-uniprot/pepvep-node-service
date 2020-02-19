@@ -63,6 +63,7 @@ app.post('/parser', async (req, res) => {
     (error && error instanceof Error)
     || (error && Object.entries(error).length !== 0 && error.constructor === Object)
   ) {
+    console.log("Server-side Error:", error);
     res.status(500).send({ error });
   }
 

@@ -34,6 +34,7 @@ export default class Protein {
   private _tremblAccessions: string[] = [];
   private _uniparcAccessions: string[] = [];
   private _variations: Variation[] = [];
+  private _reduntantENSTs: string[] = [];
 
   constructor(accession: string) {
     this.accession = accession;
@@ -81,6 +82,13 @@ export default class Protein {
   public getVariationsInRange(start: number, end: number) : Variation[] {
     return this._variations
       .filter(v => v.isInRange(start, end));
+  }
+
+  public get redundantENSTs() : string[] { return this._reduntantENSTs; }
+  public addRedundantENSTs(ensts: string[]) {
+    if (ensts.length > 0) {
+      this._reduntantENSTs.push(...ensts);
+    }
   }
 
   public hasVariationWithProteinPosition() : boolean {
