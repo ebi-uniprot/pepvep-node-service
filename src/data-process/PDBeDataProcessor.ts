@@ -5,6 +5,10 @@ import Variation from '../data-structure/Variation';
 export default abstract class PDBeDataProcessor {
   public static async process(results: SearchResults, data: any) {
     data.reduce((all, current) => {
+      if (current.status === 404) {
+        current.data = [];
+      }
+
       current.data
         .forEach((i) => {
           const accession = Object.keys(i)[0];
@@ -18,21 +22,23 @@ export default abstract class PDBeDataProcessor {
       return all;
     }, [])
     .forEach((pdbeResult) => {
-      const accession = Object.keys(pdbeResult)[0];
-      const pdbeDetails = pdbeResult[accession];
+      Object.keys(pdbeResult)
+        .forEach((accession) => {
+          const pdbeDetails = pdbeResult[accession];
 
-      results.getProteinsByAccession(accession)
-        .forEach((protein) => {
-          protein.getVariations()
-            .forEach((variation) => {
-              const structrualSignificance : StructuralSignificance
-                = new StructuralSignificance();
+          results.getProteinsByAccession(accession)
+            .forEach((protein) => {
+              protein.getVariations()
+                .forEach((variation) => {
+                  const structrualSignificance : StructuralSignificance
+                    = new StructuralSignificance();
 
-              PDBeDataProcessor.collectStructuralSignificancesData(
-                structrualSignificance,
-                variation,
-                pdbeDetails,
-              );
+                  PDBeDataProcessor.collectStructuralSignificancesData(
+                    structrualSignificance,
+                    variation,
+                    pdbeDetails,
+                  );
+                });
             });
         });
     });

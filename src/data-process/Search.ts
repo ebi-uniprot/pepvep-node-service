@@ -85,7 +85,6 @@ export default class Search {
     }
 
     await PDBeDataProcessor.process(this.results, proteinStructuralData);
-
     if (download) {
       return Promise.resolve(
         this.results.generateDownloadableData()
