@@ -90,4 +90,7 @@ app.post('/download', async (req, res) => {
 // To serve front-end from 'www' folder
 app.get('*', (req, res) => res.sendFile(path.join(`${__dirname}/../../www/index.html`)));
 
+// To serve front-end from 'www-test' folder
+app.get('/test', (req, res) => res.sendFile(path.join(`${__dirname}/../../www-test/index.html`)));
+
 app.listen(port, () => console.log(`server listening on http://localhost:${port}/`));
