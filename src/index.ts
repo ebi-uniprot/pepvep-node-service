@@ -30,10 +30,15 @@ app.use((req, res, next) => {
 });
 
 app.use(express.static('public'));
+
 // to server front-end files from server
 app.use('/uniprot/pepvep', express.static(path.join(__dirname, '/../../www')));
+app.use('/uniprot/pepvep/test', express.static(path.join(__dirname, '/../../wwwtest')));
+
 // to server front-end files from server
 app.use(express.static(path.join(__dirname, '/../../www')));
+app.use(express.static(path.join(__dirname, '/../../wwwtest')));
+
 app.use(bodyParser.urlencoded({
   extended: false,
 }));
@@ -87,10 +92,9 @@ app.post('/download', async (req, res) => {
   res.send(results);
 });
 
-// To serve front-end from 'www' folder
-app.get('*', (req, res) => res.sendFile(path.join(`${__dirname}/../../www/index.html`)));
+app.get('/test', (req, res) => res.sendFile(path.join(`${__dirname}/../../wwwtest/index.html`)));
 
-// To serve front-end from 'www-test' folder
-app.get('/test', (req, res) => res.sendFile(path.join(`${__dirname}/../../www-test/index.html`)));
+// To serve front-end from 'www' folder
+app.get('/pepvep', (req, res) => res.sendFile(path.join(`${__dirname}/../../www/index.html`)));
 
 app.listen(port, () => console.log(`server listening on http://localhost:${port}/`));
