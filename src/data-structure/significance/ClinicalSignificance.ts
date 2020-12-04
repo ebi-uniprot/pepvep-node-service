@@ -11,18 +11,22 @@
  * the `VariationNode`.
  */
 export default class ClinicalSignificance {
-  readonly raw: string;
+  readonly raw: any[];;
   readonly value: string[];
   readonly association: any[];
 
-  constructor(raw: string, association: any[]) {
+  constructor(raw: any[], association: any[]) {
     this.raw = raw;
     this.value = this.parseInput(raw);
     this.association = association;
   }
 
-  private parseInput(raw: string) : string[] {
-    return raw.split(',');
+  private parseInput(raw: any[]) : string[] {
+    var significances = [];
+    raw.forEach((significance) => {
+  	significances.push(significance.type);
+    });
+    return significances;
   }
 
   public toJSON() {

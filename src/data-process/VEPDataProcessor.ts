@@ -24,6 +24,20 @@ export default abstract class VEPDataProcessor {
       if (vepOutput.transcript_consequences !== undefined) {
         vepOutput.transcript_consequences
           .forEach((tc) => {
+            if (tc.swissprot !== undefined) {
+              var swissprotSplit = []
+              tc.swissprot.forEach(accession => {
+                swissprotSplit.push(accession.split('.')[0]);
+              });
+              tc.swissprot = swissprotSplit;
+            }
+          if (tc.trembl !== undefined) {
+              var tremblSplit = []
+              tc.trembl.forEach(accession => {
+                tremblSplit.push(accession.split('.')[0]);
+              });
+              tc.trembl = tremblSplit;
+            }
             // If entry doesn't have any UniProt/Trembl accessions, ignore and quit.
             if (
               (!tc.swissprot || !tc.swissprot.length) &&
